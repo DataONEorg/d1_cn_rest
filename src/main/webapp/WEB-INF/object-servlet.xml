@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	<!--  based on the type of return needed by the Accept header this will resolve a 
+	      response object formated either in JSON or XML.  CSV will be added later via XSLT or Jasper Reports -->
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+	  <property name="order" value="1" />
+	  <property name="defaultViews">
+	    <list>
+	      <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+	      <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" >
+	      	<property name="contentType" value="text/json"/>
+	      </bean>
+	      <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+				<property name="modelKey" value="org.dataone.ns.core.objects.Test"/>
+				<property name="marshaller">
+					<ref bean="jibxMarshallerResponse"/>
+				</property>
+	      </bean>
+	      <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+				<property name="modelKey" value="org.dataone.ns.core.objects.Test"/>
+				<property name="contentType" value="text/xml" />
+				<property name="marshaller">
+					<ref bean="jibxMarshallerResponse"/>
+				</property>
+	      </bean>
+	    </list>
+	  </property>
+	  <property name="ignoreAcceptHeader" value="false" />
+	</bean>
+</beans>
