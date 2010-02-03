@@ -1,12 +1,13 @@
 package org.dataone.cn.rest.controller;
 
 
-import org.dataone.cn.rest.service.CrudService;
+import java.util.Date;
+
+import org.dataone.cn.rest.service.HealthService;
 import org.dataone.cn.rest.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
+//import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -22,37 +23,24 @@ import org.dataone.ns.core.objects.Response;
 public class LogController {
 	
 	@Autowired
-	CrudService crudService;
+	HealthService healthService;
 	QueryService queryService;
 	
-	@RequestMapping(value = "/object/" , method = RequestMethod.GET)
+	@RequestMapping(value = "/log/" , method = RequestMethod.GET)
 		public ModelAndView getSearch() throws Exception {
+		Date fromDate = new Date();
+		Date toDate = new Date();
 		Object token = new Object();
-		Object search = new Object();
-		Response response = queryService.search(token, search);
+		Response response = queryService.getLogRecords(token, fromDate, toDate);
 		return new ModelAndView("response", "org.dataone.ns.core.objects.Response",response);
 	}
 	
-	@RequestMapping(value = "/object/{guid}", method = RequestMethod.GET)
-	public ModelAndView get(@PathVariable String guid) throws Exception {
+	@RequestMapping(value = "/log/report", method = RequestMethod.GET)
+	public ModelAndView get() throws Exception {
 		Object token = new Object();
-		Response response = crudService.get(token, guid);
+		Object response = healthService.generateReport(token);
 		return new ModelAndView("response", "org.dataone.ns.core.objects.Response",response);
 	}
-	
-	@RequestMapping(value = "/object/{guid}/meta/", method = RequestMethod.GET)
-	public ModelAndView getMeta(@PathVariable String guid) throws Exception {
-		Object token = new Object();
-		Response response = crudService.getSystemMetadata(token, guid);
-		return new ModelAndView("response", "org.dataone.ns.core.objects.Response",response);
-	}
-	
-	@RequestMapping(value = "/object/{guid}/locate/", method = RequestMethod.GET)
-	public ModelAndView locateMeta(@PathVariable String guid) throws Exception {
-		Object token = new Object();
-		Response response = crudService.resolve(token, guid);
-		return new ModelAndView("response", "org.dataone.ns.core.objects.Response",response);
-	}	
 	
 }
 

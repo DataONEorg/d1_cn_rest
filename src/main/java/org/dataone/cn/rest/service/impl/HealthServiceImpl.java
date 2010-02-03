@@ -8,7 +8,7 @@ public class HealthServiceImpl implements HealthService {
 	@Override
 	public Object generateReport(Object token) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		throw new Exception("generateReport Not implemented Yet!");
 	}
 
 }

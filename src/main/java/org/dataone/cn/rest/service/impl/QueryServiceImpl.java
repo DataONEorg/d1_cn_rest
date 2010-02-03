@@ -12,13 +12,13 @@ public class QueryServiceImpl implements QueryService {
 	public Response getLogRecords(Object token, Date fromDate, Date toDate)
 			throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		throw new Exception("getLogRecords Not implemented Yet!");
 	}
 
 	@Override
 	public Response search(Object token, Object query) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		throw new Exception("getLogRecords Not implemented Yet!");
 	}
 
 }
