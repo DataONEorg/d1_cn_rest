@@ -48,7 +48,9 @@ public class CrudServiceImpl implements CrudService {
 		String read = new String("Hello World!");
 		byte[] readBytes = Base64.encodeBase64(read.getBytes("UTF-8"));
 		data.setHash(readBytes);
-		data.setSize((long)readBytes.length);
+
+		data.setSize(new Integer(readBytes.length));
+		
 		datalist.add(data);
 		response.setDatas(datalist);
 		return response;
