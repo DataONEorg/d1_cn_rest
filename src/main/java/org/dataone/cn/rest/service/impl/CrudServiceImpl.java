@@ -1,7 +1,11 @@
 package org.dataone.cn.rest.service.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.dataone.cn.rest.dao.RepositoryDao;
@@ -12,48 +16,31 @@ import org.dataone.ns.core.objects.Response.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 @Service("crudServiceImpl")
+@Qualifier("crudService")
 public class CrudServiceImpl implements CrudService {
 
 	private RepositoryDao repositoryDao;
 	
 	@Autowired
-	@Qualifier("metacat")
+	@Qualifier("metacatDaoImpl")
 	public void setRepositoryDao(RepositoryDao repositoryDao) {
 		this.repositoryDao = repositoryDao;
 	}
-	
+
 	public void create(String systemMetadataGuid,
 			SystemMetadata systemMetadata, String scienceMetadataGuid,
 			Object scienceMetadata) throws Exception {
 		throw new Exception("create Not implemented Yet!");
 	}
 
-	public Response get(Object token, String guid) throws Exception {
+	public void get(Object token, String guid, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// TODO Auto-generated method stub
-		
-		
-		Response response = new Response();
-		response.setStart(1);
-		response.setCount(1);
-		response.setTotal(1);
-		ArrayList<Data> datalist = new ArrayList<Data>();
-		Data data = new Data();
-		data.setGuid("abc123");
-		data.setModified(new Date());
-		data.setOclass("String");
-
-		// String read = repositoryDao.read(guid);
-		String read = new String("Hello World!");
-		byte[] readBytes = Base64.encodeBase64(read.getBytes("UTF-8"));
-		data.setHash(readBytes);
-
-		data.setSize(new Integer(readBytes.length));
-		
-		datalist.add(data);
-		response.setDatas(datalist);
-		return response;
+		repositoryDao.read(token, guid, request, response);
 	}
 
 	public Response getSystemMetadata(Object token, String guid)
@@ -67,4 +54,17 @@ public class CrudServiceImpl implements CrudService {
 		throw new Exception("resolve Not implemented Yet!");
 	}
 
+	// probably needs to be moved to a statically exposed util class
+	/* dont' think i'll need it afterall
+	private byte[] getBytes(Object obj) throws java.io.IOException{
+	      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	      ObjectOutputStream oos = new ObjectOutputStream(bos);
+	      oos.writeObject(obj);
+	      oos.flush();
+	      oos.close();
+	      bos.close();
+	      byte [] data = bos.toByteArray();
+	      return data;
+	  }
+	  */
 }

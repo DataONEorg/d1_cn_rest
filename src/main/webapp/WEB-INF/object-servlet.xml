@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    	<context:component-scan base-package="org.dataone.cn.rest.controller" />
+   <!--  	<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+   		<property name="alwaysUseFullPath" value="true" />
+   	</bean>-->
+
 	<!--  based on the type of return needed by the Accept header this will resolve a 
-	      response object formated either in JSON or XML.  CSV will be added later via XSLT or Jasper Reports -->
+	      response object formated either in JSON or XML.  CSV will be added later via XSLT or Jasper Reports 
 	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 	  <property name="order" value="1" />
 	  <property name="defaultViews">
@@ -13,13 +25,13 @@
 	      	<property name="contentType" value="text/json"/>
 	      </bean>
 	      <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
-				<property name="modelKey" value="org.dataone.ns.core.objects.Test"/>
+				<property name="modelKey" value="org.dataone.ns.core.objects.Response"/>
 				<property name="marshaller">
 					<ref bean="jibxMarshallerResponse"/>
 				</property>
 	      </bean>
 	      <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
-				<property name="modelKey" value="org.dataone.ns.core.objects.Test"/>
+				<property name="modelKey" value="org.dataone.ns.core.objects.Response"/>
 				<property name="contentType" value="text/xml" />
 				<property name="marshaller">
 					<ref bean="jibxMarshallerResponse"/>
@@ -29,4 +41,5 @@
 	  </property>
 	  <property name="ignoreAcceptHeader" value="false" />
 	</bean>
+	-->
 </beans>

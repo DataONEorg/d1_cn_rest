@@ -1,10 +1,12 @@
 package org.dataone.cn.rest.dao;
 
-import org.w3c.dom.Document;
+/*import org.w3c.dom.Document; */
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public interface RepositoryDao {
-	public String create(String objectId, Document object) throws Exception;
-	public String read(String objectId) throws Exception;
-	public String update(String ObjectId, Document object) throws Exception;
-	public String delete(String objectId) throws Exception;
+/*	public void create(String objectId, Document object) throws Exception; */
+	public void read(Object token, String guid,HttpServletRequest request, HttpServletResponse response) throws Exception;
+/*	public void update(String ObjectId, Document object) throws Exception;
+	public void delete(String objectId) throws Exception; */
 }

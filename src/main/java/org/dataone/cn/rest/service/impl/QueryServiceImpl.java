@@ -4,8 +4,10 @@ import java.util.Date;
 
 import org.dataone.cn.rest.service.QueryService;
 import org.dataone.ns.core.objects.Response;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 @Service("queryServiceImpl")
+@Qualifier("queryService")
 public class QueryServiceImpl implements QueryService {
 
 	@Override
