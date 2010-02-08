@@ -130,7 +130,7 @@
 			<type>jar</type>
 		</dependency>
 		
-		<!--  Jackson JSON implementations -->
+		<!--  Jackson JSON implementations -CURRENTLY NOT NEEDED
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
@@ -152,7 +152,7 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		
+-->		
 		<!--  we are going to remember to test all of this, right? -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -162,9 +162,15 @@
 			<scope>compile</scope>
 		</dependency>
 		<!--  and we have dependencies on re-usable projects that we maintain -->
-		<dependency>
+		<dependency> 
 			<groupId>org.dataone.cn</groupId>
 			<artifactId>DataONE-CnDomain</artifactId>
+			<version>0.3.0</version>
+			<type>jar</type>
+		</dependency> 
+		<dependency>
+			<groupId>org.dataone.cn</groupId>
+			<artifactId>DataONE-CnRestProxy</artifactId>
 			<version>0.3.0</version>
 			<type>jar</type>
 		</dependency>
@@ -172,6 +178,13 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.tuckey</groupId>
+			<artifactId>urlrewritefilter</artifactId>
+			<version>3.1.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

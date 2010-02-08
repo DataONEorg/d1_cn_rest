@@ -26,7 +26,6 @@ import org.dataone.ns.core.objects.Response;
  */
 
 @Controller
-@RequestMapping("/log")
 public class LogController {
 
 	@Autowired
@@ -36,7 +35,7 @@ public class LogController {
 	@Qualifier("queryService")
 	QueryService queryService;
 	
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value ="/log", method = RequestMethod.GET)
 		public void getSearch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		OutputStream output = response.getOutputStream();
 		output.write("testing logs\n".getBytes());
@@ -45,7 +44,7 @@ public class LogController {
 		return;
 	}
 	
-	@RequestMapping(value = "/report", method = RequestMethod.GET)
+	@RequestMapping(value = "/log/report", method = RequestMethod.GET)
 	public void get(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		OutputStream output = response.getOutputStream();
 		output.write("testing report\n".getBytes());
