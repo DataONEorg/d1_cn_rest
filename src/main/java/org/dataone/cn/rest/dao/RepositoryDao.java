@@ -1,12 +1,14 @@
 package org.dataone.cn.rest.dao;
 
-/*import org.w3c.dom.Document; */
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Currently this is only an idea of how to interface with lower level repository access
+ * @author rwaltz
+ *
+ */
 public interface RepositoryDao {
-/*	public void create(String objectId, Document object) throws Exception; */
-	public void read(Object token, String guid,HttpServletRequest request, HttpServletResponse response) throws Exception;
-/*	public void update(String ObjectId, Document object) throws Exception;
-	public void delete(String objectId) throws Exception; */
+	public void create(String objectId, Object object) throws Exception;
+	public void read(Object token, String guid) throws Exception;
+	public void update(String ObjectId, Object object) throws Exception;
+	public void delete(String objectId) throws Exception;
 }

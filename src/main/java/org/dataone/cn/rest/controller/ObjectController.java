@@ -29,7 +29,7 @@ import org.dataone.ns.core.objects.Response;
  */
 
 @Controller
-public class ObjectController implements ServletContextAware {
+public class ObjectController {
 	@Autowired
 	@Qualifier("crudService")
 	CrudService crudService;
@@ -37,59 +37,31 @@ public class ObjectController implements ServletContextAware {
 	@Qualifier("queryService")
 	QueryService queryService;
 
-	private ServletContext servletContext;
 	@RequestMapping(value = "/object", method = RequestMethod.GET, headers="accept=*/xml")
-		public void getSearch(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Object token = new Object();
-		Object search = new Object();
+	public void search(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-//		Response response = queryService.search(token, search);
-		crudService.get(token, "junk", request, response);
-		return ;
+		throw new Exception("search Not implemented Yet!");
+
 	}
 
 	@RequestMapping(value = "/object/{guid}", method = RequestMethod.GET, headers="accept=*/xml")
 	public void get(HttpServletRequest request, HttpServletResponse response, @PathVariable String guid ) throws Exception {
-//	public void get(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Object token = new Object();
-		servletContext.getServerInfo();
-		ServletContext testContext = servletContext.getContext("/TestTest");
-		if (testContext != null) {
-			RequestDispatcher testDispatcher = testContext.getRequestDispatcher("/test/" + guid);
-			if (testDispatcher != null) {
-			      testDispatcher.forward(request, response);
-			} else {
-				throw new Exception("TestTest test not found! " + servletContext.getServerInfo());
-			}
-		} else {
-			throw new Exception("TestTest not found! "+ servletContext.getServerInfo());
-		}
-
-//		crudService.get(token, guid);
 		
-		return ;
+		throw new Exception("get Not implemented Yet!");
+
 	}
-	/*
+	
 	@RequestMapping(value = "/object/{guid}/meta/", method = RequestMethod.GET)
-	public ModelAndView getMeta(@PathVariable String guid) throws Exception {
-		Object token = new Object();
-		Response response = crudService.getSystemMetadata(token, guid);
-		return new ModelAndView("response", "org.dataone.ns.core.objects.Response",response);
+	public void  getSystemMetadata(@PathVariable String guid) throws Exception {
+		throw new Exception("getSystemMetadata Not implemented Yet!");
+
 	}
 	
 	@RequestMapping(value = "/object/{guid}/locate/", method = RequestMethod.GET)
-	public ModelAndView locateMeta(@PathVariable String guid) throws Exception {
-		Object token = new Object();
-		Response response = crudService.resolve(token, guid);
-		return new ModelAndView("response", "org.dataone.ns.core.objects.Response",response);
-	}	*/
+	public void  resolve(@PathVariable String guid) throws Exception {
+		throw new Exception("resolve Not implemented Yet!");
 
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-		
 	}
-
 	
 	
 }
