@@ -15,13 +15,15 @@ import org.springframework.stereotype.Service;
 @Qualifier("crudService")
 public class CrudServiceImpl implements CrudService {
 
-	private RepositoryDao repositoryDao;
+
+/*	private RepositoryDao repositoryDao;
 	
 	@Autowired
 	@Qualifier("someRepositorysDaoImpl")
 	public void setRepositoryDao(RepositoryDao repositoryDao) {
 		this.repositoryDao = repositoryDao;
-	}
+	}*/
+	
 	/*    
 	 * This is a method used internally by the CN, not exposed to MNs or the world. 
 	 * Stores the two given objects (systemMetadata, scienceMetadata) in a single atomic action. 
