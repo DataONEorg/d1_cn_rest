@@ -33,7 +33,7 @@
           			<target>1.6</target>
         		</configuration>
 			</plugin>
-			<plugin>
+<!--  			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>2.4</version>
 				<configuration>
@@ -53,7 +53,7 @@
 						</fileset>
 					</filesets>
 				</configuration>
-			</plugin>
+			</plugin> -->
 		</plugins>
     </build>
 	<repositories>
@@ -85,12 +85,12 @@
 			<type>maven-plugin</type>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
+<!-- 	<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-clean-plugin</artifactId>
 			<version>2.4</version>
 			<type>maven-plugin</type>
-		</dependency>
+		</dependency>  -->	
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-antrun-plugin</artifactId>
