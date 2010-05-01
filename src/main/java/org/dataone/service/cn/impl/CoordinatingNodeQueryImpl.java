@@ -1,18 +1,19 @@
-package org.dataone.cn.rest.service.impl;
+package org.dataone.service.cn.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 
-import java.util.List;
-import org.dataone.cn.rest.service.QueryService;
-import org.dataone.ns.core.objects.Response;
+import org.dataone.service.cn.CoordinatingNodeQuery;
+import javax.management.Query;
+import org.dataone.service.exceptions.InvalidRequest;
+import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.types.AuthToken;
+import org.dataone.service.types.ListObjects;
+import org.dataone.service.types.LogRecordSet;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 @Service("queryServiceImpl")
 @Qualifier("queryService")
-public class QueryServiceImpl implements QueryService {
+public class CoordinatingNodeQueryImpl implements CoordinatingNodeQuery {
 
 	/** generates a response to be used with servlet. Displays logging information, initially
 	 *  from apache logs (i think) and later from our logging service
@@ -24,13 +25,12 @@ public class QueryServiceImpl implements QueryService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<InputStream> getLogRecords(Object token, Date fromDate, Date toDate)
-			throws Exception {
+    public LogRecordSet getLogRecords(AuthToken token,
+            Date fromDate, Date toDate)
+        throws NotAuthorized, InvalidRequest {
 		// TODO Auto-generated method stub
-		List<InputStream> inputStreams = new ArrayList<InputStream>();
-		inputStreams.add(new ByteArrayInputStream("generateReport Not implemented Yet!".getBytes("UTF8")));
-		return inputStreams;
-//		throw new Exception("getLogRecords Not implemented Yet!");
+
+		throw new NotAuthorized(111,"getLogRecords Not implemented Yet!");
 	}
 
 	/**	
@@ -69,11 +69,11 @@ public class QueryServiceImpl implements QueryService {
 	 * </pre>
 	*/
 
-
-	@Override
-	public Response search(Object token, Object query, String... params) throws Exception {
+    @Override
+    public ListObjects search(AuthToken token, Query query)
+        throws NotAuthorized, InvalidRequest {
 		// TODO Auto-generated method stub
-		throw new Exception("getLogRecords Not implemented Yet!");
+		throw new NotAuthorized(111,"getLogRecords Not implemented Yet!");
 	}
 
 }

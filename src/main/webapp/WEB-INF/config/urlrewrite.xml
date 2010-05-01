@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE urlrewrite PUBLIC "-/tuckey.org/DTD UrlRewrite 3.0/EN" "http://tuckey.org/res/dtds/urlrewrite3.0.dtd" >
 <urlrewrite default-match-type="regex" use-query-string="true">
-	<rule match-type="regex" >
-	    <from>^/object$</from>
-	    <to>/metacat/object/</to>
-	</rule>
 	<rule match-type="regex">
-	    <from>^/object/$</from>
+	    <from>^/object/?$</from>
 	    <to>/metacat/object/</to>
 	</rule>
 	<rule match-type="regex">
@@ -14,22 +10,29 @@
 	    <to>/metacat/object/$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/object/([^/]+)/meta$</from>
-	    <to>/metacat/object/$1/meta</to>
+	    <from>^/object/([^/\?]+)/meta/?$</from>
+	    <to>/metacat/object/$1/meta/</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/object/([^/]+)/locate$</from>
-	    <to>/metacat/object/$1/locate</to>
+	    <from>^/object/([^/\?]+)/locate/?$</from>
+	    <to>/metacat/object/$1/locate/</to>
 	</rule>	
 	<rule match-type="regex">
 	    <from>^/object/(\?qt=path.*)$</from>
 	    <to>/metacat/object/$1</to>
 	</rule>
 	<rule match-type="regex">
+	    <from>^/object(\?qt=path.*)$</from>
+	    <to>/metacat/object/$1</to>
+	</rule>
+	<rule match-type="regex">
 	    <from>^/object/(\?qt=solr.*)$</from>
 	    <to>/mercury/object/$1</to>
 	</rule>
-	
+	<rule match-type="regex">
+	    <from>^/object(\?qt=solr.*)$</from>
+	    <to>/mercury/object/$1</to>
+	</rule>
 	<outbound-rule>
 	    <from>^/metacat/object/$</from>
 	    <to>/object/</to>
