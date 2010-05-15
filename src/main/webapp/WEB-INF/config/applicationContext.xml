@@ -17,7 +17,7 @@
 
 
 <!--  
-	<oxm:jibx-marshaller id="jibxMarshallerResponse" target-class="org.dataone.service.types.ListObjects"/>
+	<oxm:jibx-marshaller id="jibxMarshallerResponse" target-class="org.dataone.service.types.ObjectList"/>
 	
 	<oxm:jibx-marshaller id="jibxMarshallerSystemMetadata" target-class="org.dataone.service.types.SystemMetadata"/>
 -->	

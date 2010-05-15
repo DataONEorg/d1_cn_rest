@@ -64,7 +64,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
 	public InputStream get(AuthToken token, Identifier guid)
         throws InvalidToken, ServiceFailure, NotAuthorized, NotFound,
         NotImplemented {
-                ServiceFailure notImplemented = new ServiceFailure(111, "get method Not Implemented yet");
+                ServiceFailure notImplemented = new ServiceFailure("1111", "get method Not Implemented yet");
 
 		// TODO Auto-generated method stub
 		// repositoryDao.read(token, guid);
@@ -86,7 +86,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
     public SystemMetadata getSystemMetadata(AuthToken token, Identifier guid)
         throws InvalidToken, ServiceFailure, NotAuthorized, NotFound,
         InvalidRequest, NotImplemented {
-        NotImplemented  notImplemented = new NotImplemented(111, "getSystemMetadata method Not implemented Yet!");
+        NotImplemented  notImplemented = new NotImplemented("1111", "getSystemMetadata method Not implemented Yet!");
 		throw notImplemented;
 	}
 	
@@ -109,7 +109,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
         throws InvalidToken, ServiceFailure, NotAuthorized, NotFound,
         InvalidRequest, NotImplemented {
 		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented(111, "resolve method Not implemented Yet!");
+                NotImplemented  notImplemented = new NotImplemented("1111", "resolve method Not implemented Yet!");
 		throw notImplemented;
 	}
 
@@ -118,7 +118,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
         throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
         NotImplemented{
 		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented(111, "reserveId method Not implemented Yet!");
+                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
 		throw notImplemented;
 	}
     @Override
@@ -126,7 +126,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
         throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
         NotImplemented{
 		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented(111, "reserveId method Not implemented Yet!");
+                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
 		throw notImplemented;
 	}
     @Override
@@ -134,7 +134,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
         throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
         NotImplemented{
 		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented(111, "reserveId method Not implemented Yet!");
+                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
 		throw notImplemented;
 	}
     @Override
@@ -142,7 +142,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
         throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
         NotImplemented{
 		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented(111, "reserveId method Not implemented Yet!");
+                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
 		throw notImplemented;
 	}
     @Override
@@ -151,7 +151,7 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
         throws InvalidToken, ServiceFailure, NotAuthorized, NotFound,
         InvalidRequest, NotImplemented{
 		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented(111, "assertRelation method Not implemented Yet!");
+                NotImplemented  notImplemented = new NotImplemented("1111", "assertRelation method Not implemented Yet!");
 		throw notImplemented;
 	}
 
