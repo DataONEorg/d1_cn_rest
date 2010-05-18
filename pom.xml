@@ -46,6 +46,16 @@
     </build>
     <repositories>
         <repository>
+            <id>sonatype.org</id>
+            <url>http://repository.sonatype.org/content/repositories/central</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>Jibx Maven Repository</id>
             <url>http://jibx.sourceforge.net/maven/</url>
         </repository>
@@ -58,12 +68,6 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jibx</groupId>
-            <artifactId>jibx-run</artifactId>
-            <version>1.2.1</version>
-            <scope>compile</scope>
-        </dependency>
 
         <!--  maven specific plugins to make life more configurable-->
         <dependency>
@@ -73,19 +77,14 @@
             <type>maven-plugin</type>
             <scope>compile</scope>
         </dependency>
-        <!-- 	<dependency>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.4</version>
-                        <type>maven-plugin</type>
-                </dependency>  -->
+
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
             <version>1.3</version>
             <type>maven-plugin</type>
             <scope>compile</scope>
-        </dependency>
+        </dependency> 
 
         <!--  Spring 3.0 dependencies-->
 
@@ -154,7 +153,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-        
+
 
         <dependency>
             <groupId>commons-codec</groupId>
@@ -177,7 +176,7 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
-<!--  and we have dependencies on re-usable projects that we maintain -->
+        <!--  and we have dependencies on re-usable projects that we maintain -->
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>dataone-cn-proxy</artifactId>
@@ -190,69 +189,76 @@
             <version>0.3.0</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <type>jar</type>
+        </dependency>
+
     </dependencies>
     <properties>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
     </properties>
     <profiles>
-      <profile>
-           <id>beta</id>
-           <activation>
-              <activeByDefault>true</activeByDefault>
-              <property>
-                <name>environment.type</name>
-                <value>beta</value>
-              </property>
+        <profile>
+            <id>beta</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>beta</value>
+                </property>
             </activation>
             <build>
                 <filters>
                     <filter>src/main/filters/beta.properties</filter>
                 </filters>
             </build>
-       </profile>
-      <profile>
-           <id>dev</id>
-           <activation>
-              <activeByDefault>true</activeByDefault>
-              <property>
-                <name>environment.type</name>
-                <value>dev</value>
-              </property>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>dev</value>
+                </property>
             </activation>
             <build>
                 <filters>
                     <filter>src/main/filters/development.properties</filter>
                 </filters>
             </build>
-       </profile>
-       <profile>
-           <id>stage</id>
-           <activation>
-              <property>
-                <name>environment.type</name>
-                <value>stage</value>
-              </property>
+        </profile>
+        <profile>
+            <id>stage</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>stage</value>
+                </property>
             </activation>
             <build>
                 <filters>
                     <filter>src/main/filters/staging.properties</filter>
                 </filters>
             </build>
-       </profile>
-       <profile>
-           <id>prod</id>
-           <activation>
-              <property>
-                <name>environment.type</name>
-                <value>prod</value>
-              </property>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prod</value>
+                </property>
             </activation>
             <build>
                 <filters>
                     <filter>src/main/filters/production.properties</filter>
                 </filters>
             </build>
-       </profile>
+        </profile>
     </profiles>
 </project>
 
