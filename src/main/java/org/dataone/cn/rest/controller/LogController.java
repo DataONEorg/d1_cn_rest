@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import org.dataone.service.types.AuthToken;
-import org.dataone.service.types.LogRecordSet;
+import org.dataone.service.types.Log;;
 /**
  * @author rwaltz
  * 
@@ -37,10 +37,10 @@ public class LogController {
 	@RequestMapping(value = "/log", method = RequestMethod.GET)
 	public void getLogRecords(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-                AuthToken token = new AuthToken("Hello!");
+                AuthToken token = new AuthToken("public");
 		Date fromDate = new Date();
 		Date toDate = new Date();
-		LogRecordSet logRecordSet = queryService.getLogRecords(token,
+		Log logs = queryService.getLogRecords(token,
 				fromDate, toDate);
                 
 /*		OutputStream outputStream = response.getOutputStream();

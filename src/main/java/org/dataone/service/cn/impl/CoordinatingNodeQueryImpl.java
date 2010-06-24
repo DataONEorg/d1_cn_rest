@@ -8,7 +8,7 @@ import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.AuthToken;
 import org.dataone.service.types.ObjectList;
-import org.dataone.service.types.LogRecordSet;
+import org.dataone.service.types.Log;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 @Service("queryServiceImpl")
@@ -25,7 +25,7 @@ public class CoordinatingNodeQueryImpl implements CoordinatingNodeQuery {
 	 * @throws Exception
 	 */
 	@Override
-    public LogRecordSet getLogRecords(AuthToken token,
+    public Log getLogRecords(AuthToken token,
             Date fromDate, Date toDate)
         throws NotAuthorized, InvalidRequest {
 		// TODO Auto-generated method stub
