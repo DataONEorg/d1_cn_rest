@@ -14,6 +14,10 @@
 	    <to>/metacat/object/$1/meta/</to>
 	</rule>
 	<rule match-type="regex">
+	    <from>^/meta/([^/\?]+)/?$</from>
+	    <to>/metacat/object/$1/meta/</to>
+	</rule>
+	<rule match-type="regex">
 	    <from>^/object/([^/\?]+)/locate/?$</from>
 	    <to>/metacat/object/$1/locate/</to>
 	</rule>	

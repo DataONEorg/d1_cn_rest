@@ -41,6 +41,10 @@ public class ContextUrlRewriteTestCase {
         test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/meta/");
         tests.put("^/object/([^/\\?]+)/meta/?$", test);
         test = new HashMap<String, String>();
+        test.put("urlpath", "/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18/");
+        test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/meta/");
+        tests.put("^/meta/([^/\\?]+)/?$", test);
+        test = new HashMap<String, String>();
         test.put("urlpath", "/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/locate");
         test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/locate/");
         tests.put("^/object/([^/\\?]+)/locate/?$", test);
