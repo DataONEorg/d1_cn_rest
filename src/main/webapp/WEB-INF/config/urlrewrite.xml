@@ -9,18 +9,22 @@
 	    <from>^/object/([^/\?]+)$</from>
 	    <to>/metacat/object/$1</to>
 	</rule>
-	<rule match-type="regex">
+<!--	<rule match-type="regex">
 	    <from>^/object/([^/\?]+)/meta/?$</from>
 	    <to>/metacat/object/$1/meta/</to>
-	</rule>
+	</rule> -->
 	<rule match-type="regex">
 	    <from>^/meta/([^/\?]+)/?$</from>
 	    <to>/metacat/object/$1/meta/</to>
 	</rule>
 	<rule match-type="regex">
+	    <from>^/resolve/([^/\?]+)/?$</from>
+	    <to>/metacat/object/$1/resolve/</to>
+	</rule>
+<!--	<rule match-type="regex">
 	    <from>^/object/([^/\?]+)/locate/?$</from>
 	    <to>/metacat/object/$1/locate/</to>
-	</rule>	
+	</rule>	-->
 	<rule match-type="regex">
 	    <from>^/object/(\?qt=path.*)$</from>
 	    <to>/metacat/object/$1</to>
@@ -44,6 +48,14 @@
 	<outbound-rule>
 	    <from>^/metacat/object/(.+)$</from>
 	    <to>/object/$1</to>
+	</outbound-rule>
+	<outbound-rule>
+	    <from>^/metacat/object/([^/\?]+)/meta$</from>
+	    <to>/meta/$1</to>
+	</outbound-rule>
+	<outbound-rule>
+	    <from>^/metacat/object/([^/\?]+)/resolve$</from>
+	    <to>/resolve/$1</to>
 	</outbound-rule>
 	<outbound-rule>
 	    <from>^/mercury/object/(.+)$</from>
