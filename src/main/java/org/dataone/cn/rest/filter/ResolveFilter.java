@@ -1,10 +1,22 @@
 package org.dataone.cn.rest.filter;
 
+import javax.servlet.Filter;
 
-public class resolveFilter {
-
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+public class resolveFilter implements Filter {
+	private FilterConfig filterConfig = null;
+	
+	public void init(FilterConfig filterConfig) throws ServletException {
+		this.filterConfig = filterConfig;	
+	}
+	
+	public void destroy() {
+		this.filterConfig = null;
+	}
+	
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
+	
+	if (filterConfig == null) return;
 	
 	// not ready for consumption yet...
 	// (consider this a placeholder)
@@ -17,16 +29,16 @@ public class resolveFilter {
 	    styleSheet = "/xml/resolve-filter-xml.xsl";
 	} else {
 	    if (type.equals("csv")) {
-		contentType = "text/plain";
-		styleSheet = "/xml/resolve-filter-csv.xsl";
+	    	contentType = "text/plain";	
+	    	styleSheet = "/xml/resolve-filter-csv.xsl";
 	    } else {
-		if (type.equals("json")) {
-		    contentType = "text/plain";
-		    styleSheet = "/xml/resolve-filter-json.xsl";
-		} else {
-		    contentType = "xml";
-		    styleSheet = "/xml/resolve-filter-xml.xsl";
-		}
+	    	if (type.equals("json")) {
+	    		contentType = "text/plain";
+	    		styleSheet = "/xml/resolve-filter-json.xsl";
+	    	} else {
+	    		contentType = "xml";
+	    		styleSheet = "/xml/resolve-filter-xml.xsl";
+	    	}
 	    }
 	}
 	response.setContectType(contentType);
@@ -52,5 +64,4 @@ public class resolveFilter {
 	    out.println(ex.toString());
 	    out.write(Wrapper.toString());
 	}
-    }
 }
