@@ -16,7 +16,7 @@ public class ResolveFilter implements Filter {
 			"application/json",
 //			"text/html",
 //			"application/rdf+xml",
-			"tex/csv",
+			"text/csv",
 			"text/xml"
 			};
 	
