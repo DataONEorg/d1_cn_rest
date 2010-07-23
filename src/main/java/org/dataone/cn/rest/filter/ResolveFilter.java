@@ -12,14 +12,16 @@ import javax.xml.transform.stream.*;
 public class ResolveFilter implements Filter {
 	private FilterConfig filterConfig = null;
 	private HashMap<String,String> xsltFileNameMap;
-	private Enumeration<String> requiredAccepts = (
-			'application/json',
-			'text/xml',
-//			'application/rdf+xml',
-			'tex/csv',
-			'text/html');
+	private String[] requiredAccepts = {
+			"application/json",
+//			"text/html",
+//			"application/rdf+xml",
+			"tex/csv",
+			"text/xml"
+			};
 	
-    public void init(FilterConfig filterConfig) throws ServletException {
+    @SuppressWarnings("unchecked")
+	public void init(FilterConfig filterConfig) throws ServletException {
         this.filterConfig = filterConfig;
         xsltFileNameMap = new HashMap<String,String>();
         
@@ -32,24 +34,23 @@ public class ResolveFilter implements Filter {
         // without having to copy and paste if-then statements for each
         // new case.
 
-        Enumeration initParamNames = filterConfig.getParameterNames();
+        Enumeration<String> initParamNames = filterConfig.getInitParameterNames();
         while (initParamNames.hasMoreElements()) {
-           	String acceptType = initParamNames.nextElement();
+           	String acceptType = (String) initParamNames.nextElement();
            	
            	String path = filterConfig.getInitParameter(acceptType);
            	String realPath = filterConfig.getServletContext().getRealPath(path);
         	if (!new File(realPath).exists()) {
         		throw new UnavailableException("Unable to locate stylesheet: " + realPath, 30);
         	}
-        	xsltFileNameMap.put(accept, realPath);
+        	xsltFileNameMap.put(acceptType, realPath);
         }
         
         // test that required accept types are handled (have stylesheets)
-        while (requiredAccepts.hasMoreElements()) {
-        	String anAccept =requiredAccepts.nextElement();
-        	if (xsltFileNameMap.get(anAccept) == null) {
+        for (int i=0; i< requiredAccepts.length; i++) {
+        	if (xsltFileNameMap.get(requiredAccepts[i]) == null) {
         		throw new UnavailableException(		
-                    "Require an xslt mapping for accept type '" +  anAccept
+                    "Require an xslt mapping for accept type '" +  requiredAccepts[i]
                     + "' Please check the veracity of the init-params "
                     + "in the deployment descriptor.");
         	}
