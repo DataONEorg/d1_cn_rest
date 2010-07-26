@@ -1,15 +1,9 @@
 package org.dataone.cn.web;
 
 import static org.junit.Assert.*;
-import FilterChain;
-import FilterConfig;
-import HttpServletRequest;
-import HttpServletResponse;
-import MockFilterChain;
-import MockFilterConfig;
-import MockHttpServletRequest;
-import MockHttpServletResponse;
-import ResolveFilter;
+
+import java.io.IOException;
+//import org.springframework.test.web.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -21,7 +15,10 @@ import org.junit.Test;
 import org.dataone.cn.rest.filter.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import org.springframework.mock.*;
+
+
+import org.springframework.core.io.*;  //FileSystemResourceLoader;
+import org.springframework.mock.web.*;
 
 
 public class TestingMyResolve {
@@ -42,47 +39,63 @@ public class TestingMyResolve {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
+//	@Test
 	public void testInit() {
 		fail("Not yet implemented"); // TODO
 	}
 
-	@Test
+//	@Test
 	public void testDestroy() {
 		fail("Not yet implemented"); // TODO
 	}
 
-	@Test
+//	@Test
 	public void testDoFilter() {
 		fail("Not yet implemented"); // TODO
 	}
-
+	@Test
 	public void testXmlTransformation() {
 		//building up a new ResolveFilter with the appropriate parameters
-//		ServletContext sc = new MockServletContext();
-//		sc.addInitParameter("text/xml","/WEB-INF/config/resolve-filter-xml.xsl");
-//		FilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
 
-		FilterConfig fc = new MockFilterConfig("ResolveFilter");
+		ResourceLoader fsrl = new FileSystemResourceLoader();
+		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
+//		sc.addInitParameter("text/xml","src/main/webapp/WEB-INF/config/resolve-filter-xml.xsl");
+		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
+		
+
+		
+//		MockFilterConfig fc = new MockFilterConfig("ResolveFilter");
+		fc.addInitParameter("text/csv","/WEB-INF/config/resolve-filter-csv.xsl");
+		fc.addInitParameter("application/json","/WEB-INF/config/resolve-filter-json.xsl");
 		fc.addInitParameter("text/xml","/WEB-INF/config/resolve-filter-xml.xsl");
 		ResolveFilter rf = new ResolveFilter();	
+
+		try {
+			rf.init(fc);
+		} catch (ServletException se) {
+			fail("servlet exception at ResolveFilter.init(fc)");
+		}
 		
-		rf.init(fc);
-		
-		HttpServletRequest request= new MockHttpServletRequest(
+		MockHttpServletRequest request= new MockHttpServletRequest(
 				fc.getServletContext(),
 				null,
 				"/resolve/12345");
 		
-		request.addHeader("accept", (Object) "text/xml");
-		
-		HttpServletResponse response = new MockHttpServletResponse();
-		
+		request.addHeader("accept", (Object) "text/xml");		
+		HttpServletResponse response = new MockHttpServletResponse();		
 		FilterChain chain = new MockFilterChain();
 		
+		try {
+			rf.doFilter(request,response,chain);
+		} catch (ServletException se) {
+			fail("servlet exception at ResolveFilter.doFilter(): " + se);
+		} catch (IOException ioe) {
+			fail("servlet exception at ResolveFilter.doFilter(): " + ioe);
+		}
 		
-		rf.doFilter(request,response,filterChain);
-
+//		catch (IOException ioe) {
+//			throw new IOException(ioe);
+//		}	
 		assertEquals("two plus two", "five");
 	}
 

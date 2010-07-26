@@ -1,6 +1,8 @@
 package org.dataone.cn.web;
 
 
+import java.io.IOException;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -10,7 +12,7 @@ import org.dataone.cn.rest.filter.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 //import static org.easymock.EasyMock.*;
-import org.springframework.mock.*;
+import org.springframework.mock.web.*;
 
 public class TestResolveTransformations extends TestCase {
 
@@ -41,13 +43,17 @@ public class TestResolveTransformations extends TestCase {
 //		sc.addInitParameter("text/xml","/WEB-INF/config/resolve-filter-xml.xsl");
 //		FilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
 
-		FilterConfig fc = new MockFilterConfig("ResolveFilter");
+		MockFilterConfig fc = new MockFilterConfig("ResolveFilter");
 		fc.addInitParameter("text/xml","/WEB-INF/config/resolve-filter-xml.xsl");
 		ResolveFilter rf = new ResolveFilter();	
 		
-		rf.init(fc);
+		try {
+			rf.init(fc);
+		} catch (ServletException se) {
+			fail("servlet exception: " + se);
+		}
 		
-		HttpServletRequest request= new MockHttpServletRequest(
+		MockHttpServletRequest request= new MockHttpServletRequest(
 				fc.getServletContext(),
 				null,
 				"/resolve/12345");
@@ -58,9 +64,13 @@ public class TestResolveTransformations extends TestCase {
 		
 		FilterChain chain = new MockFilterChain();
 		
-		
-		rf.doFilter(request,response,filterChain);
-
+		try {
+			rf.doFilter(request,response,chain);	
+		} catch (ServletException se) {
+			fail("servlet exception: " + se);
+		} catch (IOException ioe) {
+			fail("IO Exception: " + ioe);
+		}
 		assertEquals("two plus two", "five");
 	}
 	public void testJsonTransformation() {

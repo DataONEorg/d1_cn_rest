@@ -39,6 +39,7 @@ public class ResolveFilter implements Filter {
            	String acceptType = (String) initParamNames.nextElement();
            	
            	String path = filterConfig.getInitParameter(acceptType);
+//           	String mybase = filterConfig.getServletContext().getResource(path);
            	String realPath = filterConfig.getServletContext().getRealPath(path);
         	if (!new File(realPath).exists()) {
         		throw new UnavailableException("Unable to locate stylesheet: " + realPath, 30);
@@ -112,8 +113,7 @@ public class ResolveFilter implements Filter {
 	
 
         //  ****** Handle request before passing control to next filter or servlet  *********
-        
-        String contentType;
+        						   
         String styleSheet;
 
         // make sure we can return the requested contentType
@@ -122,8 +122,9 @@ public class ResolveFilter implements Filter {
         if (xsltFileNameMap.containsKey(type)) {
             styleSheet = xsltFileNameMap.get(type);
         } else {
-            throw new Exceptions.NotImplemented(
-            		"Unable to provide a response for the Accept header media type of " + type, 406);
+            throw new UnavailableException(
+            		"Unable to provide a response for the "
+            		+ "Accept header media type of " + type, 406);
         }
 
         //  ******* pass control to next filter in the chain  ********
