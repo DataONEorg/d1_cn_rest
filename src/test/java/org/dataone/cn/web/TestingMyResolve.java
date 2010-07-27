@@ -1,7 +1,7 @@
 package org.dataone.cn.web;
 
 import static org.junit.Assert.*;
-
+import static org.junit.matchers.JUnitMatchers.*;
 import java.io.IOException;
 //import org.springframework.test.web.*;
 
@@ -13,6 +13,7 @@ import org.junit.Test;
 
 //import junit.framework.TestCase;
 import org.dataone.cn.rest.filter.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -82,21 +83,34 @@ public class TestingMyResolve {
 				"/resolve/12345");
 		
 		request.addHeader("accept", (Object) "text/xml");		
-		HttpServletResponse response = new MockHttpServletResponse();		
-		FilterChain chain = new MockFilterChain();
+		request.setMethod("POST");
+		HttpServletResponse response = new MockHttpServletResponse();	
+		
+		Servlet testResolve = new TestResolveServlet();
+		FilterChain chain = new PassThroughFilterChain(testResolve);
+		
+		// need to wrap the response to examine
+		BufferedHttpResponseWrapper responseWrapper =
+            new BufferedHttpResponseWrapper((HttpServletResponse) response);
+		
 		
 		try {
-			rf.doFilter(request,response,chain);
+			rf.doFilter(request,responseWrapper,chain);
 		} catch (ServletException se) {
 			fail("servlet exception at ResolveFilter.doFilter(): " + se);
 		} catch (IOException ioe) {
 			fail("servlet exception at ResolveFilter.doFilter(): " + ioe);
 		}
+		// examine contents of the response
+		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
+		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
 		
-//		catch (IOException ioe) {
-//			throw new IOException(ioe);
-//		}	
-		assertEquals("two plus two", "five");
+		String content = new String(responseWrapper.getBuffer());
+		
+//		JUnitMatchers matcher = new JUnitMatchers();
+		assertThat("response contains word 'replica'", content, containsString("replica"));
+		
+	
 	}
 
 	
