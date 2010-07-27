@@ -143,6 +143,7 @@ public class ResolveFilter implements Filter {
         // code is a workaround:
         
         byte[] origXML = responseWrapper.getBuffer( );
+//       String forDebug = new String(origXML);
         if (origXML == null || origXML.length == 0) {
             // just let Tomcat deliver its cached data back to the client
             chain.doFilter(request, response);
@@ -163,6 +164,7 @@ public class ResolveFilter implements Filter {
             Source xmlSource = new StreamSource(origXMLIn);
 
             ByteArrayOutputStream resultBuf = new ByteArrayOutputStream( );
+//            String forDebug2 = transformer.getOutputProperty(OutputKeys.METHOD);
             transformer.transform(xmlSource, new StreamResult(resultBuf));
 
             response.setContentLength(resultBuf.size( ));
