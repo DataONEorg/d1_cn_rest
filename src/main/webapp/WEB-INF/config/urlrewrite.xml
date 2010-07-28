@@ -33,6 +33,10 @@
 	    <from>^/object(\?qt=solr.*)$</from>
 	    <to>/mercury/object/$1</to>
 	</rule>
+	<rule match-type="regex">
+	    <from>^/node/?$</from>
+	    <to>/nodeList.xml</to>
+	</rule>
 	<outbound-rule>
 	    <from>^/metacat/object/$</from>
 	    <to>/object/</to>
@@ -52,6 +56,10 @@
 	<outbound-rule>
 	    <from>^/mercury/object/(.+)$</from>
 	    <to>/object/$1</to>
+	</outbound-rule>
+	<outbound-rule>
+	    <from>^/nodeList\.xml$</from>
+	    <to>/node/</to>
 	</outbound-rule>
 
 </urlrewrite>

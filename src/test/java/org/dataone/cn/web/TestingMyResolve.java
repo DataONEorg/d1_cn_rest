@@ -86,7 +86,7 @@ public class TestingMyResolve {
 		request.setMethod("POST");
 		HttpServletResponse response = new MockHttpServletResponse();	
 		
-		Servlet testResolve = new TestResolveServlet();
+		Servlet testResolve = new ResolveServlet();
 		FilterChain chain = new PassThroughFilterChain(testResolve);
 		
 		// need to wrap the response to examine
