@@ -108,7 +108,7 @@ public class TestingMyResolve {
 		String content = new String(responseWrapper.getBuffer());
 		
 //		JUnitMatchers matcher = new JUnitMatchers();
-		assertThat("response contains word 'replica'", content, containsString("objectLocationList"));
+		assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
 //		assertEquals(content,"<?xml version=\"1.0\" encoding=\"UTF-8\"?><locations identifier=\"Identifier0\"><location node=\"ReplicaMemberNode0\" " 
 //				+"href=\"http://ReplicaMemberNode0object?id=Identifier0\"/><location node=\"ReplicaMemberNode2\" "
 //				+"href=\"http://ReplicaMemberNode2object?id=Identifier0\"/></locations>");
