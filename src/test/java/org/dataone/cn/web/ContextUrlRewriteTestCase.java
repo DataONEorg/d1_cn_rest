@@ -45,9 +45,9 @@ public class ContextUrlRewriteTestCase {
         test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/meta/");
         tests.put("^/meta/([^/\\?]+)/?$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/locate");
-        test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/locate/");
-        tests.put("^/object/([^/\\?]+)/locate/?$", test);
+        test.put("urlpath", "/resolve/http%3A%2F%2Ffoo.com%2Fmeta%2F18/");
+        test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/resolve/");
+        tests.put("^/resolve/([^/\\?]+)/?$", test);
         test = new HashMap<String, String>();
         test.put("urlpath", "/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         test.put("pathresult", "/metacat/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
@@ -72,6 +72,14 @@ public class ContextUrlRewriteTestCase {
         test.put("urlpath", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
         test.put("pathresult", "/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
         tests.put("^/metacat/object/(.+)$", test);
+        test = new HashMap<String, String>();
+        test.put("urlpath", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/meta");
+        test.put("pathresult", "/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
+        tests.put("^/metacat/object/([^/\\?]+)/meta$", test);
+        test = new HashMap<String, String>();
+        test.put("urlpath", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18/resolve");
+        test.put("pathresult", "/resolve/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
+        tests.put("^/metacat/object/([^/\\?]+)/resolve$", test);
         test = new HashMap<String, String>();
         test.put("urlpath", "/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         test.put("pathresult", "/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
