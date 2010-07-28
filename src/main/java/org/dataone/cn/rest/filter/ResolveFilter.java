@@ -56,44 +56,6 @@ public class ResolveFilter implements Filter {
                     + "in the deployment descriptor.");
         	}
         }
-        
- /*       
-        // xsltPath should be something like "/WEB-INF/xslt/a.xslt"
-        String xsltCsvPath = filterConfig.getInitParameter("xsltCsvPath");
-        if (xsltCsvPath == null) {
-            throw new UnavailableException(
-                    "xsltCsvPath is a required parameter. Please "
-                    + "check the deployment descriptor.");
-        }
-        String xsltJsonPath = filterConfig.getInitParameter("xsltJsonPath");
-        if (xsltJsonPath == null) {
-            throw new UnavailableException(
-                    "xsltJsonPath is a required parameter. Please "
-                    + "check the deployment descriptor.");
-        }
-        String xsltXmlPath = filterConfig.getInitParameter("xsltXmlPath");
-        if (xsltXmlPath == null) {
-            throw new UnavailableException(
-                    "xsltXmlPath is a required parameter. Please "
-                    + "check the deployment descriptor.");
-        }
-        
-        
-        // convert the context-relative path to a physical path name
-        xsltFileNameMap.put("contentType", filterConfig.getServletContext( ).getRealPath(xsltXmlPath));
-        if (xsltFileNameMap.get("contentType") == null ||
-                !new File(xsltFileNameMap.get("contentType")).exists( )) {
-            throw new UnavailableException(
-                    "Unable to locate stylesheet: " + xsltXmlPath, 30);
-        }
-        xsltFileNameMap.put("contentType", filterConfig.getServletContext( ).getRealPath(xsltXmlPath));
-        // see above examples to fill in below calls
-        xsltFileNameMap.put("contentType", filterConfig.getServletContext( ).getRealPath(xsltXmlPath));
-        xsltFileNameMap.put("contentType", filterConfig.getServletContext( ).getRealPath(xsltXmlPath));
-        xsltFileNameMap.put("contentType", filterConfig.getServletContext( ).getRealPath(xsltXmlPath));
-        xsltFileNameMap.put("contentType", filterConfig.getServletContext( ).getRealPath(xsltXmlPath));
-        // verify that the file exists
-*/
     }
 
 	public void destroy() {
@@ -102,15 +64,14 @@ public class ResolveFilter implements Filter {
 	
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
+        if (filterConfig == null) return;
 		
-        if (!(res instanceof HttpServletResponse) || !(req instanceof HttpServletRequest)) {
+		if (!(res instanceof HttpServletResponse) || !(req instanceof HttpServletRequest)) {
             throw new ServletException("This filter only supports HTTP");
         }
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        if (filterConfig == null) return;
-	
 
         //  ****** Handle request before passing control to next filter or servlet  *********
         						   
