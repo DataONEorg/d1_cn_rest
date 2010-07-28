@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<d1:objectLocationList xmlns:d1="http://dataone.org/service/types/ObjectLocationList/0.1"
+ 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 		xsi:schemaLocation="http://dataone.org/service/types/ObjectLocationList/0.1 https://repository.dataone.org/software/cicore/trunk/schemas/objectlocationlist.xsd"> 
+	<identifier>abc12345</identifier>
+	<objectLocation>
+		<nodeIdentifier>mn1.dataone.org/mn</nodeIdentifier>
+		<url>http://mn1.dataone.org/mn/object/abc12345</url>
+	</objectLocation>
+</d1:objectLocationList>
