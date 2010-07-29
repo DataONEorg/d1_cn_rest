@@ -150,7 +150,7 @@
     </filter>
     <filter-mapping>
         <filter-name>ResolveFilter</filter-name>
-        <url-pattern>/resolve/*</url-pattern>
+        <url-pattern>*/resolve</url-pattern>
     </filter-mapping>
     <servlet>
         <servlet-name>metacat</servlet-name>
