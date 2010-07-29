@@ -17,7 +17,7 @@
 
     <build>
         <finalName>cn</finalName>
-        <defaultGoal>test</defaultGoal>
+        <defaultGoal>package</defaultGoal>
         <directory>target</directory>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
