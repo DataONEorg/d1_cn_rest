@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE urlrewrite PUBLIC "-/tuckey.org/DTD UrlRewrite 3.0/EN" "http://tuckey.org/res/dtds/urlrewrite3.0.dtd" >
+<!DOCTYPE urlrewrite SYSTEM "UrlRewrite.dtd" >
 <urlrewrite default-match-type="regex" use-query-string="true">
 	<rule match-type="regex">
 	    <from>^/object/?$</from>

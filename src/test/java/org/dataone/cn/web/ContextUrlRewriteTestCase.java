@@ -127,6 +127,10 @@ public class ContextUrlRewriteTestCase {
         NodeList urlrewriteChildren = root.getChildNodes();
         for (int i = 0; i < urlrewriteChildren.getLength(); ++i) {
             Node urlrewrite = urlrewriteChildren.item(i);
+            if (urlrewrite.getNodeType() != urlrewrite.ELEMENT_NODE)
+            {
+                continue;
+            }
             NodeList ruleChildren = urlrewrite.getChildNodes();
             String fromString = "";
             String toString = "";
