@@ -19,10 +19,18 @@
       <!-- transcribe replica node information -->
       <xsl:for-each select="replica[replicationStatus = 'completed']"> 
 	  	<xsl:element name="objectLocation">
-	    	<xsl:element name="nodeIdentifier"><xsl:value-of select="replicaMemberNode"/></xsl:element>
-	    	<xsl:element name="url"><xsl:value-of select="replicaMemberNode"/>/mn/object/<xsl:value-of select="$theID"/>
-	    	</xsl:element>
+	  		<xsl:choose>
+	  			<xsl:when test="matches(replicaMemberNode,'knb','i')">
+	  				<xsl:element name="nodeIdentifier">http://knb-mn.ecoinformatics.org/knb</xsl:element>
+		    		<xsl:element name="url">http://knb-mn.ecoinformatics.org/knb/object/<xsl:value-of select="$theID"/></xsl:element>
+		    	</xsl:when>
+	    		<xsl:otherwise>
+	    			<xsl:element name="nodeIdentifier"><xsl:value-of select="replicaMemberNode"/>/mn</xsl:element>
+	    			<xsl:element name="url"><xsl:value-of select="replicaMemberNode"/>/mn/object/<xsl:value-of select="$theID"/></xsl:element>
+	  			</xsl:otherwise>
+	  		</xsl:choose>
 	  	</xsl:element>
+	  	
       </xsl:for-each>
     </xsl:element>
   </xsl:template>
