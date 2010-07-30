@@ -7,9 +7,11 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
+import org.apache.log4j.Logger;
 
 
 public class ResolveFilter implements Filter {
+        Logger logger = Logger.getLogger("ResolveFilter");
 	private FilterConfig filterConfig = null;
 	private HashMap<String,String> xsltFileNameMap;
 	private String[] requiredAccepts = {
@@ -17,11 +19,13 @@ public class ResolveFilter implements Filter {
 //			"text/html",
 //			"application/rdf+xml",
 			"text/csv",
-			"text/xml"
+			"text/xml",
+                        "application/xml",
 			};
 	
     @SuppressWarnings("unchecked")
 	public void init(FilterConfig filterConfig) throws ServletException {
+        logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
         xsltFileNameMap = new HashMap<String,String>();
         
@@ -83,9 +87,11 @@ public class ResolveFilter implements Filter {
         if (xsltFileNameMap.containsKey(type)) {
             styleSheet = xsltFileNameMap.get(type);
         } else {
-            throw new UnavailableException(
+            logger.warn("Unable to provide a response for the Accept header media type of " + type);
+/*            throw new UnavailableException(
             		"Unable to provide a response for the "
-            		+ "Accept header media type of " + type, 406);
+            		+ "Accept header media type of " + type, 406); */
+            return;
         }
 
         //  ******* pass control to next filter in the chain  ********
@@ -113,7 +119,7 @@ public class ResolveFilter implements Filter {
 
         //  ****** Handle response from the servlet  *********
         
-
+        logger.info("ResolveFilter using styleSheet for " + request.getRequestURI());
         Source styleSource = new StreamSource(styleSheet);	
 
         try {

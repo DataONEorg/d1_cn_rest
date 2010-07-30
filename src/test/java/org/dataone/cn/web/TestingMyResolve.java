@@ -69,6 +69,7 @@ public class TestingMyResolve {
 		fc.addInitParameter("text/csv","/WEB-INF/config/resolve-filter-csv.xsl");
 		fc.addInitParameter("application/json","/WEB-INF/config/resolve-filter-json.xsl");
 		fc.addInitParameter("text/xml","/WEB-INF/config/resolve-filter-xml.xsl");
+                fc.addInitParameter("application/xml","/WEB-INF/config/resolve-filter-xml.xsl");
 		ResolveFilter rf = new ResolveFilter();	
 
 		try {
