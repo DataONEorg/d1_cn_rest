@@ -1,14 +1,10 @@
 <?xml version="1.0" ?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-	xmlns:d1="http://dataone.org/service/types/SystemMetadata/0.1"
-  	xmlns:fn="http://www.w3.org/2005/xpath-functions">
+	xmlns:d1="http://dataone.org/service/types/SystemMetadata/0.1">
   <xsl:output method="xml" omit-xml-declaration="no"/>
   <xsl:template match="/">
     <xsl:apply-templates/>
   </xsl:template>
-
-  <!-- assuming that input stream is a contatenation (with document wrapper) of real 
-       systemMetaData XML objects as described in the mule1 documentation  -->
        
   <xsl:template match="d1:systemMetadata">
     <xsl:element name="d1:objectLocationList" xmlns:d1="http://dataone.org/service/types/ObjectLocationList/0.1"
@@ -20,8 +16,21 @@
       <!-- transcribe replica node information -->
       <xsl:for-each select="replica[replicationStatus = 'completed']"> 
 	  	<xsl:element name="objectLocation">
-	  		<xsl:choose>
-	  			<xsl:when test="fn:matches(replicaMemberNode,'knb','i')">
+	  		<xsl:variable name="theNode" select="replicaMemberNode"/>
+	   		
+	   		<!-- TODO:  we don't want to have hardcoded urls to handle odd cases.  This choose 
+	   		   structure is a temporary workaround and needs to be removed once the node information
+	   		   coming in on the systemMetadata is harmonized  -->
+	   		<xsl:choose>
+	  			<xsl:when test="contains($theNode,'knb')">
+	  				<xsl:element name="nodeIdentifier">http://knb-mn.ecoinformatics.org/knb</xsl:element>
+		    		<xsl:element name="url">http://knb-mn.ecoinformatics.org/knb/object/<xsl:value-of select="$theID"/></xsl:element>
+		    	</xsl:when>
+		    	<xsl:when test="contains($theNode,'KNB')">
+	  				<xsl:element name="nodeIdentifier">http://knb-mn.ecoinformatics.org/knb</xsl:element>
+		    		<xsl:element name="url">http://knb-mn.ecoinformatics.org/knb/object/<xsl:value-of select="$theID"/></xsl:element>
+		    	</xsl:when>
+		    	<xsl:when test="contains($theNode,'Knb')">
 	  				<xsl:element name="nodeIdentifier">http://knb-mn.ecoinformatics.org/knb</xsl:element>
 		    		<xsl:element name="url">http://knb-mn.ecoinformatics.org/knb/object/<xsl:value-of select="$theID"/></xsl:element>
 		    	</xsl:when>
@@ -35,4 +44,4 @@
       </xsl:for-each>
     </xsl:element>
   </xsl:template>
-</xsl:stylesheet>
+ </xsl:stylesheet>
