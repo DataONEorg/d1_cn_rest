@@ -17,8 +17,6 @@ public class ResolveServlet extends HttpServlet {
                                 throws ServletException, IOException {
 //		FileReader fr = new FileReader("src/test/java/org/dataone/cn/web/sampleSysMetadata.xml");
 //		BufferedReader br = new BufferedReader(fr);
-//		String s;
-		
 		
 		res.setContentType("text/xml");
 		PrintWriter out = res.getWriter();
@@ -27,7 +25,7 @@ public class ResolveServlet extends HttpServlet {
         out.println("<d1:systemMetadata xmlns:d1=\"http://dataone.org/service/types/SystemMetadata/0.1\"");
         out.println("                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
         out.println("                   xmlns:schemaLocation=\"http://dataone.org/service/types/SystemMetadata/0.1 https://repository/dataone.org/software/cicore/trunk/schemas/systemmetadata.xsd\">");
-        out.println("    <identifier>Identifier0</identifier>");
+        out.println("    <identifier>xXyYzZ12345</identifier>");
         out.println("    <objectFormat>eml://ecoinformatics.org/eml-2.0.1</objectFormat>");
         out.println("    <size>0</size>");
         out.println("    <submitter>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</submitter>");
@@ -57,7 +55,7 @@ public class ResolveServlet extends HttpServlet {
         out.println("    <originMemberNode>OriginMemberNode0</originMemberNode>");
         out.println("    <authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>ReplicaMemberNode0</replicaMemberNode>");
+        out.println("        <replicaMemberNode>patternmatch2knb4now</replicaMemberNode>");
         out.println("        <replicationStatus>completed</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
@@ -67,27 +65,22 @@ public class ResolveServlet extends HttpServlet {
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>ReplicaMemberNode2</replicaMemberNode>");
+        out.println("        <replicaMemberNode>http://foo.dataone.org</replicaMemberNode>");
         out.println("        <replicationStatus>completed</replicationStatus>");
+        out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
+        out.println("    </replica>");
+        out.println("    <replica>");
+        out.println("        <replicaMemberNode>http://bar.dataone.org/mn</replicaMemberNode>");
+        out.println("        <replicationStatus>completed</replicationStatus>");
+        out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
+        out.println("    </replica>");
+        out.println("    <replica>");
+        out.println("        <replicaMemberNode>http://foo.dataone.org</replicaMemberNode>");
+        out.println("        <replicationStatus>queued</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("</d1:systemMetadata>");
 		
-		
-/*		out.println("<systemMetadata>");
-		out.println("<identifier>12345678</identifier>");
-		out.println("<replica>");
-		out.println("<replicaMemberNode>MN1</replicaMemberNode>");
-		out.println("<replicationStatus>completed</replicationStatus>");
-		out.println("<systemMetadata>");
-		out.println("<identifier>12345678</identifier>");
-		out.println("<replica>");
-		out.println("<replicaMemberNode>MN1</replicaMemberNode>");
-		out.println("<replicationStatus>completed</replicationStatus>");
-		out.println("</replica>");
-		out.println("</systemMetadata>");
-*/		
-        
         out.flush();
 	}
 }
