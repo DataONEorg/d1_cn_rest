@@ -14,7 +14,7 @@
  		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  		xsi:schemaLocation="http://dataone.org/service/types/ObjectLocationList/0.1 https://repository.dataone.org/software/cicore/trunk/schemas/objectlocationlist.xsd"> 
       <xsl:variable name="theID" select="identifier"/>
-      <xsl:attribute name="identifier"><xsl:value-of select="$theID"/></xsl:attribute>
+      <xsl:element name="identifier"><xsl:value-of select="$theID"/></xsl:element>
 
       <!-- transcribe replica node information -->
       <xsl:for-each select="replica[replicationStatus = 'completed']"> 
