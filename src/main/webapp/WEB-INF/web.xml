@@ -126,12 +126,6 @@
             </init-param>
         -->
     </filter>
-    <filter-mapping>
-        <filter-name>UrlRewriteFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
     <filter>
         <filter-name>ResolveFilter</filter-name>
         <filter-class>org.dataone.cn.rest.filter.ResolveFilter</filter-class>
@@ -150,8 +144,15 @@
     </filter>
     <filter-mapping>
         <filter-name>ResolveFilter</filter-name>
-        <url-pattern>*/resolve</url-pattern>
+        <url-pattern>/resolve/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>metacat</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

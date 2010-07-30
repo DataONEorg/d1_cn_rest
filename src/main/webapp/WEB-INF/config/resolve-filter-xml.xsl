@@ -20,7 +20,7 @@
       <xsl:for-each select="replica[replicationStatus = 'completed']"> 
 	  	<xsl:element name="objectLocation">
 	    	<xsl:element name="nodeIdentifier"><xsl:value-of select="replicaMemberNode"/></xsl:element>
-	    	<xsl:element name="url">http://<xsl:value-of select="replicaMemberNode"/>object/<xsl:value-of select="$theID"/>
+	    	<xsl:element name="url"><xsl:value-of select="replicaMemberNode"/>/mn/object/<xsl:value-of select="$theID"/>
 	    	</xsl:element>
 	  	</xsl:element>
       </xsl:for-each>

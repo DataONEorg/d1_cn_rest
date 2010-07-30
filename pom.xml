@@ -24,7 +24,7 @@
         <outputDirectory>target/main-classes</outputDirectory>
         <testOutputDirectory>target/test-classes</testOutputDirectory>
         <filters>
-            <filter>src/main/filters/default.properties</filter>
+            <filter>src/main/filters/development.properties</filter>
         </filters>
         <resources>
             <resource>
@@ -240,6 +240,7 @@
         <profile>
             <id>stage</id>
             <activation>
+                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>environment.type</name>
                     <value>stage</value>
@@ -254,6 +255,7 @@
         <profile>
             <id>prod</id>
             <activation>
+                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>environment.type</name>
                     <value>prod</value>

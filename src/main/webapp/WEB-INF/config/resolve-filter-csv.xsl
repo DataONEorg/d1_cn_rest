@@ -9,7 +9,7 @@
   <xsl:template match="d1:systemMetadata"><xsl:variable name="theID" select="identifier"/>
 #<xsl:value-of select="$theID"/>
 node,url<xsl:for-each select="replica[replicationStatus = 'completed']">
-'<xsl:value-of select="replicaMemberNode"/>', 'http://<xsl:value-of select="replicaMemberNode"/>object/=<xsl:value-of select="$theID"/>'</xsl:for-each>
+'<xsl:value-of select="replicaMemberNode"/>', '<xsl:value-of select="replicaMemberNode"/>/mn/object/=<xsl:value-of select="$theID"/>'</xsl:for-each>
   </xsl:template>
 
 </xsl:stylesheet>

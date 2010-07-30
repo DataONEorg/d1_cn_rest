@@ -9,7 +9,7 @@
 {
  'identifier':'<xsl:value-of select="$theID"/>'
  'locations': [<xsl:for-each select="replica[replicationStatus = 'completed']">
-   ['<xsl:value-of select="replicaMemberNode"/>', 'http://<xsl:value-of select="replicaMemberNode"/>object/<xsl:value-of select="$theID"/>']<xsl:if test="position() != last()">,</xsl:if></xsl:for-each> ]
+   ['<xsl:value-of select="replicaMemberNode"/>', '<xsl:value-of select="replicaMemberNode"/>/mn/object/<xsl:value-of select="$theID"/>']<xsl:if test="position() != last()">,</xsl:if></xsl:for-each> ]
 }
 </xsl:template>
 </xsl:stylesheet>
