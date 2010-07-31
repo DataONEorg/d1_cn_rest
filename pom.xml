@@ -5,16 +5,19 @@
     <groupId>org.dataone.cn</groupId>
     <artifactId>dataone-cn-rest</artifactId>
     <packaging>war</packaging>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <name>DataONE-CnRestService</name>
     <url>http://dataone.org</url>
     <parent>
         <groupId>org.dataone</groupId>
         <artifactId>cn-prototype</artifactId>
-        <version>0.3.0</version>
+        <version>0.4.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
+     <properties>
+        <org.springframework.version>3.0.3.RELEASE</org.springframework.version>
+        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+    </properties>
     <build>
         <finalName>cn</finalName>
         <defaultGoal>package</defaultGoal>
@@ -91,34 +94,34 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>3.0.2.RELEASE</version>
+            <version>${org.springframework.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.0.2.RELEASE</version>
+            <version>${org.springframework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>3.0.2.RELEASE</version>
+            <version>${org.springframework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>3.0.2.RELEASE</version>
+            <version>${org.springframework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>3.0.2.RELEASE</version>
+            <version>${org.springframework.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
-            <version>3.0.2.RELEASE</version>
+            <version>${org.springframework.version}</version>
             <type>jar</type>
         </dependency>
 
@@ -180,13 +183,13 @@
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>dataone-cn-proxy</artifactId>
-            <version>0.3.0</version>
+            <version>0.4.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>dataone-service-api</artifactId>
-            <version>0.3.0</version>
+            <version>0.4.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -203,9 +206,6 @@
         	<type>jar</type>
         </dependency>
     </dependencies>
-    <properties>
-        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
-    </properties>
     <profiles>
         <profile>
             <id>beta</id>
