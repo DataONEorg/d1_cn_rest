@@ -107,15 +107,16 @@ public class TestingMyResolve {
 		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
 		
 		String content = new String(responseWrapper.getBuffer());
-		
-//		JUnitMatchers matcher = new JUnitMatchers();
+
 		assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
+
+//		TODO more sophisticated tests can catch more potential errors in the XSLT.  depends on crafting more fake metadata.
+
+//		JUnitMatchers matcher = new JUnitMatchers();
+		
 //		assertEquals(content,"<?xml version=\"1.0\" encoding=\"UTF-8\"?><locations identifier=\"Identifier0\"><location node=\"ReplicaMemberNode0\" " 
 //				+"href=\"http://ReplicaMemberNode0object?id=Identifier0\"/><location node=\"ReplicaMemberNode2\" "
-//				+"href=\"http://ReplicaMemberNode2object?id=Identifier0\"/></locations>");
-		
+//				+"href=\"http://ReplicaMemberNode2object?id=Identifier0\"/></locations>");	
 	
-	}
-
-	
+	}	
 }

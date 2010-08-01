@@ -20,7 +20,7 @@ public class ResolveFilter implements Filter {
 //			"application/rdf+xml",
 			"text/csv",
 			"text/xml",
-                        "application/xml",
+            "application/xml",
 			};
 	
     @SuppressWarnings("unchecked")
@@ -38,12 +38,14 @@ public class ResolveFilter implements Filter {
         // without having to copy and paste if-then statements for each
         // new case.
 
+        // However, new accept-types will have to be added to the
+        // private array "requiredAccepts", above.
+
         Enumeration<String> initParamNames = filterConfig.getInitParameterNames();
         while (initParamNames.hasMoreElements()) {
            	String acceptType = (String) initParamNames.nextElement();
            	
            	String path = filterConfig.getInitParameter(acceptType);
-//           	String mybase = filterConfig.getServletContext().getResource(path);
            	String realPath = filterConfig.getServletContext().getRealPath(path);
         	if (!new File(realPath).exists()) {
         		throw new UnavailableException("Unable to locate stylesheet: " + realPath, 30);
@@ -87,6 +89,7 @@ public class ResolveFilter implements Filter {
         if (xsltFileNameMap.containsKey(type)) {
             styleSheet = xsltFileNameMap.get(type);
         } else {
+        	// TODO decide runtime exception-handling behavior for the filter: warn & log vs. throw)
             logger.warn("Unable to provide a response for the Accept header media type of " + type);
 /*            throw new UnavailableException(
             		"Unable to provide a response for the "
@@ -123,7 +126,7 @@ public class ResolveFilter implements Filter {
         Source styleSource = new StreamSource(styleSheet);	
 
         try {
-
+        	// set up the transformer to call out to the xslt filters
         	TransformerFactory tf = TransformerFactory.newInstance();
         	Transformer transformer = tf.newTransformer(styleSource);
 
