@@ -18,9 +18,14 @@
 	  	<xsl:element name="objectLocation">
 	  		<xsl:variable name="theNode" select="replicaMemberNode"/>
 	   		
-	   		<!-- TODO:  we don't want to have hardcoded urls to handle odd cases.  This choose 
+	   		<!-- TODO: (Major) We don't want to have hardcoded urls to handle odd cases.  This choose 
 	   		   structure is a temporary workaround and needs to be removed once the node information
-	   		   coming in on the systemMetadata is harmonized  -->
+	   		   coming in on the systemMetadata is harmonized.  In future, we expect the replicaMemberNode element
+	   		   to contain a (registered) node identifier, and this code to invoke an external function
+	   		   that fetches the base-url from the node registry.  see http://www.javaworld.com/javaworld/jw-12-2001/jw-1221-xslt.html
+	   		   for how-to do this with a Java extension.  A Java extension requires Xalan xslt processor, so reduces portability.
+	   		   Other possible techniques include embedded JavaScript, Jython, or other interpretted languages.  -->  
+	   		   
 	   		<xsl:choose>
 	  			<xsl:when test="contains($theNode,'knb')">
 	  				<xsl:element name="nodeIdentifier">http://knb-mn.ecoinformatics.org/knb</xsl:element>
