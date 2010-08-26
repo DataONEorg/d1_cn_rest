@@ -5,16 +5,20 @@
 	    <from>^/object/?$</from>
 	    <to>/metacat/object/</to>
 	</rule>
+        <!--
+        object,meta,resolve regex path should exclude any queries, or those paths that have a ? directly
+        after the /object/
+        -->
 	<rule match-type="regex">
-	    <from>^/object/([^/\?]+)$</from>
+	    <from>^/object/([^\?]{1}[^/]*)$</from>
 	    <to>/metacat/object/$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/meta/([^/\?]+)/?$</from>
+	    <from>^/meta/([^\?]{1}[^/]*)/?$</from>
 	    <to>/metacat/object/$1/meta/</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/resolve/([^/\?]+)/?$</from>
+	    <from>^/resolve/([^\?]{1}[^/]*)/?$</from>
 	    <to>/metacat/object/$1/resolve/</to>
 	</rule>
 	<rule match-type="regex">
@@ -37,6 +41,10 @@
 	    <from>^/node/?$</from>
 	    <to>/nodeList.xml</to>
 	</rule>
+        <!--
+        TODO /metacat/object, /metacat/meta, /metacat/resolve regex path should exclude any queries, or those paths that have a ? directly
+        after the /object/
+        -->
 	<outbound-rule>
 	    <from>^/metacat/object/$</from>
 	    <to>/object/</to>
@@ -46,11 +54,11 @@
 	    <to>/object/$1</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/metacat/object/([^/\?]+)/meta$</from>
+	    <from>^/metacat/object/([^/]+)/meta$</from>
 	    <to>/meta/$1</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/metacat/object/([^/\?]+)/resolve$</from>
+	    <from>^/metacat/object/([^/]+)/resolve$</from>
 	    <to>/resolve/$1</to>
 	</outbound-rule>
 	<outbound-rule>
