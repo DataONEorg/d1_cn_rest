@@ -10,16 +10,16 @@
         after the /object/
         -->
 	<rule match-type="regex">
-	    <from>^/object/([^\?]{1}[^/]*)$</from>
+	    <from>^/object/([^\?]{1}.*)$</from>
 	    <to>/metacat/object/$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/meta/([^\?]{1}[^/]*)/?$</from>
-	    <to>/metacat/object/$1/meta/</to>
+	    <from>^/meta/([^\?]{1}.*)$</from>
+	    <to>/metacat/meta/$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/resolve/([^\?]{1}[^/]*)/?$</from>
-	    <to>/metacat/object/$1/resolve/</to>
+	    <from>^/resolve/([^\?]{1}.*)$</from>
+	    <to>/metacat/resolve/$1</to>
 	</rule>
 	<rule match-type="regex">
 	    <from>^/object/(\?qt=path.*)$</from>
@@ -54,11 +54,11 @@
 	    <to>/object/$1</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/metacat/object/([^/]+)/meta$</from>
+	    <from>^/metacat/meta/(.+)$</from>
 	    <to>/meta/$1</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/metacat/object/([^/]+)/resolve$</from>
+	    <from>^/metacat/resolve/(.+)$</from>
 	    <to>/resolve/$1</to>
 	</outbound-rule>
 	<outbound-rule>
