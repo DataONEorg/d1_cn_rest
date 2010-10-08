@@ -2,16 +2,21 @@ package org.dataone.service.cn.impl;
 
 import java.io.InputStream;
 import java.util.List;
+import org.dataone.service.exceptions.IdentifierNotUnique;
+import org.dataone.service.exceptions.InsufficientResources;
 
 import org.dataone.service.exceptions.InvalidRequest;
+import org.dataone.service.exceptions.InvalidSystemMetadata;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.exceptions.UnsupportedType;
 import org.dataone.service.types.AuthToken;
 import org.dataone.service.types.IdentifierFormat;
 import org.dataone.service.types.Identifier;
+import org.dataone.service.types.ObjectLocationList;
 import org.dataone.service.types.SystemMetadata;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -104,47 +109,8 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
 	 * information about MN (which would include the endpoint URL for the MN API implementation). Is there a use 
 	 * case that involves asking a CN for metadata describing a MN?</p>
 	 */
-        @Override
-	public List<String> resolve(AuthToken token, Identifier guid)
-        throws InvalidToken, ServiceFailure, NotAuthorized, NotFound,
-        InvalidRequest, NotImplemented {
-		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented("1111", "resolve method Not implemented Yet!");
-		throw notImplemented;
-	}
 
-    @Override
-    public Identifier reserveId(AuthToken token, String scope, IdentifierFormat format)
-        throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
-        NotImplemented{
-		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
-		throw notImplemented;
-	}
-    @Override
-    public Identifier reserveId(AuthToken token, String scope)
-        throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
-        NotImplemented{
-		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
-		throw notImplemented;
-	}
-    @Override
-    public Identifier reserveId(AuthToken token, IdentifierFormat format)
-        throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
-        NotImplemented{
-		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
-		throw notImplemented;
-	}
-    @Override
-    public Identifier reserveId(AuthToken token)
-        throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest,
-        NotImplemented{
-		// TODO Auto-generated method stub
-                NotImplemented  notImplemented = new NotImplemented("1111", "reserveId method Not implemented Yet!");
-		throw notImplemented;
-	}
+
     @Override
     public boolean assertRelation(AuthToken token, Identifier subjectId,
         String relationship, Identifier objectId)
@@ -154,5 +120,35 @@ public class CoordinatingNodeCrudImpl implements CoordinatingNodeCrud {
                 NotImplemented  notImplemented = new NotImplemented("1111", "assertRelation method Not implemented Yet!");
 		throw notImplemented;
 	}
+
+    @Override
+    public Identifier create(AuthToken token, Identifier guid, InputStream object, SystemMetadata sysmeta) throws InvalidToken, ServiceFailure, NotAuthorized, IdentifierNotUnique, UnsupportedType, InsufficientResources, InvalidSystemMetadata, NotImplemented {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Identifier reserveIdentifier(AuthToken token, String scope, IdentifierFormat format) throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest, NotImplemented {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Identifier reserveIdentifier(AuthToken token, String scope) throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest, NotImplemented {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Identifier reserveIdentifier(AuthToken token, IdentifierFormat format) throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest, NotImplemented {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Identifier reserveIdentifier(AuthToken token) throws InvalidToken, ServiceFailure, NotAuthorized, InvalidRequest, NotImplemented {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ObjectLocationList resolve(AuthToken token, Identifier guid) throws InvalidToken, ServiceFailure, NotAuthorized, NotFound, InvalidRequest, NotImplemented {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
 }
