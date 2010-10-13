@@ -9,18 +9,31 @@ import javax.servlet.http.*;
 public class ResolveServlet extends HttpServlet {
 
 	/**
-	 * 
+	 * For unit testing, build a 2 member filter chain consisting of ResolveFilter
+	 * and this servlet (the endpoint).  This replaces the urlrewrite to metacat chain 
+	 * that comprise the inner layers of the calling chain.
+	 * Returns a systemMetadata xml file.
 	 */
 	private static final long serialVersionUID = 1L;
 
 	public void doPost(HttpServletRequest req, HttpServletResponse res)
                                 throws ServletException, IOException {
-//		FileReader fr = new FileReader("src/test/java/org/dataone/cn/web/sampleSysMetadata.xml");
-//		BufferedReader br = new BufferedReader(fr);
+
+		
+		FileReader fr = new FileReader("src/test/resources/resolveTesting/systemMetadata-valid.xml");
+		BufferedReader br = new BufferedReader(fr);
 		
 		res.setContentType("text/xml");
 		PrintWriter out = res.getWriter();
+		
+		String line = br.readLine();
+		while (line != null) {
+			out.println(line);
+			line = br.readLine();
+		}
+		out.flush();
 
+/*		
 		out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         out.println("<d1:systemMetadata xmlns:d1=\"http://dataone.org/service/types/SystemMetadata/0.1\"");
         out.println("                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
@@ -55,32 +68,33 @@ public class ResolveServlet extends HttpServlet {
         out.println("    <originMemberNode>OriginMemberNode0</originMemberNode>");
         out.println("    <authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>patternmatch2knb4now</replicaMemberNode>");
+        out.println("        <replicaMemberNode>http://mn-dev.dataone.org</replicaMemberNode>");
         out.println("        <replicationStatus>completed</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>ReplicaMemberNode1</replicaMemberNode>");
+        out.println("        <replicaMemberNode>http://dev-dryad-mn.dataone.org</replicaMemberNode>");
         out.println("        <replicationStatus>queued</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>http://foo.dataone.org</replicaMemberNode>");
+        out.println("        <replicaMemberNode>http://daacmn.dataone.utk.edu</replicaMemberNode>");
         out.println("        <replicationStatus>completed</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>http://bar.dataone.org/mn</replicaMemberNode>");
+        out.println("        <replicaMemberNode>http://knb-mn.ecoinformatics.org</replicaMemberNode>");
         out.println("        <replicationStatus>completed</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("    <replica>");
-        out.println("        <replicaMemberNode>http://foo.dataone.org</replicaMemberNode>");
+        out.println("        <replicaMemberNode>http://cn-unm-1.dataone.org</replicaMemberNode>");
         out.println("        <replicationStatus>queued</replicationStatus>");
         out.println("        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>");
         out.println("    </replica>");
         out.println("</d1:systemMetadata>");
 		
         out.flush();
+*/
 	}
 }
