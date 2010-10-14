@@ -15,13 +15,21 @@ public class ResolveServlet extends HttpServlet {
 	 * Returns a systemMetadata xml file.
 	 */
 	private static final long serialVersionUID = 1L;
+	private BufferedReader br;
 
+	public void setOutput(String file) throws FileNotFoundException {
+		
+		FileReader fr = new FileReader("src/test/resources/resolveTesting/" + file);
+		this.br = new BufferedReader(fr);
+	}
+	
 	public void doPost(HttpServletRequest req, HttpServletResponse res)
                                 throws ServletException, IOException {
 
 		
-		FileReader fr = new FileReader("src/test/resources/resolveTesting/systemMetadata-valid.xml");
-		BufferedReader br = new BufferedReader(fr);
+		if (this.br == null) {
+			throw new ServletException("output not set.  call setOutput(file) before doPost( )");
+		}
 		
 		res.setContentType("text/xml");
 		PrintWriter out = res.getWriter();

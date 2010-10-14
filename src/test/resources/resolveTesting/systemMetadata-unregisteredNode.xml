@@ -32,7 +32,8 @@
 	<originMemberNode>OriginMemberNode0</originMemberNode>
 	<authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
 	<replica>
-    	<replicaMemberNode>http://mn-dev.dataone.org</replicaMemberNode>
+		<!-- a fake value for testing -->
+    	<replicaMemberNode>testUnregisteredNode</replicaMemberNode>
    	 	<replicationStatus>completed</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>

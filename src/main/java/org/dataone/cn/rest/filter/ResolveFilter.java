@@ -48,11 +48,11 @@ public class ResolveFilter implements Filter {
     Logger logger = Logger.getLogger("ResolveFilter");
 	private FilterConfig filterConfig = null;
     private HashMap<String, String> baseUrlMap = null;
-    private Integer refreshInterval = 5;
-    private String nodeListLocation = null;
-//    private String nodeListSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/schemas/nodelist.xsd";
-    private String nodeListSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/nodelist.xsd";
-    private String systemMetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
+    private Integer nodelistRefreshInterval = 5;
+    private String nodelistLocation = "/Users/rnahf/software/svn_checkouts/dataone-cn-os-core/var/lib/dataone/nodeList.xml";
+//    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/schemas/nodelist.xsd";
+    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/nodelist.xsd";
+    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
     
     private String targetEnvironment = "prod";
 
@@ -61,11 +61,11 @@ public class ResolveFilter implements Filter {
 	public void destroy() {
 		this.filterConfig = null;
 		this.baseUrlMap = null;	
-		this.nodeListLocation = null;
+		this.nodelistLocation = null;
 		this.xFactory = null;
 /*
-		this.refreshInterval = null;
-		this.nodeListSchemaLocation = null;
+		this.nodelistRefreshInterval = null;
+		this.nodelistSchemaLocation = null;
 		this.targetEnvironment = null;
 	*/
 	}
@@ -87,12 +87,20 @@ public class ResolveFilter implements Filter {
         this.filterConfig = filterConfig;
 
     // read in parameters to the filter
+        if ( filterConfig.getInitParameter("nodelistRefreshInterval") != null )  
+        	this.nodelistRefreshInterval = Integer.valueOf(filterConfig.getInitParameter("nodelistRefreshInterval"));
         
-        this.refreshInterval = Integer.valueOf(filterConfig.getInitParameter("nodeListCacheRefreshMinutes"));
-        this.nodeListLocation = filterConfig.getInitParameter("nodeListLocation");
-        this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
-//        this.nodeListSchemaLocation = filterConfig.getInitParameter("nodeListSchemaLocation") || this.nodeListSchemaLocation;
-//        this.systemMetadataSchemaLocation = filterConfig.getInitParameter("systemMetadataSchemaLocation") || this/systemMetadataSchemaLocation;
+        if (filterConfig.getInitParameter("nodelistLocation") != null)
+        	this.nodelistLocation = filterConfig.getInitParameter("nodelistLocation");
+        
+        if (filterConfig.getInitParameter("targetEnvironment") != null)
+        	this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
+        
+        if (filterConfig.getInitParameter("nodelistSchemaLocation") != null)
+        	this.nodelistSchemaLocation = filterConfig.getInitParameter("nodelistSchemaLocation");
+        
+        if (filterConfig.getInitParameter("systemmetadataSchemaLocation") != null)
+        	this.systemmetadataSchemaLocation = filterConfig.getInitParameter("systemmetadataSchemaLocation");
 
 
         // build the baseURL map
@@ -116,18 +124,18 @@ public class ResolveFilter implements Filter {
 		if (this.baseUrlMap == null) {
 
 			// build the XML parser
-			Schema schema = createXsdSchema(this.nodeListSchemaLocation);
+			Schema schema = createXsdSchema(this.nodelistSchemaLocation);
 			DocumentBuilder parser = createStdValidatingDOMParser(schema);
 
 	        // ----------- parse the nodelist into DOM-style document
 	        Document document;
 			try {
-				document = parser.parse(this.nodeListLocation);
+				document = parser.parse(this.nodelistLocation);
 			} catch (SAXException e) {
 				throw new ServiceFailure("4150","Cannot parse NodeList");
 			} catch (IOException e) {
 				e.printStackTrace();
-				throw new ServiceFailure("4150","Cannot open NodeList: " + this.nodeListLocation);
+				throw new ServiceFailure("4150","Cannot open NodeList: " + this.nodelistLocation);
 			}
 
 
@@ -227,8 +235,28 @@ public class ResolveFilter implements Filter {
         return parser;
     }
      
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+    	
+    	try {
+			doFilterInterceptErrors(req,res,chain);
+		} catch (ServiceFailure e) {
 
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+			byte[] errorMsgXML = e.serialize(BaseException.FMT_XML).getBytes();
+			
+			HttpServletResponse response = (HttpServletResponse) res;
+			
+			response.setContentLength(errorMsgXML.length);
+//			response.setContentType(type);
+			response.getOutputStream().write(errorMsgXML);
+			response.flushBuffer( );
+			
+			
+		}
+
+    }
+    
+    
+    public void doFilterInterceptErrors(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure {
 
 		// return if init has not been called - it's the setter for filterConfig
         if (filterConfig == null) return;
@@ -287,7 +315,7 @@ public class ResolveFilter implements Filter {
         // parse the input stream, determining if it's sysMD or error
 		DocumentBuilder sysMDparser = null;
         try {
-        	Schema sysMDschema = createXsdSchema(this.systemMetadataSchemaLocation);
+        	Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation);
 			sysMDparser = createStdValidatingDOMParser(sysMDschema);
 		} catch (ServiceFailure e) {
 			throw new ServletException(e.getMessage());
@@ -316,26 +344,39 @@ public class ResolveFilter implements Filter {
 			throw new ServletException("error compiling the xpath expressions");
 		}
 
-		// apply expressions to get data from systemMetadata 
+		// apply expressions to get data from systemmetadata 
 		ArrayList<String> targetID = null;
 		ArrayList<String> replicaIDs = null;
+		ArrayList<String> errorXML = null;
 		try {
+			errorXML = extractLeafElementStrings(metacatXML,errorExpr);
 			targetID = extractLeafElementStrings(metacatXML,idExpr);
 			replicaIDs = extractLeafElementStrings(metacatXML,replicaExpr);
 		} catch (XPathExpressionException e2) {
 			throw new ServletException(e2.getMessage());
 		}
-		String targetIdentifier = targetID.get(0);
+
 		
 		
-		// ---------------- create the ObjectLocationList
-		Document doc;
-		try {
-			doc = createObjectLocationList(targetIdentifier, replicaIDs);
-		} catch (ServiceFailure e1) {
-			throw new ServletException(e1.getDescription());
+		// -------------------- create the response content
+		
+
+		if (targetID.isEmpty()) {
+			if (errorXML.isEmpty()) {	
+				// create error to return
+				throw new ServiceFailure("4150","Unexpected content from metacat returned");
+			} else {
+				// forward the metacat error
+	            chain.doFilter(request, response);
+	            return;
+			}
 		}
-	
+				
+		// got systemmetadata
+		// ------create an ObjectLocationList
+		String targetIdentifier = targetID.get(0);
+		Document doc = createObjectLocationList(targetIdentifier, replicaIDs);
+			
 		
 		// -------- transform OLL Document to XML  -----------
 		
@@ -384,7 +425,35 @@ public class ResolveFilter implements Filter {
 		return resultStrings;
 	}
 
-	
+/*	
+	private Document createErrorXML() {
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = null;
+		try {
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ServiceFailure("4150","Error creating ObjectLocationList");
+		}
+		DOMImplementation impl = builder.getDOMImplementation();
+
+		//document
+		Document doc = impl.createDocument(null,null,null);
+		//root element
+//		org.w3c.dom.Element root = doc.getDocumentElement();
+		org.w3c.dom.Element oll = doc.createElement("error");
+		doc.appendChild(oll);
+		oll.setAttribute("xmlns:d1","http://dataone.org/service/types/ObjectLocationList/0.1");
+		oll.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance");
+		oll.setAttribute("xsi:schemaLocation","http://dataone.org/service/types/ObjectLocationList/0.1 https://repository.dataone.org/software/cicore/trunk/schemas/objectLocationList.xsd");
+		
+		org.w3c.dom.Element id = doc.createElement("identifier");
+		id.setTextContent(idString);
+		oll.appendChild(id);
+
+		
+	}
+	*/
 	
 	private Document createObjectLocationList(String idString, ArrayList<String> nodes) throws ServiceFailure {
 		
@@ -417,7 +486,7 @@ public class ResolveFilter implements Filter {
 			String nodeIDstring = nodes.get(i); //.toString();
 			String baseURLstring = lookupBaseURLbyNode(nodeIDstring);
 			if (baseURLstring == null) {
-				throw new ServiceFailure("4150","unregistered Node identifer in systemMetadata document for object: " + idString);
+				throw new ServiceFailure("4150","unregistered Node identifer in systemmetadata document for object: " + idString);
 			}
 			String urlString = baseURLstring + "/object/" + idString;
 			
@@ -454,10 +523,10 @@ public class ResolveFilter implements Filter {
 	 * -------------------------------------*/
 
 	public Integer getRefreshInterval() {
-		return refreshInterval;
+		return nodelistRefreshInterval;
 	}
 	
 	public void setRefreshInterval(Integer i) {
-		refreshInterval = i;
+		nodelistRefreshInterval = i;
 	}
 }
