@@ -61,6 +61,7 @@ public class TestingMyResolve {
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
+		fc.addInitParameter("useSchemas","false");
 		fc.addInitParameter("nodelistRefreshInterval","1234");
 		ResolveFilter rf = new ResolveFilter();	
 
@@ -95,6 +96,7 @@ public class TestingMyResolve {
 	public void testDoFilter() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemas","false");
 		settings.put("nodelistRefreshInterval","13579");
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
@@ -121,6 +123,7 @@ public class TestingMyResolve {
 	public void testMetacatError() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemas","false");
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
 
 		String content = new String(responseWrapper.getBuffer());
@@ -132,6 +135,25 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
 		assertThat("response contains word 'error'", content, containsString("error"));
+	
+	}
+
+	@Test
+	public void testSystemMetadataError() throws FileNotFoundException {
+
+		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemas","false");
+		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml", settings);
+
+		String content = new String(responseWrapper.getBuffer());
+		System.out.println("===== output =====");
+		System.out.print(content.toString());
+		System.out.println("------------------");
+		// examine contents of the response
+		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
+		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
+		
+		assertThat("response contains word 'error'", content, containsString("<error"));
 	
 	}
 	
@@ -150,7 +172,7 @@ public class TestingMyResolve {
 		while (pNames.hasMoreElements()) {
 			String name = pNames.nextElement(); 
 			String val = params.get(name);
-			fc.addInitParameter("name","value");		
+			fc.addInitParameter(name,val);		
 		}
 		
 		ResolveFilter rf = new ResolveFilter();	

@@ -49,7 +49,9 @@ public class ResolveFilter implements Filter {
 	private FilterConfig filterConfig = null;
     private HashMap<String, String> baseUrlMap = null;
     private Integer nodelistRefreshInterval = 5;
-    private String nodelistLocation = "/Users/rnahf/software/svn_checkouts/dataone-cn-os-core/var/lib/dataone/nodeList.xml";
+    private boolean useSchemas = true;
+//    private String nodelistLocation = "/Users/rnahf/software/svn_checkouts/dataone-cn-os-core/var/lib/dataone/nodeList.xml";
+    private String nodelistLocation = "/Users/rnahf/software/svn-checkouts/dataone-cn-os-core/var/lib/dataone/nodelist.xml";
 //    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/schemas/nodelist.xsd";
     private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/nodelist.xsd";
     private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
@@ -96,6 +98,9 @@ public class ResolveFilter implements Filter {
         if (filterConfig.getInitParameter("targetEnvironment") != null)
         	this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
         
+        if ( (filterConfig.getInitParameter("useSchemas") != null) &&  
+        	(filterConfig.getInitParameter("useSchemas") == "false")) this.useSchemas = false;
+        
         if (filterConfig.getInitParameter("nodelistSchemaLocation") != null)
         	this.nodelistSchemaLocation = filterConfig.getInitParameter("nodelistSchemaLocation");
         
@@ -124,8 +129,8 @@ public class ResolveFilter implements Filter {
 		if (this.baseUrlMap == null) {
 
 			// build the XML parser
-			Schema schema = createXsdSchema(this.nodelistSchemaLocation);
-			DocumentBuilder parser = createStdValidatingDOMParser(schema);
+			Schema schema = createXsdSchema(this.nodelistSchemaLocation,this.useSchemas);
+			DocumentBuilder parser = createStdValidatingDOMParser(schema,this.useSchemas);
 
 	        // ----------- parse the nodelist into DOM-style document
 	        Document document;
@@ -197,9 +202,11 @@ public class ResolveFilter implements Filter {
 	}
 
     
-    private Schema createXsdSchema(String xsdUrlString) throws ServiceFailure {
+    private Schema createXsdSchema(String xsdUrlString, boolean useSchema) throws ServiceFailure {
         Schema schema;
     	
+        if (!useSchema) return null;
+        
     	// create a SchemaFactory capable of understanding WXS schemas
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		try {
@@ -218,14 +225,16 @@ public class ResolveFilter implements Filter {
         return schema;
     }
         
-    private DocumentBuilder createStdValidatingDOMParser(Schema xsdSchema) throws ServiceFailure {
+    private DocumentBuilder createStdValidatingDOMParser(Schema xsdSchema, boolean useSchema) throws ServiceFailure {
         
     	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setIgnoringElementContentWhitespace(true);
         documentBuilderFactory.setNamespaceAware(true);
-        documentBuilderFactory.setSchema(xsdSchema);
-        documentBuilderFactory.setValidating(false);
-
+        if (useSchema) {
+        	documentBuilderFactory.setSchema(xsdSchema);
+        	documentBuilderFactory.setValidating(false);
+        }
+        
         DocumentBuilder parser;
 		try {
 			parser = documentBuilderFactory.newDocumentBuilder();
@@ -238,9 +247,9 @@ public class ResolveFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
     	
     	try {
-			doFilterInterceptErrors(req,res,chain);
-		} catch (ServiceFailure e) {
-
+			doFilterDelegate(req,res,chain);
+		} catch (BaseException e) {
+			
 			byte[] errorMsgXML = e.serialize(BaseException.FMT_XML).getBytes();
 			
 			HttpServletResponse response = (HttpServletResponse) res;
@@ -256,13 +265,13 @@ public class ResolveFilter implements Filter {
     }
     
     
-    public void doFilterInterceptErrors(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure {
+    public void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure {
 
 		// return if init has not been called - it's the setter for filterConfig
         if (filterConfig == null) return;
 	
-        // would rather leave generalized, instead of hhtp specific
-        // check to see if using specific http logic
+        // compiles without the subtyping to Http versions of request and response.
+        // why is the check here?
 		if (!(res instanceof HttpServletResponse) || !(req instanceof HttpServletRequest)) {
             throw new ServletException("This filter only supports HTTP");
         }
@@ -280,7 +289,7 @@ public class ResolveFilter implements Filter {
         BufferedHttpResponseWrapper responseWrapper =
                 new BufferedHttpResponseWrapper((HttpServletResponse) response);
         
-        chain.doFilter(request, responseWrapper);
+        chain.doFilter(req, responseWrapper);
 
         // we're using tomcat 6.  Is the workaround still necessary?
         
@@ -296,7 +305,7 @@ public class ResolveFilter implements Filter {
 //       String forDebug = new String(origXML);
         if (origXML == null || origXML.length == 0) {
             // just let Tomcat deliver its cached data back to the client
-            chain.doFilter(request, response);
+            chain.doFilter(req, response);
             return;
         }
 
@@ -313,20 +322,14 @@ public class ResolveFilter implements Filter {
         // ---------------- create DOM doc out of SysMD XML
     
         // parse the input stream, determining if it's sysMD or error
-		DocumentBuilder sysMDparser = null;
-        try {
-        	Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation);
-			sysMDparser = createStdValidatingDOMParser(sysMDschema);
-		} catch (ServiceFailure e) {
-			throw new ServletException(e.getMessage());
-		}
-      
-		Document metacatXML = null;
+        Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation,this.useSchemas);
+        DocumentBuilder sysMDparser = createStdValidatingDOMParser(sysMDschema,this.useSchemas);
+		      
+		Document metacatDoc = null;
 		try {
-			metacatXML = sysMDparser.parse(xmlSource);
+			metacatDoc = sysMDparser.parse(xmlSource);
 		} catch (SAXException e) {
-			// some sort of error string from metacat, xml or otherwise
-			e.printStackTrace();
+			throw new ServiceFailure("4150","Error parsing metacat output: " + e);
 		}
 		
 		// ---------------- extract info from document
@@ -339,9 +342,9 @@ public class ResolveFilter implements Filter {
 			XPath xpath = xFactory.newXPath();
 			idExpr = xpath.compile("//identifier");
 			replicaExpr = xpath.compile("//replicaMemberNode[../replicationStatus = 'completed']");
-			errorExpr = xpath.compile("/error");
+			errorExpr = xpath.compile("//error");
 		} catch (XPathExpressionException e) {
-			throw new ServletException("error compiling the xpath expressions");
+			throw new ServiceFailure("4150", "error compiling the xpath expressions");
 		}
 
 		// apply expressions to get data from systemmetadata 
@@ -349,48 +352,38 @@ public class ResolveFilter implements Filter {
 		ArrayList<String> replicaIDs = null;
 		ArrayList<String> errorXML = null;
 		try {
-			errorXML = extractLeafElementStrings(metacatXML,errorExpr);
-			targetID = extractLeafElementStrings(metacatXML,idExpr);
-			replicaIDs = extractLeafElementStrings(metacatXML,replicaExpr);
+			errorXML = extractLeafElementStrings(metacatDoc,errorExpr);
+			targetID = extractLeafElementStrings(metacatDoc,idExpr);
+			replicaIDs = extractLeafElementStrings(metacatDoc,replicaExpr);
 		} catch (XPathExpressionException e2) {
-			throw new ServletException(e2.getMessage());
+			throw new ServiceFailure("4150","error extracting data from metcat response. " + e2);
 		}
 
 		
 		
 		// -------------------- create the response content
 		
-
+		Document returnDoc = null;
 		if (targetID.isEmpty()) {
 			if (errorXML.isEmpty()) {	
-				// create error to return
 				throw new ServiceFailure("4150","Unexpected content from metacat returned");
 			} else {
-				// forward the metacat error
-	            chain.doFilter(request, response);
-	            return;
+	            returnDoc = metacatDoc;
 			}
+		} else {
+			String targetIdentifier = targetID.get(0);
+			returnDoc = createObjectLocationList(targetIdentifier, replicaIDs);
 		}
-				
-		// got systemmetadata
-		// ------create an ObjectLocationList
-		String targetIdentifier = targetID.get(0);
-		Document doc = createObjectLocationList(targetIdentifier, replicaIDs);
-			
+						
+		// -------- transform return Document to XML  -----------
 		
-		// -------- transform OLL Document to XML  -----------
-		
-		
-		DOMSource domSource = new DOMSource(doc);
-//		StreamResult streamResult = new StreamResult(out);
+		DOMSource domSource = new DOMSource(returnDoc);
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer serializer;
 		try {
 			serializer = tf.newTransformer();
 			serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
-//			serializer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,"users.dtd");
 			serializer.setOutputProperty(OutputKeys.INDENT,"yes");
-
 				
 			// create byte-array output stream to feed to transformer
 			ByteArrayOutputStream resultBuf = new ByteArrayOutputStream( );
@@ -403,11 +396,10 @@ public class ResolveFilter implements Filter {
 //      	      response.setContentType(type);
 			response.getOutputStream().write(resultBuf.toByteArray( ));
 			response.flushBuffer( );
-	
 		} catch (TransformerConfigurationException e) {
-			throw new ServletException(e);
+			throw new ServiceFailure("4150","error setting up the document transformer");
 		} catch (TransformerException e) {
-			throw new ServletException(e);
+			throw new ServiceFailure("4150","error serializing output");
 		} 
 	}
 
