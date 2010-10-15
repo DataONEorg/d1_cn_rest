@@ -5,6 +5,11 @@ import static org.junit.matchers.JUnitMatchers.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -22,14 +27,27 @@ import org.dataone.service.exceptions.ServiceFailure;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 
 import org.springframework.core.io.*;  //FileSystemResourceLoader;
 import org.springframework.mock.web.*;
+import org.xml.sax.SAXException;
 
 
 public class TestingMyResolve {
-
+	private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
+	private static DocumentBuilder ollParser;
+		
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -106,7 +124,7 @@ public class TestingMyResolve {
 		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
 		
 		String content = new String(responseWrapper.getBuffer());
-//		System.out.print(content.toString());
+
 		assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
 
 		
@@ -118,6 +136,52 @@ public class TestingMyResolve {
 //				+"href=\"http://ReplicaMemberNode2object?id=Identifier0\"/></locations>");	
 
 	}
+
+//	@Test
+	public void testValidOllXML() throws Exception {
+
+		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemas","false");
+		settings.put("nodelistRefreshInterval","13579");
+		
+		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+		
+		// examine contents of the response
+		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
+		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
+		
+		String content = new String(responseWrapper.getBuffer());
+
+		// create dom from output then validate against schema
+		
+		Validator validator;
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		try {
+			URL xsdUrl = new URL(objectlocationlistUrl);
+			URLConnection xsdUrlConnection = xsdUrl.openConnection();
+			InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
+			Source schemaFile = new StreamSource(xsdUrlStream);
+			Schema schema = factory.newSchema(schemaFile);
+			validator = schema.newValidator();
+		} catch (MalformedURLException e) {
+			throw new ServiceFailure("4150","error: malformed URL for schema: " + objectlocationlistUrl);	
+		} catch (IOException e) {
+			throw new ServiceFailure("4150","Error connecting to schema: " + objectlocationlistUrl);
+		} catch (SAXException e) {
+			throw new ServiceFailure("4150","error parsing schema for validation: " + objectlocationlistUrl );
+		}    
+		
+		// validate the output
+		try {
+			StreamSource ss = new StreamSource(new StringReader(content));
+			validator.validate(ss);
+		} catch (SAXException e) {
+			fail("invalid xml for returned objectlocationlist");
+		} catch (IOException e) {
+			fail("IO error during xml validation test: " + e);
+		}
+	}
+
 	
 	@Test
 	public void testMetacatError() throws FileNotFoundException {
@@ -211,5 +275,47 @@ public class TestingMyResolve {
 		}
 		return responseWrapper;
 	}
+	
+	
+
+	
+    private static Schema createXsdSchemaValidator(String xsdUrlString) throws ServiceFailure {
+        Schema schema;
+    	
+    	// create a SchemaFactory capable of understanding WXS schemas
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		try {
+			URL xsdUrl = new URL(xsdUrlString);
+			URLConnection xsdUrlConnection = xsdUrl.openConnection();
+			InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
+			Source schemaFile = new StreamSource(xsdUrlStream);
+			schema = factory.newSchema(schemaFile);
+		} catch (MalformedURLException e) {
+			throw new ServiceFailure("4150","error: malformed URL for schema: " + xsdUrlString);	
+		} catch (IOException e) {
+			throw new ServiceFailure("4150","Error connecting to schema: " + xsdUrlString);
+		} catch (SAXException e) {
+			throw new ServiceFailure("4150","error parsing schema for validation: " + xsdUrlString );
+		}       
+        return schema;
+    }
+        
+    private static DocumentBuilder createStdValidatingDOMParser(Schema xsdSchema) throws ServiceFailure {
+        
+    	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setIgnoringElementContentWhitespace(true);
+        documentBuilderFactory.setNamespaceAware(true);
+        documentBuilderFactory.setSchema(xsdSchema);
+        documentBuilderFactory.setValidating(false);
+        
+        DocumentBuilder parser;
+		try {
+			parser = documentBuilderFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ServiceFailure("4150","Error creating a document parser");
+		}
+        return parser;
+    }
+     
 	
 }

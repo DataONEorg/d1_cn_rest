@@ -50,8 +50,8 @@ public class ResolveFilter implements Filter {
     private HashMap<String, String> baseUrlMap = null;
     private Integer nodelistRefreshInterval = 5;
     private boolean useSchemas = true;
-//    private String nodelistLocation = "/Users/rnahf/software/svn_checkouts/dataone-cn-os-core/var/lib/dataone/nodeList.xml";
-    private String nodelistLocation = "/Users/rnahf/software/svn-checkouts/dataone-cn-os-core/var/lib/dataone/nodelist.xml";
+    private String nodelistLocation = "/Users/rnahf/software/svn_checkouts/dataone-cn-os-core/var/lib/dataone/nodeList.xml";
+//    private String nodelistLocation = "/Users/rnahf/software/svn-checkouts/dataone-cn-os-core/var/lib/dataone/nodelist.xml";
 //    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/schemas/nodelist.xsd";
     private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/nodelist.xsd";
     private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
@@ -72,7 +72,6 @@ public class ResolveFilter implements Filter {
 	*/
 	}
 
-	
 	/* -------------------------------------------
 	 * Init's main job in this case is to read and parse the nodelist
 	 * into a map for looking up baseURLs by node IDs.
@@ -117,8 +116,7 @@ public class ResolveFilter implements Filter {
 			throw new ServletException();
 		}
     }
-    
-    
+  
     private void cacheNodeListURLs() throws ServiceFailure { 
 		
     	// expire the map if refresh interval is exceeded
@@ -187,21 +185,18 @@ public class ResolveFilter implements Filter {
     	// TODO: implement cache timeout logic.
     	return false;
     }
-    
-    
+        
     /* ------------------------------------------------------
      * 
      *     Runtime (doFilter) methods and routines
      * 
      *  -----------------------------------------------------*/
-    
-    
+      
     public String lookupBaseURLbyNode(String nodeID) throws ServiceFailure {
     	cacheNodeListURLs();
 		return baseUrlMap.get(nodeID);
 	}
-
-    
+ 
     private Schema createXsdSchema(String xsdUrlString, boolean useSchema) throws ServiceFailure {
         Schema schema;
     	
@@ -257,13 +252,10 @@ public class ResolveFilter implements Filter {
 			response.setContentLength(errorMsgXML.length);
 //			response.setContentType(type);
 			response.getOutputStream().write(errorMsgXML);
-			response.flushBuffer( );
-			
-			
+			response.flushBuffer( );			
 		}
 
     }
-    
     
     public void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure {
 
@@ -403,8 +395,6 @@ public class ResolveFilter implements Filter {
 		} 
 	}
 
-	
-	
 	private ArrayList<String> extractLeafElementStrings(Document d, XPathExpression expr ) throws XPathExpressionException {
 		
 		// evaluate the xpath expression
@@ -416,36 +406,6 @@ public class ResolveFilter implements Filter {
 		}		
 		return resultStrings;
 	}
-
-/*	
-	private Document createErrorXML() {
-
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = null;
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new ServiceFailure("4150","Error creating ObjectLocationList");
-		}
-		DOMImplementation impl = builder.getDOMImplementation();
-
-		//document
-		Document doc = impl.createDocument(null,null,null);
-		//root element
-//		org.w3c.dom.Element root = doc.getDocumentElement();
-		org.w3c.dom.Element oll = doc.createElement("error");
-		doc.appendChild(oll);
-		oll.setAttribute("xmlns:d1","http://dataone.org/service/types/ObjectLocationList/0.1");
-		oll.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance");
-		oll.setAttribute("xsi:schemaLocation","http://dataone.org/service/types/ObjectLocationList/0.1 https://repository.dataone.org/software/cicore/trunk/schemas/objectLocationList.xsd");
-		
-		org.w3c.dom.Element id = doc.createElement("identifier");
-		id.setTextContent(idString);
-		oll.appendChild(id);
-
-		
-	}
-	*/
 	
 	private Document createObjectLocationList(String idString, ArrayList<String> nodes) throws ServiceFailure {
 		
