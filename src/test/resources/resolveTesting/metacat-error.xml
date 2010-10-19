@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><error errorCode="404" detailCode="1000">
-  <description>Document not found:THIS_ID_IS_BOGUS</description>
+<?xml version="1.0" encoding="UTF-8"?><error errorCode="123456" detailCode="987654">
+  <description>A generic error from the /meta service to test forwarding capabilities of resolve.  The codes are bogus in this case.</description>
   <traceInformation>
   </traceInformation>
 </error>

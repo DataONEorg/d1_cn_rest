@@ -32,27 +32,27 @@
 	<originMemberNode>OriginMemberNode0</originMemberNode>
 	<authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
 	<replica>
-    	<replicaMemberNode>http://mn-dev.dataone.org</replicaMemberNode>
+    	<replicaMemberNode>mn-dev</replicaMemberNode>
    	 	<replicationStatus>completed</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>http://dev-dryad-mn.dataone.org</replicaMemberNode>
+    	<replicaMemberNode>dev-dryad-mn</replicaMemberNode>
     	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>http://daacmn.dataone.utk.edu</replicaMemberNode>
+    	<replicaMemberNode>daacmn</replicaMemberNode>
     	<replicationStatus>completed</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>http://knb-mn.ecoinformatics.org</replicaMemberNode>
+    	<replicaMemberNode>knb-mn</replicaMemberNode>
     	<replicationStatus>completed</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>http://cn-unm-1.dataone.org</replicaMemberNode>
+    	<replicaMemberNode>cn-unm-1</replicaMemberNode>
     	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>

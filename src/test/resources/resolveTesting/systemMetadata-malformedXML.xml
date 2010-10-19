@@ -4,7 +4,12 @@
       xmlns:schemaLocation="http://dataone.org/service/types/SystemMetadata/0.1 https://repository/dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd">
 	<identifier>aAbBcC12345</identifier>
 	<objectFormat>eml://ecoinformatics.org/eml-2.0.1</objectFormat>
-	<size>0</size>
+	<!-- 
+		introducing an error to simulate malformed systemmetadata returned (not closing size element)
+	 -->
+	<size>0   <size>
+	
+	
 	<submitter>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</submitter>
 	<rightsHolder>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</rightsHolder>
 	<obsoletes>Obsoletes0</obsoletes>
@@ -32,8 +37,7 @@
 	<originMemberNode>OriginMemberNode0</originMemberNode>
 	<authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
 	<replica>
-		<!-- a fake value for testing -->
-    	<replicaMemberNode>testUnregisteredNode</replicaMemberNode>
+    	<replicaMemberNode>mn-dev</replicaMemberNode>
    	 	<replicationStatus>completed</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>

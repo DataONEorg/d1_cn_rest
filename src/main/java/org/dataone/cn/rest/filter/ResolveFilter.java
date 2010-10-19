@@ -27,21 +27,14 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
-/*
-import org.dataone.cn.batch.utils.*;
-import org.dataone.service.types.NodeList;
-import org.dataone.service.types.Node;
-import org.dataone.service.types.NodeReference;
-import org.dataone.cn.batch.utils.NodeListAccess;
-import org.jibx.runtime.JiBXException;
-*/
-
 import org.dataone.service.exceptions.*;
 
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 public class ResolveFilter implements Filter {
@@ -50,14 +43,13 @@ public class ResolveFilter implements Filter {
     private HashMap<String, String> baseUrlMap = null;
     private Integer nodelistRefreshInterval = 5;
     private boolean useSchemas = true;
-    private String nodelistLocation = "/Users/rnahf/software/svn_checkouts/dataone-cn-os-core/var/lib/dataone/nodeList.xml";
-//    private String nodelistLocation = "/Users/rnahf/software/svn-checkouts/dataone-cn-os-core/var/lib/dataone/nodelist.xml";
-//    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/schemas/nodelist.xsd";
+    private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
     private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/nodelist.xsd";
     private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
+    private static String d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
+    private static String objectlocationlistSchemaURL = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
     
     private String targetEnvironment = "prod";
-
     private XPathFactory xFactory = null;
     
 	public void destroy() {
@@ -72,6 +64,17 @@ public class ResolveFilter implements Filter {
 	*/
 	}
 
+	/*
+	 *    An error handler to raise schema validation errors for xsd schemas
+	 */
+	class XSDValidationErrorHandler extends DefaultHandler  {
+
+		public void error(SAXParseException e) throws SAXParseException {
+			throw e;
+		}
+	}
+	
+	
 	/* -------------------------------------------
 	 * Init's main job in this case is to read and parse the nodelist
 	 * into a map for looking up baseURLs by node IDs.
@@ -86,10 +89,15 @@ public class ResolveFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
         logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
+        
 
     // read in parameters to the filter
         if ( filterConfig.getInitParameter("nodelistRefreshInterval") != null )  
-        	this.nodelistRefreshInterval = Integer.valueOf(filterConfig.getInitParameter("nodelistRefreshInterval"));
+        	try {
+        		this.nodelistRefreshInterval = Integer.parseInt(filterConfig.getInitParameter("nodelistRefreshInterval"));
+        	} catch (NumberFormatException e) {
+        		throw new ServletException(e);
+        	}
         
         if (filterConfig.getInitParameter("nodelistLocation") != null)
         	this.nodelistLocation = filterConfig.getInitParameter("nodelistLocation");
@@ -97,24 +105,19 @@ public class ResolveFilter implements Filter {
         if (filterConfig.getInitParameter("targetEnvironment") != null)
         	this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
         
-        if ( (filterConfig.getInitParameter("useSchemas") != null) &&  
-        	(filterConfig.getInitParameter("useSchemas") == "false")) this.useSchemas = false;
-        
+        if (filterConfig.getInitParameter("useSchemas") != null) {
+        	if (filterConfig.getInitParameter("useSchemas") == "false")  this.useSchemas = false;
+        	else if (filterConfig.getInitParameter("useSchemas") == "true")  this.useSchemas = true;
+        	else throw new ServletException("bad value for input parameter 'useSchemas'");
+        }
         if (filterConfig.getInitParameter("nodelistSchemaLocation") != null)
         	this.nodelistSchemaLocation = filterConfig.getInitParameter("nodelistSchemaLocation");
         
         if (filterConfig.getInitParameter("systemmetadataSchemaLocation") != null)
         	this.systemmetadataSchemaLocation = filterConfig.getInitParameter("systemmetadataSchemaLocation");
 
+		this.xFactory = XPathFactory.newInstance();
 
-        // build the baseURL map
-        // because of the need to cache, delegating to separate method
-        try {
-			cacheNodeListURLs();
-		} catch (ServiceFailure e) {
-			e.printStackTrace();
-			throw new ServletException();
-		}
     }
   
     private void cacheNodeListURLs() throws ServiceFailure { 
@@ -145,7 +148,6 @@ public class ResolveFilter implements Filter {
 			// ---------- compile the XPath expression that selects nodes
 	        Object result;
 			try {
-				this.xFactory = XPathFactory.newInstance();
 		        XPath xpath = xFactory.newXPath();
 			//	XPathExpression expr = xpath.compile("/node[evironment='" + targetEnvironment + "']");
 				XPathExpression expr = xpath.compile("//node");
@@ -169,14 +171,18 @@ public class ResolveFilter implements Filter {
 	            		baseURL = d1nodeElements.item(j).getTextContent();
 	            	}
 	            }
-	            if (nodeID == null || baseURL == null) {
-	            	throw new ServiceFailure("4150","can't get nodeID or baseURL for node");
+	            if (nodeID == null || nodeID.isEmpty()) {
+	            	baseUrlMap = null;
+	            	throw new ServiceFailure("4150","Error parsing Nodelist: cannot get nodeID for node " + i + " of " + targetNodes.getLength());
+	            } else if (baseURL == null || baseURL.isEmpty()) {
+	            	baseUrlMap = null;
+	            	throw new ServiceFailure("4150","Error parsing Nodelist: cannot get baseURL for nodeID " + nodeID);
 	            } else {
 	            	baseUrlMap.put(nodeID, baseURL);
 	            }
 	        }
 	        if (baseUrlMap.isEmpty()) {
-	        	throw new ServiceFailure("4150","baseUrlMap is empty. Cannot service resolve.");
+	        	throw new ServiceFailure("4150","baseUrlMap is empty. Cannot service the resolve method.");
 	        }		
 		}
 	}
@@ -209,7 +215,7 @@ public class ResolveFilter implements Filter {
 			URLConnection xsdUrlConnection = xsdUrl.openConnection();
 			InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
 			Source schemaFile = new StreamSource(xsdUrlStream);
-			schema = factory.newSchema(schemaFile);
+			schema = factory.newSchema(schemaFile);			
 		} catch (MalformedURLException e) {
 			throw new ServiceFailure("4150","error: malformed URL for schema: " + xsdUrlString);	
 		} catch (IOException e) {
@@ -257,7 +263,7 @@ public class ResolveFilter implements Filter {
 
     }
     
-    public void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure {
+    public void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure, NotFound {
 
 		// return if init has not been called - it's the setter for filterConfig
         if (filterConfig == null) return;
@@ -316,12 +322,13 @@ public class ResolveFilter implements Filter {
         // parse the input stream, determining if it's sysMD or error
         Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation,this.useSchemas);
         DocumentBuilder sysMDparser = createStdValidatingDOMParser(sysMDschema,this.useSchemas);
-		      
+		XSDValidationErrorHandler xsdveh = new XSDValidationErrorHandler();
+        sysMDparser.setErrorHandler(xsdveh);
 		Document metacatDoc = null;
 		try {
 			metacatDoc = sysMDparser.parse(xmlSource);
 		} catch (SAXException e) {
-			throw new ServiceFailure("4150","Error parsing metacat output: " + e);
+			throw new ServiceFailure("4150","Error parsing /meta output: " + e);
 		}
 		
 		// ---------------- extract info from document
@@ -331,7 +338,7 @@ public class ResolveFilter implements Filter {
 		XPathExpression replicaExpr;
 		XPathExpression errorExpr;
 		try {
-			XPath xpath = xFactory.newXPath();
+			XPath xpath = this.xFactory.newXPath();
 			idExpr = xpath.compile("//identifier");
 			replicaExpr = xpath.compile("//replicaMemberNode[../replicationStatus = 'completed']");
 			errorExpr = xpath.compile("//error");
@@ -407,7 +414,7 @@ public class ResolveFilter implements Filter {
 		return resultStrings;
 	}
 	
-	private Document createObjectLocationList(String idString, ArrayList<String> nodes) throws ServiceFailure {
+	private Document createObjectLocationList(String idString, ArrayList<String> nodes) throws ServiceFailure, NotFound {
 		
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
@@ -424,21 +431,26 @@ public class ResolveFilter implements Filter {
 		Document doc = impl.createDocument(null,null,null);
 		//root element
 //		org.w3c.dom.Element root = doc.getDocumentElement();
-		org.w3c.dom.Element oll = doc.createElement("objectLocationList");
+		org.w3c.dom.Element oll = doc.createElement("d1:objectLocationList");
 		doc.appendChild(oll);
-		oll.setAttribute("xmlns:d1","http://dataone.org/service/types/ObjectLocationList/0.1");
+		oll.setAttribute("xmlns:d1",d1namespaceVersion);
 		oll.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance");
-		oll.setAttribute("xsi:schemaLocation","http://dataone.org/service/types/ObjectLocationList/0.1 https://repository.dataone.org/software/cicore/trunk/schemas/objectLocationList.xsd");
+		oll.setAttribute("xsi:schemaLocation", d1namespaceVersion + " " + objectlocationlistSchemaURL);
 		
 		org.w3c.dom.Element id = doc.createElement("identifier");
 		id.setTextContent(idString);
 		oll.appendChild(id);
 
+		if (nodes.size() == 0) {
+			// assuming there should be at least one location to retrieve, so will throw an error
+			throw new NotFound("4140","The requested object is not presently available: " + idString);
+		}
+		
 		for(int i=0; i<nodes.size(); i++) {
 			String nodeIDstring = nodes.get(i); //.toString();
 			String baseURLstring = lookupBaseURLbyNode(nodeIDstring);
 			if (baseURLstring == null) {
-				throw new ServiceFailure("4150","unregistered Node identifer in systemmetadata document for object: " + idString);
+				throw new ServiceFailure("4150","unregistered Node identifier (" + nodeIDstring + ") in systemmetadata document for object: " + idString);
 			}
 			String urlString = baseURLstring + "/object/" + idString;
 			
@@ -449,11 +461,11 @@ public class ResolveFilter implements Filter {
 			nodeID.appendChild(n);
 			loc.appendChild(nodeID);
 						
-			org.w3c.dom.Element baseURL = doc.createElement("baseURL");
+/*			org.w3c.dom.Element baseURL = doc.createElement("baseURL");
 			org.w3c.dom.Node b = doc.createTextNode(baseURLstring);
 			baseURL.appendChild(b);
 			loc.appendChild(baseURL);
-
+*/
 			org.w3c.dom.Element url = doc.createElement("url");
 			org.w3c.dom.Node u = doc.createTextNode(urlString);
 			url.appendChild(u);
