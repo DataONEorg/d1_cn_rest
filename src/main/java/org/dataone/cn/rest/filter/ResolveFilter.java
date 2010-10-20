@@ -38,14 +38,14 @@ import org.xml.sax.helpers.DefaultHandler;
 
 
 public class ResolveFilter implements Filter {
-    Logger logger = Logger.getLogger("ResolveFilter");
+    Logger logger = Logger.getLogger(ResolveFilter.class);
 	private FilterConfig filterConfig = null;
     private HashMap<String, String> baseUrlMap = null;
     private Integer nodelistRefreshInterval = 5;
     private boolean useSchemas = true;
     private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
-    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/nodelist.xsd";
-    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_4/systemmetadata.xsd";
+    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
+    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/systemmetadata.xsd";
     private static String d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
     private static String objectlocationlistSchemaURL = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
     
@@ -461,11 +461,11 @@ public class ResolveFilter implements Filter {
 			nodeID.appendChild(n);
 			loc.appendChild(nodeID);
 						
-/*			org.w3c.dom.Element baseURL = doc.createElement("baseURL");
+			org.w3c.dom.Element baseURL = doc.createElement("baseURL");
 			org.w3c.dom.Node b = doc.createTextNode(baseURLstring);
 			baseURL.appendChild(b);
 			loc.appendChild(baseURL);
-*/
+
 			org.w3c.dom.Element url = doc.createElement("url");
 			org.w3c.dom.Node u = doc.createTextNode(urlString);
 			url.appendChild(u);
