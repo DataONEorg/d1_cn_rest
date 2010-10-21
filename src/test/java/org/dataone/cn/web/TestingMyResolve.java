@@ -5,7 +5,10 @@ import static org.junit.matchers.JUnitMatchers.*;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -50,7 +53,7 @@ public class TestingMyResolve {
 	private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
 	private static String validTestingNodelistLocation = "src/test/resources/resolveTesting/nodelist_0_5_valid.xml";
 	private static boolean debuggingOutput = false;
-	private static String useSchemasString = "false";
+	private static String useSchemasString = "true";
 
 	// need to test that resolveFilter behaves properly under various conditions:
 	// (general)
@@ -193,7 +196,7 @@ public class TestingMyResolve {
 	}
 
 	@Test
-	public void testNodeListNullBaseURL() throws FileNotFoundException {
+	public void testNodeListNullBaseURLError() throws FileNotFoundException {
 
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
@@ -230,8 +233,8 @@ public class TestingMyResolve {
 	
 	}
 
-//	@Test
-	public void testNodeListInvalidSchema() throws FileNotFoundException {
+	@Test
+	public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
 		settings.put("useSchemas","true");
@@ -248,10 +251,9 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\'4150\'"));
-		assertThat("Nodelist null baseURL error produced-3", content, containsString("unregistered Node identifier"));
-	
+		assertThat("NodeList Invalid vs Schema error produced-1", content, containsString("errorCode=\'500\'"));
+		assertThat("Nodelist Invalid vs Schema error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("Nodelist Invalid vs Schema error produced-3", content, containsString("document invalid against NodeList schema"));
 	}
 
 	@Test
@@ -301,15 +303,6 @@ public class TestingMyResolve {
 		String content = new String(responseWrapper.getBuffer());
 
 		assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
-
-		
-//		TODO more sophisticated tests can catch more potential errors in the XSLT.  depends on crafting more fake metadata.
-
-//		JUnitMatchers matcher = new JUnitMatchers();
-//		assertEquals(content,"<?xml version=\"1.0\" encoding=\"UTF-8\"?><locations identifier=\"Identifier0\"><location node=\"ReplicaMemberNode0\" " 
-//				+"href=\"http://ReplicaMemberNode0object?id=Identifier0\"/><location node=\"ReplicaMemberNode2\" "
-//				+"href=\"http://ReplicaMemberNode2object?id=Identifier0\"/></locations>");	
-
 	}
 
 	@Test
@@ -326,6 +319,7 @@ public class TestingMyResolve {
 		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
 		
 		String content = new String(responseWrapper.getBuffer());
+
 		if (debuggingOutput) {
 			System.out.println("===== output =====");
 			System.out.print(content.toString());
@@ -354,7 +348,6 @@ public class TestingMyResolve {
 		
 		// validate the output
 		try {
-//			content.concat("junkAtTheEnd");
 			StreamSource ss = new StreamSource(new StringReader(content));
 			validator.validate(ss);
 		} catch (SAXParseException e) {
@@ -364,6 +357,21 @@ public class TestingMyResolve {
 		} catch (IOException e) {
 			fail("IO error during xml validation test: " + e);
 		}
+
+		// follow up with test to make sure we can catch the schema error in the first place!
+		String invalidContent = content.replace("baseURL>", "baseHURL>");
+		try {
+			StreamSource ss = new StreamSource(new StringReader(invalidContent));
+			validator.validate(ss);
+		} catch (SAXParseException e) {
+			assertThat("oll schema testing error checking", e,  instanceOf(SAXParseException.class));
+			return;
+		} catch (SAXException e) {
+			fail("invalid xml for returned objectlocationlist: " + e);
+		} catch (IOException e) {
+			fail("IO error during xml validation test: " + e);
+		}
+		fail("did not catch invalid OLL error");
 	}
 
 	@Test
@@ -411,7 +419,7 @@ public class TestingMyResolve {
 	
 	}
 	
-	@Test
+//	@Test
 	public void testMetacatErrorDocNotFound() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
@@ -460,6 +468,30 @@ public class TestingMyResolve {
 	}
 
 	@Test
+	public void testSystemMetadataInvalidVsSchema() throws FileNotFoundException {
+
+		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemas",useSchemasString);
+		settings.put("nodelistLocation", validTestingNodelistLocation);
+		
+		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
+
+		String content = new String(responseWrapper.getBuffer());
+		if (debuggingOutput) {
+			System.out.println("===== output =====");
+			System.out.print(content.toString());
+			System.out.println("------------------");
+		}
+		// examine contents of the response
+		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
+		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
+		
+		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\'500\'"));
+		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
+	}
+	
+	@Test
 	public void testSystemMetadataMalformedXMLError() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
@@ -507,6 +539,81 @@ public class TestingMyResolve {
 		assertThat("systemMetadata unregistered node error produced-3", content, containsString("The requested object is not presently available"));
 	}
 
+//	@Test
+	public void testNodeListRefresh() throws InterruptedException, IOException {
+		// TODO: build a real test for testing refresh.  Will involve changing the nodeList file, so a real change can be observed in the second call.
+		// building up a new ResolveFilter with the appropriate parameters
+		ResourceLoader fsrl = new FileSystemResourceLoader();
+		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
+		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
+		fc.addInitParameter("useSchemas",useSchemasString);
+		fc.addInitParameter("nodelistRefreshInterval","2000");
+		
+		
+		
+		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
+		
+		File origNodelistFile = new File(validTestingNodelistLocation);
+		File newNodelistFile = new File("src/test/resources/resolveTesting/nodelistCachingTest.xml");
+		File nodelistLocation = new File("src/test/resources/resolveTesting/tmpNodelistCachingTest.xml");
+
+		FileReader in = new FileReader(origNodelistFile);
+		FileWriter out = new FileWriter(nodelistLocation);
+
+		int c;
+		while ((c = in.read()) != -1)  out.write(c);
+		in.close();
+		out.close();
+
+		
+		ResolveFilter rf = new ResolveFilter();
+
+		try {
+			rf.init(fc);
+		} catch (ServletException se) {
+			fail("servlet exception at ResolveFilter.init(fc)");
+		}
+		// read the baseURLmap to make sure it's working
+		String url = null;
+		try {
+			url = rf.lookupBaseURLbyNode("daacmn");
+		} catch (ServiceFailure e) {
+			fail("baseURLmap lookup error: "+ e);
+		}
+		if (url == null) 
+			fail("baseURLmap lookup error: returned null value");
+		else if(url.isEmpty())
+			fail("baseURLmap lookup error: url returned is empty");	
+
+		// the wait is longer than the refresh interval
+		Thread.sleep(5000);
+
+		// copy the "new" nodelist to the designated location
+		in = new FileReader(newNodelistFile);
+		out = new FileWriter(nodelistLocation);
+
+		while ((c = in.read()) != -1)  out.write(c);
+		in.close();
+		out.close();
+
+		
+		String url2 = null;
+		try {
+			url2 = rf.lookupBaseURLbyNode("daacmn");
+		} catch (ServiceFailure e) {
+			fail("baseURLmap lookup error: "+ e);
+		} finally {
+			nodelistLocation.delete();
+		}
+		if (url2 == null) 
+			fail("baseURLmap lookup error: returned null value");
+		else if(url2.isEmpty())
+			fail("baseURLmap lookup error: url returned is empty");	
+
+		if (url.equals(url2)) {
+			fail("cache refresh failed - should have returned different url string");
+		}
+	}
 	
 	
 	// ==========================================================================================================

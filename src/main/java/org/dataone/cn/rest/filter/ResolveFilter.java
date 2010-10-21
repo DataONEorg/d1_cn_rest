@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.servlet.*;
@@ -20,6 +21,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.*;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -33,9 +35,6 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-
 
 public class ResolveFilter implements Filter {
     Logger logger = Logger.getLogger(ResolveFilter.class);
@@ -51,38 +50,22 @@ public class ResolveFilter implements Filter {
     
     private String targetEnvironment = "prod";
     private XPathFactory xFactory = null;
+    private long cacheTimePointMS = 0;
     
 	public void destroy() {
 		this.filterConfig = null;
 		this.baseUrlMap = null;	
 		this.nodelistLocation = null;
 		this.xFactory = null;
-/*
+	/*
 		this.nodelistRefreshInterval = null;
 		this.nodelistSchemaLocation = null;
 		this.targetEnvironment = null;
 	*/
 	}
-
-	/*
-	 *    An error handler to raise schema validation errors for xsd schemas
-	 */
-	class XSDValidationErrorHandler extends DefaultHandler  {
-
-		public void error(SAXParseException e) throws SAXParseException {
-			throw e;
-		}
-	}
 	
 	
-	/* -------------------------------------------
-	 * Init's main job in this case is to read and parse the nodelist
-	 * into a map for looking up baseURLs by node IDs.
-	 * Also some housekeeping parameters related to how long
-	 * to cache the nodelist for, and where to find it.
-	 * The Nodelist should be relatively stable (the baseURL at least)
-	 * but it is important to not to assume too much.
-	 * 
+	/* 
 	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
 	 */
 	
@@ -90,8 +73,7 @@ public class ResolveFilter implements Filter {
         logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
         
-
-    // read in parameters to the filter
+        // TODO: implement cache refresh feature
         if ( filterConfig.getInitParameter("nodelistRefreshInterval") != null )  
         	try {
         		this.nodelistRefreshInterval = Integer.parseInt(filterConfig.getInitParameter("nodelistRefreshInterval"));
@@ -101,7 +83,8 @@ public class ResolveFilter implements Filter {
         
         if (filterConfig.getInitParameter("nodelistLocation") != null)
         	this.nodelistLocation = filterConfig.getInitParameter("nodelistLocation");
-        
+
+        // TODO: implement targetEnvironment in node selection
         if (filterConfig.getInitParameter("targetEnvironment") != null)
         	this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
         
@@ -129,9 +112,12 @@ public class ResolveFilter implements Filter {
     	// TODO: implement logic for excluding nodes in the wrong target environment
 		if (this.baseUrlMap == null) {
 
+//	    	System.out.println("refreshing the nodelist baseURL map");
+
 			// build the XML parser
 			Schema schema = createXsdSchema(this.nodelistSchemaLocation,this.useSchemas);
-			DocumentBuilder parser = createStdValidatingDOMParser(schema,this.useSchemas);
+			Validator v = schema.newValidator();
+			DocumentBuilder parser = createNSDOMParser();
 
 	        // ----------- parse the nodelist into DOM-style document
 	        Document document;
@@ -143,7 +129,13 @@ public class ResolveFilter implements Filter {
 				e.printStackTrace();
 				throw new ServiceFailure("4150","Cannot open NodeList: " + this.nodelistLocation);
 			}
-
+			try {
+				v.validate(new DOMSource(document));
+			} catch (SAXException e1) {
+				throw new ServiceFailure("4150","document invalid against NodeList schema (" + this.nodelistSchemaLocation + ") " + e1);
+			} catch (IOException e1) {
+				throw new ServiceFailure("4150","IO error during schema validation: "+ e1);
+			}
 
 			// ---------- compile the XPath expression that selects nodes
 	        Object result;
@@ -187,9 +179,16 @@ public class ResolveFilter implements Filter {
 		}
 	}
 
-    private Boolean isTimeForRefresh() {
-    	// TODO: implement cache timeout logic.
-    	return false;
+	private Boolean isTimeForRefresh() {
+    	long nowMS = new Date().getTime();
+//    	System.out.println("now: " + nowMS + "  then: " + this.cacheTimePointMS);
+    	if (nowMS - this.cacheTimePointMS > this.nodelistRefreshInterval) {
+    		this.cacheTimePointMS = nowMS;
+//    		System.out.println("new cached time: " + this.cacheTimePointMS);
+    		return true;
+    	} else {
+    		return false;
+    	}
     }
         
     /* ------------------------------------------------------
@@ -226,16 +225,11 @@ public class ResolveFilter implements Filter {
         return schema;
     }
         
-    private DocumentBuilder createStdValidatingDOMParser(Schema xsdSchema, boolean useSchema) throws ServiceFailure {
+    private DocumentBuilder createNSDOMParser() throws ServiceFailure {
         
     	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setIgnoringElementContentWhitespace(true);
         documentBuilderFactory.setNamespaceAware(true);
-        if (useSchema) {
-        	documentBuilderFactory.setSchema(xsdSchema);
-        	documentBuilderFactory.setValidating(false);
-        }
-        
         DocumentBuilder parser;
 		try {
 			parser = documentBuilderFactory.newDocumentBuilder();
@@ -321,12 +315,11 @@ public class ResolveFilter implements Filter {
     
         // parse the input stream, determining if it's sysMD or error
         Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation,this.useSchemas);
-        DocumentBuilder sysMDparser = createStdValidatingDOMParser(sysMDschema,this.useSchemas);
-		XSDValidationErrorHandler xsdveh = new XSDValidationErrorHandler();
-        sysMDparser.setErrorHandler(xsdveh);
-		Document metacatDoc = null;
+        DocumentBuilder sysMDparser = createNSDOMParser();
+
+		Document metaDoc = null;
 		try {
-			metacatDoc = sysMDparser.parse(xmlSource);
+			metaDoc = sysMDparser.parse(xmlSource);
 		} catch (SAXException e) {
 			throw new ServiceFailure("4150","Error parsing /meta output: " + e);
 		}
@@ -351,25 +344,34 @@ public class ResolveFilter implements Filter {
 		ArrayList<String> replicaIDs = null;
 		ArrayList<String> errorXML = null;
 		try {
-			errorXML = extractLeafElementStrings(metacatDoc,errorExpr);
-			targetID = extractLeafElementStrings(metacatDoc,idExpr);
-			replicaIDs = extractLeafElementStrings(metacatDoc,replicaExpr);
+			errorXML = extractLeafElementStrings(metaDoc,errorExpr);
+			targetID = extractLeafElementStrings(metaDoc,idExpr);
+			replicaIDs = extractLeafElementStrings(metaDoc,replicaExpr);
 		} catch (XPathExpressionException e2) {
 			throw new ServiceFailure("4150","error extracting data from metcat response. " + e2);
 		}
 
-		
 		
 		// -------------------- create the response content
 		
 		Document returnDoc = null;
 		if (targetID.isEmpty()) {
 			if (errorXML.isEmpty()) {	
-				throw new ServiceFailure("4150","Unexpected content from metacat returned");
+				throw new ServiceFailure("4150","Unexpected content from /meta service returned");
 			} else {
-	            returnDoc = metacatDoc;
+	            returnDoc = metaDoc;
 			}
 		} else {
+			if (useSchemas) {
+				try {
+					Validator sysMDvalidator = sysMDschema.newValidator();
+					sysMDvalidator.validate(new DOMSource(metaDoc));
+				} catch (SAXException e1) {
+					throw new ServiceFailure("4150","document invalid against SystemMetadata schema (" + this.systemmetadataSchemaLocation + ") " + e1);
+				} catch (IOException e1) {
+					throw new ServiceFailure("4150","IO error during schema validation: "+ e1);
+				}
+			}
 			String targetIdentifier = targetID.get(0);
 			returnDoc = createObjectLocationList(targetIdentifier, replicaIDs);
 		}
@@ -422,7 +424,6 @@ public class ResolveFilter implements Filter {
 		try {
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			throw new ServiceFailure("4150","Error creating ObjectLocationList");
 		}
 		DOMImplementation impl = builder.getDOMImplementation();
@@ -452,7 +453,11 @@ public class ResolveFilter implements Filter {
 			if (baseURLstring == null) {
 				throw new ServiceFailure("4150","unregistered Node identifier (" + nodeIDstring + ") in systemmetadata document for object: " + idString);
 			}
-			String urlString = baseURLstring + "/object/" + idString;
+			String urlString;
+			if (baseURLstring.endsWith("/")) 
+				urlString = baseURLstring + "object/" + idString;
+			else 
+				urlString = baseURLstring + "/object/" + idString;
 			
 			org.w3c.dom.Element loc = doc.createElement("objectLocation");
 

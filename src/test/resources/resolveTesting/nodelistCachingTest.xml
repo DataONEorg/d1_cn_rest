@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <d1:nodeList xmlns:d1="http://dataone.org/service/types/NodeList/0.5"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://dataone.org/service/types/NodeList/0.5 https://repository.dataone.org/software/cicore/trunk/schemas/nodelist.xsd">
+	xsi:schemaLocation="http://dataone.org/service/types/NodeList/0.5 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd">
 	<!--
 		This instance document was generated for testing purposes It contains
 		no useful information.
@@ -10,13 +10,7 @@
 		<identifier>mn-dev</identifier>
 		<name>DataONESamples</name>
 		<description>the development mn instance</description>
-
-		<!-- cannot omit the baseURL tag, but it can be empty,
-			so we need to test this situation for desired effect
-			which is: catch the empty url at runtime and produce 
-			the appropriate error to the client-->
-		<baseURL></baseURL>
-
+		<baseURL>http://mn-dev.dataone.org/mn/</baseURL>
 		<services>
 			<service version="0.5" available="true">
 				<name>mn_crud</name>
@@ -72,7 +66,7 @@
 		<identifier>daacmn</identifier>
 		<name>ornldaac</name>
 		<description>the daac mn instance</description>
-		<baseURL>http://daacmn.dataone.utk.edu/mn/</baseURL>
+		<baseURL>http://daacmn.dataone.utk.edu/a_new_service_endpoint/</baseURL>
 		<services>
 			<service version="0.5" available="true">
 				<name>mn_crud</name>
