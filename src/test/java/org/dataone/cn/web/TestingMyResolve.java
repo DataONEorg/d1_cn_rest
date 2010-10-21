@@ -539,24 +539,33 @@ public class TestingMyResolve {
 		assertThat("systemMetadata unregistered node error produced-3", content, containsString("The requested object is not presently available"));
 	}
 
-//	@Test
+	
+	/* to test the refresh ability, the test points ResolveFilter to a nodelistLocation and first copies
+	 * the original valid nodelist to that location and does a baseURL lookup for a nodeIdentifier
+	 * then copies an altered nodelist file with different baseURL for the same nodeIdentifier,
+	 * sleeps for longer than the refresh interval, and repeats the lookup.
+	 * The results should be different.
+	 */
+	
+	@Test
 	public void testNodeListRefresh() throws InterruptedException, IOException {
-		// TODO: build a real test for testing refresh.  Will involve changing the nodeList file, so a real change can be observed in the second call.
-		// building up a new ResolveFilter with the appropriate parameters
+
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
 		fc.addInitParameter("useSchemas",useSchemasString);
-		fc.addInitParameter("nodelistRefreshInterval","2000");
+		fc.addInitParameter("nodelistRefreshInterval","2");
 		
-		
-		
-		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
-		
+		String tmpNodelistLocation = "src/test/resources/resolveTesting/tmpNodelistCachingTest.xml";
+		fc.addInitParameter("nodelistLocation", tmpNodelistLocation);
+
+		// the two source versions of the nodelist
 		File origNodelistFile = new File(validTestingNodelistLocation);
 		File newNodelistFile = new File("src/test/resources/resolveTesting/nodelistCachingTest.xml");
-		File nodelistLocation = new File("src/test/resources/resolveTesting/tmpNodelistCachingTest.xml");
 
+		File nodelistLocation = new File(tmpNodelistLocation);
+
+		// copy the original nodelist file to the tmp location where Resolve will be looking for it
 		FileReader in = new FileReader(origNodelistFile);
 		FileWriter out = new FileWriter(nodelistLocation);
 
@@ -564,7 +573,6 @@ public class TestingMyResolve {
 		while ((c = in.read()) != -1)  out.write(c);
 		in.close();
 		out.close();
-
 		
 		ResolveFilter rf = new ResolveFilter();
 
@@ -573,7 +581,8 @@ public class TestingMyResolve {
 		} catch (ServletException se) {
 			fail("servlet exception at ResolveFilter.init(fc)");
 		}
-		// read the baseURLmap to make sure it's working
+
+		// lookup a baseURL
 		String url = null;
 		try {
 			url = rf.lookupBaseURLbyNode("daacmn");
@@ -586,9 +595,10 @@ public class TestingMyResolve {
 			fail("baseURLmap lookup error: url returned is empty");	
 
 		// the wait is longer than the refresh interval
-		Thread.sleep(5000);
+		Thread.sleep( 5 * 1000);
 
-		// copy the "new" nodelist to the designated location
+		
+		// copy the new nodelist to the designated location
 		in = new FileReader(newNodelistFile);
 		out = new FileWriter(nodelistLocation);
 
@@ -596,7 +606,7 @@ public class TestingMyResolve {
 		in.close();
 		out.close();
 
-		
+		// lookup the baseURL again
 		String url2 = null;
 		try {
 			url2 = rf.lookupBaseURLbyNode("daacmn");
@@ -610,8 +620,9 @@ public class TestingMyResolve {
 		else if(url2.isEmpty())
 			fail("baseURLmap lookup error: url returned is empty");	
 
+		// urls should be different
 		if (url.equals(url2)) {
-			fail("cache refresh failed - should have returned different url string");
+			fail("cache refresh failed - should have returned different url string.  Got: " + url + " and " + url2);
 		}
 	}
 	

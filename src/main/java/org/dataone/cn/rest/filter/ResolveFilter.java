@@ -40,7 +40,7 @@ public class ResolveFilter implements Filter {
     Logger logger = Logger.getLogger(ResolveFilter.class);
 	private FilterConfig filterConfig = null;
     private HashMap<String, String> baseUrlMap = null;
-    private Integer nodelistRefreshInterval = 5;
+    private Integer nodelistRefreshInterval = 5 * 60;  // seconds
     private boolean useSchemas = true;
     private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
     private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
@@ -73,7 +73,6 @@ public class ResolveFilter implements Filter {
         logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
         
-        // TODO: implement cache refresh feature
         if ( filterConfig.getInitParameter("nodelistRefreshInterval") != null )  
         	try {
         		this.nodelistRefreshInterval = Integer.parseInt(filterConfig.getInitParameter("nodelistRefreshInterval"));
@@ -104,15 +103,17 @@ public class ResolveFilter implements Filter {
     }
   
     private void cacheNodeListURLs() throws ServiceFailure { 
-		
+
+        // TODO: implement modification date test for updating the cache
+    	
     	// expire the map if refresh interval is exceeded
     	if (isTimeForRefresh())  this.baseUrlMap = null;
     	
     	// create new map by reading the nodelist file and parsing out the baseURL
-    	// TODO: implement logic for excluding nodes in the wrong target environment
 		if (this.baseUrlMap == null) {
 
-//	    	System.out.println("refreshing the nodelist baseURL map");
+
+	    	logger.info("refreshing the nodelist baseURL map from: " + this.nodelistLocation);
 
 			// build the XML parser
 			Schema schema = createXsdSchema(this.nodelistSchemaLocation,this.useSchemas);
@@ -141,7 +142,7 @@ public class ResolveFilter implements Filter {
 	        Object result;
 			try {
 		        XPath xpath = xFactory.newXPath();
-			//	XPathExpression expr = xpath.compile("/node[evironment='" + targetEnvironment + "']");
+//				XPathExpression expr = xpath.compile("//node[@environment = '" + this.targetEnvironment + "']");
 				XPathExpression expr = xpath.compile("//node");
 				result = expr.evaluate(document, XPathConstants.NODESET);
 			} catch (XPathExpressionException e) {
@@ -182,7 +183,9 @@ public class ResolveFilter implements Filter {
 	private Boolean isTimeForRefresh() {
     	long nowMS = new Date().getTime();
 //    	System.out.println("now: " + nowMS + "  then: " + this.cacheTimePointMS);
-    	if (nowMS - this.cacheTimePointMS > this.nodelistRefreshInterval) {
+    	// convert seconds to milliseconds
+    	long refreshInterval = getRefreshInterval() * 1000;
+    	if (nowMS - this.cacheTimePointMS > refreshInterval) {
     		this.cacheTimePointMS = nowMS;
 //    		System.out.println("new cached time: " + this.cacheTimePointMS);
     		return true;
@@ -416,6 +419,7 @@ public class ResolveFilter implements Filter {
 		return resultStrings;
 	}
 	
+	// TODO: Implement JSON formatted output, based on Accept type in the request
 	private Document createObjectLocationList(String idString, ArrayList<String> nodes) throws ServiceFailure, NotFound {
 		
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
