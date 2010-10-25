@@ -419,7 +419,7 @@ public class TestingMyResolve {
 	
 	}
 	
-//	@Test
+	@Test
 	public void testMetacatErrorDocNotFound() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
