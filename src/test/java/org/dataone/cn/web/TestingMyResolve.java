@@ -60,7 +60,7 @@ public class TestingMyResolve {
 	// 1. All's well
 
 	// (init)
-	// 2. useSchemas parameter is neither string "true" or "false"
+	// 2. useSchemaValidation parameter is neither string "true" or "false"
 	// 3. refreshInterval parameter is not a number.
 	
 	// (runtime)
@@ -107,8 +107,8 @@ public class TestingMyResolve {
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemas",useSchemasString);
-		fc.addInitParameter("nodelistRefreshInterval","1234");
+		fc.addInitParameter("useSchemaValidation",useSchemasString);
+		fc.addInitParameter("nodelistRefreshIntervalSeconds","1234");
 		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
 		ResolveFilter rf = new ResolveFilter();	
 
@@ -120,7 +120,7 @@ public class TestingMyResolve {
 		}
 
 		if (rf.getRefreshInterval() != 1234) {
-			fail("failed to set nodelistRefreshInterval parameter");
+			fail("failed to set nodelistRefreshIntervalSeconds parameter");
 		}
 	}
 
@@ -131,7 +131,7 @@ public class TestingMyResolve {
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("nodelistRefreshInterval","should be a number but is not");
+		fc.addInitParameter("nodelistRefreshIntervalSeconds","should be a number but is not");
 		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
 		ResolveFilter rf = new ResolveFilter();	
 
@@ -145,13 +145,13 @@ public class TestingMyResolve {
 	}
 	
 	@Test
-	public void testUseSchemasFlag() {
+	public void testuseSchemaValidationFlag() {
 
 		// building up a new ResolveFilter with the appropriate parameters
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemas","neitherTrueNorFalse");
+		fc.addInitParameter("useSchemaValidation","neitherTrueNorFalse");
 		ResolveFilter rf = new ResolveFilter();	
 
 		try {
@@ -170,7 +170,7 @@ public class TestingMyResolve {
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemas",useSchemasString);
+		fc.addInitParameter("useSchemaValidation",useSchemasString);
 		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
 		ResolveFilter rf = new ResolveFilter();	
 
@@ -201,7 +201,7 @@ public class TestingMyResolve {
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemas",useSchemasString);
+		fc.addInitParameter("useSchemaValidation",useSchemasString);
 		fc.addInitParameter("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_nullBaseURL.xml");
 		ResolveFilter rf = new ResolveFilter();	
 
@@ -213,7 +213,7 @@ public class TestingMyResolve {
 		}
 		
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_nullBaseURL.xml");
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
 
@@ -237,7 +237,7 @@ public class TestingMyResolve {
 	public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas","true");
+		settings.put("useSchemaValidation","true");
 		settings.put("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_invalid_schema.xml");
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
 
@@ -260,7 +260,7 @@ public class TestingMyResolve {
 	public void testNodeListMalformedXML() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas","true");
+		settings.put("useSchemaValidation","true");
 		settings.put("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_malformedXML.xml");
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
 
@@ -291,8 +291,8 @@ public class TestingMyResolve {
 	public void testDoFilter() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
-		settings.put("nodelistRefreshInterval","13579");
+		settings.put("useSchemaValidation",useSchemasString);
+		settings.put("nodelistRefreshIntervalSeconds","13579");
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
 		
@@ -309,7 +309,7 @@ public class TestingMyResolve {
 	public void testValidOllXML() throws Exception {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
@@ -378,7 +378,7 @@ public class TestingMyResolve {
 	public void testingNegativeControl() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
 
@@ -399,7 +399,7 @@ public class TestingMyResolve {
 	public void testMetacatErrorGeneric() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
 
@@ -423,7 +423,7 @@ public class TestingMyResolve {
 	public void testMetacatErrorDocNotFound() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error-docNotFound.xml", settings);
 
@@ -447,7 +447,7 @@ public class TestingMyResolve {
 	public void testSystemMetadataError() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml", settings);
@@ -471,7 +471,7 @@ public class TestingMyResolve {
 	public void testSystemMetadataInvalidVsSchema() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
@@ -495,7 +495,7 @@ public class TestingMyResolve {
 	public void testSystemMetadataMalformedXMLError() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
@@ -519,7 +519,7 @@ public class TestingMyResolve {
 	public void testSystemMetadataNoReplicasCompleted() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemas",useSchemasString);
+		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-noReplicasCompletedStatus.xml", settings);
@@ -553,8 +553,8 @@ public class TestingMyResolve {
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemas",useSchemasString);
-		fc.addInitParameter("nodelistRefreshInterval","2");
+		fc.addInitParameter("useSchemaValidation",useSchemasString);
+		fc.addInitParameter("nodelistRefreshIntervalSeconds","2");
 		
 		String tmpNodelistLocation = "src/test/resources/resolveTesting/tmpNodelistCachingTest.xml";
 		fc.addInitParameter("nodelistLocation", tmpNodelistLocation);
@@ -596,16 +596,9 @@ public class TestingMyResolve {
 
 		// the wait is longer than the refresh interval
 		Thread.sleep( 5 * 1000);
-
 		
-		// copy the new nodelist to the designated location
-		in = new FileReader(newNodelistFile);
-		out = new FileWriter(nodelistLocation);
-
-		while ((c = in.read()) != -1)  out.write(c);
-		in.close();
-		out.close();
-
+		// after the refresh interval is over, we still shouldn't refresh unless
+		// the nodelist has changed.
 		// lookup the baseURL again
 		String url2 = null;
 		try {
@@ -621,9 +614,36 @@ public class TestingMyResolve {
 			fail("baseURLmap lookup error: url returned is empty");	
 
 		// urls should be different
-		if (url.equals(url2)) {
-			fail("cache refresh failed - should have returned different url string.  Got: " + url + " and " + url2);
+		assertTrue("cache should not refresh unless the file changes.",url.equals(url2));
+		
+		
+		
+		// copy the new nodelist to the designated location
+		in = new FileReader(newNodelistFile);
+		out = new FileWriter(nodelistLocation);
+
+		while ((c = in.read()) != -1)  out.write(c);
+		in.close();
+		out.close();
+
+		// lookup the baseURL again
+		String url3 = null;
+		try {
+			url3 = rf.lookupBaseURLbyNode("daacmn");
+		} catch (ServiceFailure e) {
+			fail("baseURLmap lookup error: "+ e);
+		} finally {
+			nodelistLocation.delete();
 		}
+		if (url3 == null) 
+			fail("baseURLmap lookup error: returned null value");
+		else if(url3.isEmpty())
+			fail("baseURLmap lookup error: url returned is empty");	
+
+		// urls should be different
+		assertFalse("cache refresh failed - should have returned different url string. Got: " + url + " and " + url3,
+				url.equals(url3));
+
 	}
 	
 	

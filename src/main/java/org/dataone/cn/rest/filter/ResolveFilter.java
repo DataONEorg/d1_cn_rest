@@ -1,11 +1,13 @@
 package org.dataone.cn.rest.filter;
 
-//import NodeListLookup;
+// TODO: refactor to split out nodelist logic into separate class - CachedNodeList
+// using bridge pattern, perhaps to swap out jax implementation with jibx one when the time comes
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,46 +38,80 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/**
+ * ResolveFilter interoperates with UrlRewriteFilter to handle cn/resolve calls.
+ * Using a Tomcat / Spring filter chain, UrlRewriteFilter redirects the 
+ * cn/resolve call to cn/meta, and ResolveFilter intercepts the response and
+ * transforms it into an ojbectLocationList.  To accomplish this, it also 
+ * caches baseURL/nodeID pairs obtained from the dataone nodeList, refreshing 
+ * the cache periodically, based on a minimum refresh interval, and the nodelist
+ * modication date
+ * 
+ * @param targetEnvironment:          for nodelist selection: prod,staging,test
+ * @param nodelistLocation:           URI for where to find the nodelist
+ * @param nodelistSchemaLocation:     a URI for the nodelist schema
+ * @param systemmetadataSchemaLocation:     a URI for the sysMD schema
+ * @param nodelistRefreshIntervalSeconds:   the nodelist cache will be refreshed
+ *      									  after this number of seconds
+ * @param useSchemaValidation:      if false, bypass validating data objects
+ *                                   against their schemas
+ *                                  
+ * @author rnahf 
+ *
+ */
 public class ResolveFilter implements Filter {
     Logger logger = Logger.getLogger(ResolveFilter.class);
 	private FilterConfig filterConfig = null;
     private HashMap<String, String> baseUrlMap = null;
-    private Integer nodelistRefreshInterval = 5 * 60;  // seconds
-    private boolean useSchemas = true;
+    private XPathFactory xFactory = null;
+    private long lastRefreshTimeMS = 0;
+    private File nodelistFile = null;
+    
+    // parameters and their default values
+    private Integer nodelistRefreshIntervalSeconds = 3 * 60;
     private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
     private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
     private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/systemmetadata.xsd";
+    private String targetEnvironment = "prod";
+    private boolean useSchemaValidation = true;
+
+    // static for this deployment of the dataone architecture
+    // if you are changing these, you better look at the procedure to 
+    // create the objectLocationList
     private static String d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
     private static String objectlocationlistSchemaURL = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
     
-    private String targetEnvironment = "prod";
-    private XPathFactory xFactory = null;
-    private long cacheTimePointMS = 0;
     
+
+    /**
+     * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
+     */
 	public void destroy() {
 		this.filterConfig = null;
 		this.baseUrlMap = null;	
 		this.nodelistLocation = null;
+		this.nodelistFile = null;
 		this.xFactory = null;
-	/*
-		this.nodelistRefreshInterval = null;
+
+		/*
+		this.nodelistRefreshIntervalSeconds = 0;
 		this.nodelistSchemaLocation = null;
-		this.targetEnvironment = null;
+		this.targetEnvironment = "prod";
 	*/
 	}
 	
 	
-	/* 
-	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-	 */
 	
+	/* 
+	 * @see javax.servlet.Filter#destroy(javax.servlet.FilterConfig)
+	 */	
 	public void init(FilterConfig filterConfig) throws ServletException {
         logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
         
-        if ( filterConfig.getInitParameter("nodelistRefreshInterval") != null )  
+        if ( filterConfig.getInitParameter("nodelistRefreshIntervalSeconds") != null )  
         	try {
-        		this.nodelistRefreshInterval = Integer.parseInt(filterConfig.getInitParameter("nodelistRefreshInterval"));
+        		this.nodelistRefreshIntervalSeconds = Integer.parseInt(filterConfig.getInitParameter("nodelistRefreshIntervalSeconds"));
         	} catch (NumberFormatException e) {
         		throw new ServletException(e);
         	}
@@ -87,10 +123,10 @@ public class ResolveFilter implements Filter {
         if (filterConfig.getInitParameter("targetEnvironment") != null)
         	this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
         
-        if (filterConfig.getInitParameter("useSchemas") != null) {
-        	if (filterConfig.getInitParameter("useSchemas") == "false")  this.useSchemas = false;
-        	else if (filterConfig.getInitParameter("useSchemas") == "true")  this.useSchemas = true;
-        	else throw new ServletException("bad value for input parameter 'useSchemas'");
+        if (filterConfig.getInitParameter("useSchemaValidation") != null) {
+        	if (filterConfig.getInitParameter("useSchemaValidation") == "false")  this.useSchemaValidation = false;
+        	else if (filterConfig.getInitParameter("useSchemaValidation") == "true")  this.useSchemaValidation = true;
+        	else throw new ServletException("bad value for input parameter 'useSchemaValidation'");
         }
         if (filterConfig.getInitParameter("nodelistSchemaLocation") != null)
         	this.nodelistSchemaLocation = filterConfig.getInitParameter("nodelistSchemaLocation");
@@ -102,21 +138,25 @@ public class ResolveFilter implements Filter {
 
     }
   
+	
+	/**
+	 * 
+	 * @throws ServiceFailure
+	 */
     private void cacheNodeListURLs() throws ServiceFailure { 
 
-        // TODO: implement modification date test for updating the cache
-    	
-    	// expire the map if refresh interval is exceeded
     	if (isTimeForRefresh())  this.baseUrlMap = null;
     	
     	// create new map by reading the nodelist file and parsing out the baseURL
 		if (this.baseUrlMap == null) {
-
-
 	    	logger.info("refreshing the nodelist baseURL map from: " + this.nodelistLocation);
 
+	    	if (this.nodelistFile == null) {
+	    		this.nodelistFile = new File(this.nodelistLocation);
+	    	}
+	    	
 			// build the XML parser
-			Schema schema = createXsdSchema(this.nodelistSchemaLocation,this.useSchemas);
+			Schema schema = createXsdSchema(this.nodelistSchemaLocation,this.useSchemaValidation);
 			Validator v = schema.newValidator();
 			DocumentBuilder parser = createNSDOMParser();
 
@@ -180,30 +220,53 @@ public class ResolveFilter implements Filter {
 		}
 	}
 
+    
+    
+    /**
+     * determines if it is time to refresh the nodelist information cache.  The combination of refresh interval
+     * and the modification date on the nodelist file both help to minimize unnecessary refreshes and checks.
+     * 
+     * @return boolean.  true if time to refresh 
+     */
 	private Boolean isTimeForRefresh() {
-    	long nowMS = new Date().getTime();
-//    	System.out.println("now: " + nowMS + "  then: " + this.cacheTimePointMS);
+    	Date now = new Date();
+    	long nowMS = now.getTime();
+    	DateFormat df = DateFormat.getDateTimeInstance();
+    	df.format(now);
+
     	// convert seconds to milliseconds
-    	long refreshInterval = getRefreshInterval() * 1000;
-    	if (nowMS - this.cacheTimePointMS > refreshInterval) {
-    		this.cacheTimePointMS = nowMS;
-//    		System.out.println("new cached time: " + this.cacheTimePointMS);
-    		return true;
+    	long refreshIntervalMS = getRefreshInterval() * 1000;
+    	if (nowMS - this.lastRefreshTimeMS > refreshIntervalMS) {
+    		// time to see if the file has changed
+    		if (this.nodelistFile == null || (this.nodelistFile.lastModified() > this.lastRefreshTimeMS)) {
+        		this.lastRefreshTimeMS = nowMS;
+        		logger.info("  nodelist refresh: new cached time: " + df.format(now));
+        		return true;
+    		} else {
+    			return false;
+    		}
     	} else {
     		return false;
     	}
     }
         
-    /* ------------------------------------------------------
+	
+	
+    /**
+     *  procedure to lookup a BaseURL by the node id.  Meant to be called by
+     *  internally, but made public for testing sake, and no apparent reason to restrict it.
+     *  
+     *  @param String nodeID  - the registered nodeID
+     *  @return String theBaseURL mapped to the nodeID
+     *  @exception org.dataone.service.exceptions.ServiceFailure
      * 
-     *     Runtime (doFilter) methods and routines
-     * 
-     *  -----------------------------------------------------*/
-      
+     **/      
     public String lookupBaseURLbyNode(String nodeID) throws ServiceFailure {
     	cacheNodeListURLs();
 		return baseUrlMap.get(nodeID);
 	}
+    
+    
  
     private Schema createXsdSchema(String xsdUrlString, boolean useSchema) throws ServiceFailure {
         Schema schema;
@@ -227,6 +290,8 @@ public class ResolveFilter implements Filter {
 		}       
         return schema;
     }
+    
+    
         
     private DocumentBuilder createNSDOMParser() throws ServiceFailure {
         
@@ -241,7 +306,16 @@ public class ResolveFilter implements Filter {
 		}
         return parser;
     }
-     
+    
+    
+    
+    /**
+     *  location of the translation logic that transforms systemMetadata to an objectlocationList
+     *  or passes through or serializes any error condition that arose at runtime
+     *  
+     *  For general information on doFilter:
+     *  @see javax.servlet.Filter#doFilter(javax.servlet.FilterConfig)
+     */
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
     	
     	try {
@@ -260,7 +334,11 @@ public class ResolveFilter implements Filter {
 
     }
     
-    public void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException, ServiceFailure, NotFound {
+    
+    
+    private void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain) 
+    	throws IOException, ServletException, ServiceFailure, NotFound 
+    {
 
 		// return if init has not been called - it's the setter for filterConfig
         if (filterConfig == null) return;
@@ -317,7 +395,7 @@ public class ResolveFilter implements Filter {
         // ---------------- create DOM doc out of SysMD XML
     
         // parse the input stream, determining if it's sysMD or error
-        Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation,this.useSchemas);
+        Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation,this.useSchemaValidation);
         DocumentBuilder sysMDparser = createNSDOMParser();
 
 		Document metaDoc = null;
@@ -365,7 +443,7 @@ public class ResolveFilter implements Filter {
 	            returnDoc = metaDoc;
 			}
 		} else {
-			if (useSchemas) {
+			if (useSchemaValidation) {
 				try {
 					Validator sysMDvalidator = sysMDschema.newValidator();
 					sysMDvalidator.validate(new DOMSource(metaDoc));
@@ -407,6 +485,8 @@ public class ResolveFilter implements Filter {
 		} 
 	}
 
+    
+    
 	private ArrayList<String> extractLeafElementStrings(Document d, XPathExpression expr ) throws XPathExpressionException {
 		
 		// evaluate the xpath expression
@@ -418,6 +498,8 @@ public class ResolveFilter implements Filter {
 		}		
 		return resultStrings;
 	}
+	
+	
 	
 	// TODO: Implement JSON formatted output, based on Accept type in the request
 	private Document createObjectLocationList(String idString, ArrayList<String> nodes) throws ServiceFailure, NotFound {
@@ -455,7 +537,8 @@ public class ResolveFilter implements Filter {
 			String nodeIDstring = nodes.get(i); //.toString();
 			String baseURLstring = lookupBaseURLbyNode(nodeIDstring);
 			if (baseURLstring == null) {
-				throw new ServiceFailure("4150","unregistered Node identifier (" + nodeIDstring + ") in systemmetadata document for object: " + idString);
+				throw new ServiceFailure("4150","unregistered Node identifier (" + 
+						nodeIDstring + ") in systemmetadata document for object: " + idString);
 			}
 			String urlString;
 			if (baseURLstring.endsWith("/")) 
@@ -480,6 +563,7 @@ public class ResolveFilter implements Filter {
 			url.appendChild(u);
 			loc.appendChild(url);
 			
+			// TODO: implement preference
 /*			org.w3c.dom.Element preference = doc.createElement("preference");
 			org.w3c.dom.Node p = doc.createTextNode(thePreference);
 			preference.appendChild(p);
@@ -491,15 +575,22 @@ public class ResolveFilter implements Filter {
 	}
 	
 	
-	/* -------------------------------------
-	 *    Getters and Setters
-	 * -------------------------------------*/
+	//  ------   Getters and Setters --------------//
+	
+	
 
+	/**
+	 *  @return the refresh interval for the nodelist information cache, in seconds
+	 */
 	public Integer getRefreshInterval() {
-		return nodelistRefreshInterval;
+		return this.nodelistRefreshIntervalSeconds;
 	}
 	
+	/**
+	 * 
+	 * @param i  in seconds, the minimum interval between nodelist information cache refreshes
+	 */
 	public void setRefreshInterval(Integer i) {
-		nodelistRefreshInterval = i;
+		this.nodelistRefreshIntervalSeconds = i;
 	}
 }
