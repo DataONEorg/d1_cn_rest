@@ -3,14 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dataone.cn</groupId>
-    <artifactId>dataone-cn-rest</artifactId>
+    <artifactId>d1_cn_rest</artifactId>
     <packaging>war</packaging>
     <version>0.5.0</version>
-    <name>DataONE-CnRestService</name>
+    <name>DataONE_Cn_Rest</name>
     <url>http://dataone.org</url>
     <parent>
         <groupId>org.dataone</groupId>
-        <artifactId>cn-prototype</artifactId>
+        <artifactId>d1_cn_service</artifactId>
         <version>0.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -124,6 +124,13 @@
             <type>jar</type>
         </dependency>
 
+        <dependency>
+        	<groupId>org.springframework</groupId>
+        	<artifactId>spring-test</artifactId>
+                <version>${org.springframework.version}</version>
+        	<type>jar</type>
+        </dependency>
+
         <!--  Jackson JSON implementations -CURRENTLY NOT NEEDED
                 <dependency>
                         <groupId>cglib</groupId>
@@ -154,6 +161,11 @@
             <version>4.7</version>
             <type>jar</type>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.9</version>
         </dependency>
 
 
@@ -187,19 +199,8 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.9</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.springframework</groupId>
-        	<artifactId>spring-test</artifactId>
-        	<version>3.0.3.RELEASE</version>
-        	<type>jar</type>
-        </dependency>
-        <dependency>
         	<groupId>org.dataone</groupId>
-        	<artifactId>dataone-cn-proxy</artifactId>
+        	<artifactId>d1_cn_rest_proxy</artifactId>
         	<version>0.5.0</version>
         	<type>jar</type>
         	<scope>compile</scope>
