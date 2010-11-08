@@ -49,12 +49,13 @@ import org.xml.sax.SAXException;
  * 
  * @param targetEnvironment:          for nodelist selection: prod,staging,test
  * @param nodelistLocation:           URI for where to find the nodelist
- * @param nodelistSchemaLocation:     a URI for the nodelist schema
- * @param systemmetadataSchemaLocation:     a URI for the sysMD schema
- * @param nodelistRefreshIntervalSeconds:   the nodelist cache will be refreshed
- *      									  after this number of seconds
- * @param useSchemaValidation:      if false, bypass validating data objects
- *                                   against their schemas
+ * @param nodelistSchemaLocation:            a URI for the nodelist schema (URL or file)
+ * @param systemmetadataSchemaLocation:      a URI for the sysMD schema     (URL or file)
+ * @param objectlocationlistSchemaLocation:  a URI for the objloclist schema (URL or file)
+ * @param nodelistRefreshIntervalSeconds:    the nodelist cache will be refreshed
+ *      									    after this number of seconds
+ * @param useSchemaValidation:        if false, bypass validating data objects
+ *                                    against their schemas
  *                                  
  * @author rnahf 
  *
@@ -67,20 +68,24 @@ public class ResolveFilter implements Filter {
     private long lastRefreshTimeMS = 0;
     private File nodelistFile = null;
     
-    // parameters and their default values
+    // parameters and their default values  (defaulting for production environment)
+    // (see d1_cn_rest/src/main/webapp/WEB-INF/web.xml for std settings of these parameters) 
+    
     private Integer nodelistRefreshIntervalSeconds = 3 * 60;
     private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
-    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
+//    private String nodelistSchemaLocation       = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/nodelist.xsd";
+//    private String systemmetadataSchemaLocation = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/systemmetadata.xsd";
+//    private String objectlocationlistSchemaLocation  = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/objectlocationlist.xsd";
+    private String nodelistSchemaLocation       = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
     private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/systemmetadata.xsd";
+    private String objectlocationlistSchemaLocation  = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
     private String targetEnvironment = "prod";
     private boolean useSchemaValidation = true;
 
     // static for this deployment of the dataone architecture
-    // if you are changing these, you better look at the procedure to 
+    // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
-    private static String d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
-    private static String objectlocationlistSchemaURL = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
-    
+    private static String oll_d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
     
 
     /**
@@ -133,6 +138,9 @@ public class ResolveFilter implements Filter {
         
         if (filterConfig.getInitParameter("systemmetadataSchemaLocation") != null)
         	this.systemmetadataSchemaLocation = filterConfig.getInitParameter("systemmetadataSchemaLocation");
+
+        if (filterConfig.getInitParameter("objectlocationlistSchemaLocation") != null)
+        	this.objectlocationlistSchemaLocation = filterConfig.getInitParameter("objectlocationlistSchemaLocation");
 
 		this.xFactory = XPathFactory.newInstance();
 
@@ -276,10 +284,15 @@ public class ResolveFilter implements Filter {
     	// create a SchemaFactory capable of understanding WXS schemas
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		try {
-			URL xsdUrl = new URL(xsdUrlString);
-			URLConnection xsdUrlConnection = xsdUrl.openConnection();
-			InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
-			Source schemaFile = new StreamSource(xsdUrlStream);
+			Source schemaFile; 
+			if (xsdUrlString.startsWith("http")) {
+				URL xsdUrl = new URL(xsdUrlString);
+				URLConnection xsdUrlConnection = xsdUrl.openConnection();
+				InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
+				schemaFile = new StreamSource(xsdUrlStream);
+			} else {
+				schemaFile = new StreamSource(new File(xsdUrlString));
+			}
 			schema = factory.newSchema(schemaFile);			
 		} catch (MalformedURLException e) {
 			throw new ServiceFailure("4150","error: malformed URL for schema: " + xsdUrlString);	
@@ -520,9 +533,9 @@ public class ResolveFilter implements Filter {
 //		org.w3c.dom.Element root = doc.getDocumentElement();
 		org.w3c.dom.Element oll = doc.createElement("d1:objectLocationList");
 		doc.appendChild(oll);
-		oll.setAttribute("xmlns:d1",d1namespaceVersion);
+		oll.setAttribute("xmlns:d1",oll_d1namespaceVersion);
 		oll.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance");
-		oll.setAttribute("xsi:schemaLocation", d1namespaceVersion + " " + objectlocationlistSchemaURL);
+		oll.setAttribute("xsi:schemaLocation", oll_d1namespaceVersion + " " + objectlocationlistSchemaLocation);
 		
 		org.w3c.dom.Element id = doc.createElement("identifier");
 		id.setTextContent(idString);
