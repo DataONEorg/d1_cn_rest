@@ -52,6 +52,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class TestingMyResolve {
 	private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
 	private static String validTestingNodelistLocation = "src/test/resources/resolveTesting/nodelist_0_5_valid.xml";
+	private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
 	private static boolean debuggingOutput = false;
 	private static String useSchemasString = "true";
 
@@ -194,6 +195,39 @@ public class TestingMyResolve {
 			fail("baseURLmap lookup error: url returned is empty");	
 
 	}
+	
+	@Test
+	public void testNodeListUrlLookup() {	
+		 
+		// building up a new ResolveFilter with the appropriate parameters
+		ResourceLoader fsrl = new FileSystemResourceLoader();
+		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
+		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
+		fc.addInitParameter("useSchemaValidation",useSchemasString);
+		fc.addInitParameter("nodelistLocation", deployedNodelistLocationURL);
+		ResolveFilter rf = new ResolveFilter();	
+
+		try {
+			rf.init(fc);
+		} catch (ServletException se) {
+			//se.printStackTrace();
+			fail("servlet exception at ResolveFilter.init(fc)");
+		}
+
+		// read the baseURLmap to make sure it's working
+		String url = null;
+		try {
+			url = rf.lookupBaseURLbyNode("cn-dev");
+		} catch (ServiceFailure e) {
+			fail("baseURLmap lookup error: "+ e);
+		}
+		if (url == null) 
+			fail("baseURLmap lookup error: returned null value");
+		else if(url.isEmpty())
+			fail("baseURLmap lookup error: url returned is empty");	
+
+	}
+
 
 	@Test
 	public void testNodeListNullBaseURLError() throws FileNotFoundException {

@@ -48,7 +48,7 @@ import org.xml.sax.SAXException;
  * modication date
  * 
  * @param targetEnvironment:          for nodelist selection: prod,staging,test
- * @param nodelistLocation:           URI for where to find the nodelist
+ * @param nodelistLocation:           URI for where to find the nodelist  (URL or file)
  * @param nodelistSchemaLocation:            a URI for the nodelist schema (URL or file)
  * @param systemmetadataSchemaLocation:      a URI for the sysMD schema     (URL or file)
  * @param objectlocationlistSchemaLocation:  a URI for the objloclist schema (URL or file)
@@ -72,13 +72,12 @@ public class ResolveFilter implements Filter {
     // (see d1_cn_rest/src/main/webapp/WEB-INF/web.xml for std settings of these parameters) 
     
     private Integer nodelistRefreshIntervalSeconds = 3 * 60;
-    private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
+//    private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
+    private String nodelistLocation = "http://localhost/cn/node";
 //    private String nodelistSchemaLocation       = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/nodelist.xsd";
 //    private String systemmetadataSchemaLocation = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/systemmetadata.xsd";
-//    private String objectlocationlistSchemaLocation  = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/objectlocationlist.xsd";
     private String nodelistSchemaLocation       = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
     private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/systemmetadata.xsd";
-    private String objectlocationlistSchemaLocation  = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
     private String targetEnvironment = "prod";
     private boolean useSchemaValidation = true;
 
@@ -86,6 +85,8 @@ public class ResolveFilter implements Filter {
     // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
     private static String oll_d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
+    private static String oll_publicSchemaLocation = 
+    		"https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
     
 
     /**
@@ -139,11 +140,7 @@ public class ResolveFilter implements Filter {
         if (filterConfig.getInitParameter("systemmetadataSchemaLocation") != null)
         	this.systemmetadataSchemaLocation = filterConfig.getInitParameter("systemmetadataSchemaLocation");
 
-        if (filterConfig.getInitParameter("objectlocationlistSchemaLocation") != null)
-        	this.objectlocationlistSchemaLocation = filterConfig.getInitParameter("objectlocationlistSchemaLocation");
-
 		this.xFactory = XPathFactory.newInstance();
-
     }
   
 	
@@ -535,7 +532,7 @@ public class ResolveFilter implements Filter {
 		doc.appendChild(oll);
 		oll.setAttribute("xmlns:d1",oll_d1namespaceVersion);
 		oll.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance");
-		oll.setAttribute("xsi:schemaLocation", oll_d1namespaceVersion + " " + objectlocationlistSchemaLocation);
+		oll.setAttribute("xsi:schemaLocation", oll_d1namespaceVersion + " " + oll_publicSchemaLocation);
 		
 		org.w3c.dom.Element id = doc.createElement("identifier");
 		id.setTextContent(idString);
