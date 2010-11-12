@@ -31,6 +31,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
+import org.dataone.cn.rest.util.ResolveUtilities;
 import org.dataone.service.exceptions.*;
 
 import org.w3c.dom.DOMImplementation;
@@ -464,6 +465,7 @@ public class ResolveFilter implements Filter {
 				}
 			}
 			String targetIdentifier = targetID.get(0);
+			targetIdentifier = ResolveUtilities.decodeXmlDataItems(targetIdentifier);
 			returnDoc = createObjectLocationList(targetIdentifier, replicaIDs);
 		}
 						
@@ -550,11 +552,12 @@ public class ResolveFilter implements Filter {
 				throw new ServiceFailure("4150","unregistered Node identifier (" + 
 						nodeIDstring + ") in systemmetadata document for object: " + idString);
 			}
+			String encodedIdString = ResolveUtilities.encodeIdentifier(idString);
 			String urlString;
 			if (baseURLstring.endsWith("/")) 
-				urlString = baseURLstring + "object/" + idString;
+				urlString = baseURLstring + "object/" + encodedIdString;
 			else 
-				urlString = baseURLstring + "/object/" + idString;
+				urlString = baseURLstring + "/object/" + encodedIdString;
 			
 			org.w3c.dom.Element loc = doc.createElement("objectLocation");
 
@@ -603,4 +606,9 @@ public class ResolveFilter implements Filter {
 	public void setRefreshInterval(Integer i) {
 		this.nodelistRefreshIntervalSeconds = i;
 	}
+	
+	
+	
+	
+	
 }

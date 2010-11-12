@@ -338,7 +338,49 @@ public class TestingMyResolve {
 
 		assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
 	}
+	
+	
+	@Test
+	public void testUrlEncodingAscii() throws FileNotFoundException {
 
+		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemaValidation",useSchemasString);
+		settings.put("nodelistRefreshIntervalSeconds","13579");
+		settings.put("nodelistLocation", validTestingNodelistLocation);
+		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-disallowed-ascii.xml", settings);
+		
+		// examine contents of the response
+		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
+		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
+		
+		String content = new String(responseWrapper.getBuffer());
+
+		assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
+		assertThat("wonky identifier is escaped in url", content, containsString("aAbBcC__%2F%3Fparam=5%23__12345</url>"));
+	}
+
+	// TODO: seems to be importing the nonAscii improperly, as a different character string
+	//  so the test needs work.
+//	@Test
+	public void testUrlEncodingNonAscii() throws FileNotFoundException {
+
+		Hashtable<String, String> settings = new Hashtable<String, String>();
+		settings.put("useSchemaValidation",useSchemasString);
+		settings.put("nodelistRefreshIntervalSeconds","13579");
+		settings.put("nodelistLocation", validTestingNodelistLocation);
+		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.xml", settings);
+		
+		// examine contents of the response
+		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
+		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
+		
+		String content = new String(responseWrapper.getBuffer());
+
+		//assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
+		assertThat("non-Ascii identifier is escaped in url", content, containsString("%A9%u2014%u03C0%B0%u2018%u03C0%B0%u221A%u2013%AE%B0%u2030%A5%C8</url>"));
+	}
+	
+	
 	@Test
 	public void testValidOllXML() throws Exception {
 
