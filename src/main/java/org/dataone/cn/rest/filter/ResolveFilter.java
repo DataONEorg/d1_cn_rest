@@ -552,7 +552,8 @@ public class ResolveFilter implements Filter {
 				throw new ServiceFailure("4150","unregistered Node identifier (" + 
 						nodeIDstring + ") in systemmetadata document for object: " + idString);
 			}
-			String encodedIdString = EncodingUtilities.encodeIdentifier(idString);
+			// the id is put into the path portion of the url, so encoding thusly ;)
+			String encodedIdString = EncodingUtilities.encodeUrlPathSegment(idString);
 			String urlString;
 			if (baseURLstring.endsWith("/")) 
 				urlString = baseURLstring + "object/" + encodedIdString;
