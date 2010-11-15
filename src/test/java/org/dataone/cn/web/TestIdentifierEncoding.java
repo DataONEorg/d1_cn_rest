@@ -51,6 +51,8 @@ public class TestIdentifierEncoding
 		idEncodingPairs.put("disallowed-nonAscii-BMP-umlaut:Ÿ",          "disallowed-nonAscii-BMP-umlaut:%C3%BC");
 		idEncodingPairs.put("disallowed-nonAscii-BMP-euro:" + "\u20AC", "disallowed-nonAscii-BMP-euro:%E2%82%AC");
 
+		idEncodingPairs.put("disallowed-nonAscii-BMP-thai:" + "\u0E09", "disallowed-nonAscii-BMP-thai:%E0%B8%89");
+
 
 		// to get supplementary Unicode code points into Strings, a couple extra steps are needed
 		// because these are beyond the 16 bit limit
