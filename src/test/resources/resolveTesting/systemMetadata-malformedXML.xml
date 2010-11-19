@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<d1:systemMetadata xmlns:d1="http://dataone.org/service/types/SystemMetadata/0.5"
+<d1:systemMetadata xmlns:d1="http://dataone.org/service/types/0.5.1"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://dataone.org/service/types/SystemMetadata/0.5 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/systemmetadata.xsd">
+      xsi:schemaLocation="http://dataone.org/service/types/0.5.1 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd">
 	<identifier>aAbBcC12345</identifier>
 	<objectFormat>eml://ecoinformatics.org/eml-2.0.1</objectFormat>
 	<!-- 

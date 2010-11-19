@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<d1:nodeList xmlns:d1="http://dataone.org/service/types/NodeList/0.5"
+<d1:nodeList xmlns:d1="http://dataone.org/service/types/0.5.1"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- 	xsi:schemaLocation="http://dataone.org/service/types/NodeList/0.5 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd">
+ 	xsi:schemaLocation="http://dataone.org/service/types/0.5.1 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd">
     <!-- This instance document was generated for testing purposes
          It contains no useful information.
     

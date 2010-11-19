@@ -77,8 +77,8 @@ public class ResolveFilter implements Filter {
     private String nodelistLocation = "http://localhost/cn/node";
 //    private String nodelistSchemaLocation       = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/nodelist.xsd";
 //    private String systemmetadataSchemaLocation = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/systemmetadata.xsd";
-    private String nodelistSchemaLocation       = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/nodelist.xsd";
-    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/systemmetadata.xsd";
+    private String nodelistSchemaLocation       = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
+    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
     private String targetEnvironment = "prod";
     private boolean useSchemaValidation = true;
 
@@ -87,7 +87,7 @@ public class ResolveFilter implements Filter {
     // create the objectLocationList
     private static String oll_d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
     private static String oll_publicSchemaLocation = 
-    		"https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
+    		"https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
     
 
     /**

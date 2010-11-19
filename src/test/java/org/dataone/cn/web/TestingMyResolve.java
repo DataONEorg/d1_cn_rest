@@ -50,7 +50,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 
 public class TestingMyResolve {
-	private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5/objectlocationlist.xsd";
+	private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
 	private static String validTestingNodelistLocation = "src/test/resources/resolveTesting/nodelist_0_5_valid.xml";
 	private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
 	private static boolean debuggingOutput = false;
