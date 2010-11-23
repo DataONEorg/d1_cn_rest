@@ -20,22 +20,15 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 //import org.springframework.test.web.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-//import junit.framework.TestCase;
 import org.dataone.cn.rest.filter.*;
 import org.dataone.service.exceptions.ServiceFailure;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -350,8 +343,7 @@ public class TestingMyResolve {
 		assertThat("wonky identifier is escaped in url", content, containsString("aAbBcC__%2F%3Fparam=5%23__12345</url>"));
 	}
 
-	// TODO: seems to be importing the nonAscii improperly, as a different character string
-	//  so the test needs work.
+
 	@Test
 	public void testUrlEncodingNonAscii() throws FileNotFoundException {
 
@@ -748,7 +740,6 @@ public class TestingMyResolve {
 		} catch (FileNotFoundException e) {
 			fail("Test misconfiguration - output file not found" + e);
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			fail("Test misconfiguration - unsupported file encoding error" + e);
 		}
 
