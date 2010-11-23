@@ -5,6 +5,7 @@
 	<identifier>abc12345</identifier>
 	<objectLocation>
 		<nodeIdentifier>mn1.dataone.org/mn</nodeIdentifier>
+		<baseURL>http://mn1.dataone.org/mn</baseURL>
 		<url>http://mn1.dataone.org/mn/object/abc12345</url>
 	</objectLocation>
 </d1:objectLocationList>

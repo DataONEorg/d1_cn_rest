@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -82,21 +83,11 @@ public class TestingMyResolve {
 	// 1. mangled urls (unfollowable)
 	// 2. connection timeout from metacat (/meta service)	
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
 
 	@Before
 	public void setUp() throws Exception {
 	}
 
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	@Test
 	public void testInit() {
@@ -204,7 +195,7 @@ public class TestingMyResolve {
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
 		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
 		fc.addInitParameter("useSchemaValidation",useSchemasString);
-		fc.addInitParameter("nodelistLocation", deployedNodelistLocationURL);
+//		fc.addInitParameter("nodelistLocation", deployedNodelistLocationURL);
 		ResolveFilter rf = new ResolveFilter();	
 
 		try {
@@ -361,14 +352,14 @@ public class TestingMyResolve {
 
 	// TODO: seems to be importing the nonAscii improperly, as a different character string
 	//  so the test needs work.
-//	@Test
+	@Test
 	public void testUrlEncodingNonAscii() throws FileNotFoundException {
 
 		Hashtable<String, String> settings = new Hashtable<String, String>();
 		settings.put("useSchemaValidation",useSchemasString);
 		settings.put("nodelistRefreshIntervalSeconds","13579");
 		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.xml", settings);
+		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.utf8.xml", settings);
 		
 		// examine contents of the response
 		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
@@ -377,7 +368,7 @@ public class TestingMyResolve {
 		String content = new String(responseWrapper.getBuffer());
 
 		//assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
-		assertThat("non-Ascii identifier is escaped in url", content, containsString("%A9%u2014%u03C0%B0%u2018%u03C0%B0%u221A%u2013%AE%B0%u2030%A5%C8</url>"));
+		assertThat("non-Ascii identifier is escaped in url", content, containsString("%E0%B8%89%E0%B8%B1%E0%B8%99%E0%B8%81%E0%B8%B4%E0%B8%99%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%88%E0%B8%81%E0%B9%84%E0%B8%94%E0%B9%89</url>"));
 	}
 	
 	
@@ -756,6 +747,9 @@ public class TestingMyResolve {
 			testResolve.setOutput(outputFilename);
 		} catch (FileNotFoundException e) {
 			fail("Test misconfiguration - output file not found" + e);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			fail("Test misconfiguration - unsupported file encoding error" + e);
 		}
 
 		FilterChain chain = new PassThroughFilterChain(testResolve);

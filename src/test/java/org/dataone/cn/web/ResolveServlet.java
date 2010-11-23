@@ -2,6 +2,7 @@ package org.dataone.cn.web;
 
 //import java.io.IOException;
 import java.io.*;
+import java.util.Scanner;
 //import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -16,31 +17,41 @@ public class ResolveServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private BufferedReader br;
-
-	public void setOutput(String file) throws FileNotFoundException {
-		
-		FileReader fr = new FileReader("src/test/resources/resolveTesting/" + file);
-		this.br = new BufferedReader(fr);
+	private InputStream is;
+	private FileInputStream byteInput;
+	
+	public void setOutput(String file) throws FileNotFoundException, UnsupportedEncodingException {
+		this.is = this.getClass().getResourceAsStream("/resolveTesting/" + file);
 	}
+	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res)
                                 throws ServletException, IOException {
 
 		
-		if (this.br == null) {
+		if (this.is == null) {
 			throw new ServletException("output not set.  call setOutput(file) before doPost( )");
 		}
 		
 		res.setContentType("text/xml");
-		PrintWriter out = res.getWriter();
+		res.setCharacterEncoding("UTF-8");
+
+		ServletOutputStream out = res.getOutputStream();
 		
-		String line = br.readLine();
-		while (line != null) {
-			out.println(line);
-			line = br.readLine();
+		byte[] inBytes = null;
+		boolean eof = false;
+		int count = 0;
+		while (!eof) {
+			int input = is.read();
+	        if (input == -1)
+	          eof = true;
+	        else 
+	        	out.write(input);
+	        	count++;
 		}
+		is.close();
+		
 		out.flush();
 		out.close();
-
 	}
 }

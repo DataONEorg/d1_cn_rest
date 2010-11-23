@@ -74,7 +74,8 @@ public class ResolveFilter implements Filter {
     
     private Integer nodelistRefreshIntervalSeconds = 3 * 60;
 //    private String nodelistLocation = "/var/lib/dataone/nodeList.xml";
-    private String nodelistLocation = "http://localhost/cn/node";
+//    private String nodelistLocation = "http://localhost/cn/node";
+    private String nodelistLocation = "src/test/resources/resolveTesting/nodelist_0_5_valid.xml";
 //    private String nodelistSchemaLocation       = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/nodelist.xsd";
 //    private String systemmetadataSchemaLocation = "/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/systemmetadata.xsd";
     private String nodelistSchemaLocation       = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
@@ -85,7 +86,7 @@ public class ResolveFilter implements Filter {
     // static for this deployment of the dataone architecture
     // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
-    private static String oll_d1namespaceVersion = "http://dataone.org/service/types/ObjectLocationList/0.5";
+    private static String oll_d1namespaceVersion = "http://dataone.org/service/types/0.5.1";
     private static String oll_publicSchemaLocation = 
     		"https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
     
