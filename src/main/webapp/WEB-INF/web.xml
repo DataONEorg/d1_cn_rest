@@ -61,11 +61,11 @@
         </init-param>
         <init-param>
         	<param-name>systemmetadataSchemaLocation</param-name>
-        	<param-value>/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/systemmetadata.xsd</param-value>
+        	<param-value>/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5_1/dataoneTypes.xsd</param-value>
         	</init-param>
         <init-param>
             <param-name>nodelistSchemaLocation</param-name>
-            <param-value>/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5/nodelist.xsd</param-value>
+            <param-value>/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5_1/dataoneTypes.xsd</param-value>
         </init-param>
         <init-param>
             <param-name>nodelistLocation</param-name>
