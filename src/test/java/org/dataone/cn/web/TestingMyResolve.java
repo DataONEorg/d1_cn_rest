@@ -241,6 +241,10 @@ public class TestingMyResolve {
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 500", httpStatus == 500);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -265,6 +269,10 @@ public class TestingMyResolve {
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 500", httpStatus == 500);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -288,6 +296,10 @@ public class TestingMyResolve {
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 500", httpStatus == 500);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -492,6 +504,10 @@ public class TestingMyResolve {
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 404", httpStatus == 404);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -510,13 +526,17 @@ public class TestingMyResolve {
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml", settings);
-
+//		responseWrapper.getResponse().
 		String content = new String(responseWrapper.getBuffer());
 		if (debuggingOutput) {
 			System.out.println("===== output =====");
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 500", httpStatus == 500);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -534,13 +554,17 @@ public class TestingMyResolve {
 		settings.put("nodelistLocation", validTestingNodelistLocation);
 		
 		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
-
+		
 		String content = new String(responseWrapper.getBuffer());
 		if (debuggingOutput) {
 			System.out.println("===== output =====");
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 500", httpStatus == 500);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -565,6 +589,10 @@ public class TestingMyResolve {
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 500", httpStatus == 500);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
@@ -589,6 +617,10 @@ public class TestingMyResolve {
 			System.out.print(content.toString());
 			System.out.println("------------------");
 		}
+		// examine status code
+		int httpStatus = responseWrapper.getStatus();
+		assertTrue("error response status is 404", httpStatus == 404);
+
 		// examine contents of the response
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);

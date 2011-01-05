@@ -22,6 +22,7 @@ public class BufferedHttpResponseWrapper extends HttpServletResponseWrapper {
 
     private PrintWriter printWriter = null;
     private ServletOutputStream outputStream = null;
+    private int status = -1;
 
     public BufferedHttpResponseWrapper(HttpServletResponse origResponse) {
         super(origResponse);
@@ -81,5 +82,15 @@ public class BufferedHttpResponseWrapper extends HttpServletResponseWrapper {
 
     public void setBufferSize(int size) {
         this.bufferedServletOut.setBufferSize(size);
+    }
+    
+    // overriding to make the status gettable.
+    public void setStatus(int sc) {
+    	this.status = sc;
+    	super.setStatus(sc);
+    }
+    
+    public int getStatus() {
+    	return this.status;
     }
 } 

@@ -337,7 +337,8 @@ public class ResolveFilter implements Filter {
 			byte[] errorMsgXML = e.serialize(BaseException.FMT_XML).getBytes();
 			
 			HttpServletResponse response = (HttpServletResponse) res;
-			
+//			response.sendError(e.getCode(), "ResolveFilter: " + e.getMessage());
+			response.setStatus(e.getCode());
 			response.setContentLength(errorMsgXML.length);
 //			response.setContentType(type);
 			response.getOutputStream().write(errorMsgXML);
@@ -427,7 +428,7 @@ public class ResolveFilter implements Filter {
 			XPath xpath = this.xFactory.newXPath();
 			idExpr = xpath.compile("//identifier");
 			replicaExpr = xpath.compile("//replicaMemberNode[../replicationStatus = 'completed']");
-			errorExpr = xpath.compile("//error");
+			errorExpr = xpath.compile("//error/@errorCode");
 		} catch (XPathExpressionException e) {
 			throw new ServiceFailure("4150", "error compiling the xpath expressions");
 		}
@@ -452,6 +453,7 @@ public class ResolveFilter implements Filter {
 			if (errorXML.isEmpty()) {	
 				throw new ServiceFailure("4150","Unexpected content from /meta service returned");
 			} else {
+				response.setStatus( Integer.parseInt(errorXML.get(0).trim()) );
 	            returnDoc = metaDoc;
 			}
 		} else {
