@@ -20,6 +20,14 @@ public class RecodePathFilterRequest extends HttpServletRequestWrapper
    private HttpServletRequest request = null;
    private String pathInfo = null;
 
+   
+   /**
+    * expecting the pathInfo to contain /<method>[/*] 
+    * and requestURI to contain /cn/metacat/<method>[/*]
+    *                        or /cn/<method>[/*]
+    * @param request
+    * @throws DecoderException
+    */
    public RecodePathFilterRequest(HttpServletRequest request) throws DecoderException
    {
       super(request);
