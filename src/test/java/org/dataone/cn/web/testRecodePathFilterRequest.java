@@ -35,6 +35,9 @@ public class testRecodePathFilterRequest {
 		MockFilterConfig fc = new MockFilterConfig(sc,"PathRecodingFilter");
 
 		MockHttpServletRequest request= new MockHttpServletRequest(fc.getServletContext(), null, startingString);
+		request.setContextPath("/cn");
+		request.setServletPath("/metacat");
+		request.setMethod("/object");
 		RecodePathFilterRequest	recodedPathRequest = new RecodePathFilterRequest(request);
 		String recodedPath = recodedPathRequest.getPathInfo();
 		System.out.println("Got: " + recodedPath);
