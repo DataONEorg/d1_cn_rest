@@ -41,6 +41,8 @@ public class RecodePathFilterRequest extends HttpServletRequestWrapper
        System.out.println("original pathInfo: " + s);
        String reqUri = this.getRequestURI();
        System.out.println("original requestURI: " + reqUri);
+       System.out.println("original ContextPath: " + this.getContextPath());       
+       System.out.println("original ServletPath: " + this.getServletPath());       
        String strip = this.getContextPath() + this.getServletPath();
        System.out.println("stripping " + strip + " from requestURI");
        s = reqUri.substring(strip.length());
