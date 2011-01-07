@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.DecoderException;
 import org.dataone.cn.rest.filter.RecodePathFilterRequest;
+import org.dataone.service.exceptions.ServiceFailure;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -23,11 +24,11 @@ public class testRecodePathFilterRequest {
 	}
 
 	@Test
-	public void testURIParsing() throws DecoderException {
+	public void testURIParsing() throws DecoderException, ServiceFailure {
 	
 		
-		String startingString = "/metacat/object/aaabbbccc";
-		String expect = "aaabbbccc";
+		String startingString = "/cn/metacat/object/aaabbb%2Bccc";
+		String expect = "/object/aaabbb+ccc";
 		
 		ResourceLoader fsrl = new FileSystemResourceLoader();
 		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
@@ -38,6 +39,5 @@ public class testRecodePathFilterRequest {
 		String recodedPath = recodedPathRequest.getPathInfo();
 		System.out.println("Got: " + recodedPath);
 		assertTrue("recoded Path is " + expect, recodedPath.equals(expect) );
-		
 	}
 }

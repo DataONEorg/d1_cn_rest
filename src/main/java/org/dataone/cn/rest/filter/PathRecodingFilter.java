@@ -16,6 +16,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.DecoderException;
 import org.apache.log4j.Logger;
+import org.dataone.service.exceptions.ServiceFailure;
 
 /**
  *
@@ -39,7 +40,10 @@ public class PathRecodingFilter implements Filter {
         } catch (DecoderException ex) {
             logger.error(ex.getMessage());
             throw new RuntimeException(ex);
-        }
+        } catch (ServiceFailure e) {
+            logger.error(e.getMessage());
+        	throw new RuntimeException(e);
+		}
 
             //continue the request
             fc.doFilter(recodedPathRequest,response);
