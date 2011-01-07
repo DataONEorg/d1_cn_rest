@@ -39,6 +39,7 @@ public class RecodePathFilterRequest extends HttpServletRequestWrapper
       
 	   String s = super.getPathInfo();
        System.out.println("original pathInfo: " + s);
+
        String reqUri = this.getRequestURI();
        System.out.println("original requestURI: " + reqUri);
        System.out.println("original ContextPath: " + this.getContextPath());       
@@ -78,7 +79,10 @@ public class RecodePathFilterRequest extends HttpServletRequestWrapper
 
    @Override
    public String getPathInfo() {
-
+	   System.out.println("diagnostic getPathInfo: " + super.getPathInfo());
+       System.out.println("diagnostic ContextPath: " + this.getContextPath());       
+       System.out.println("diagnostic ServletPath: " + this.getServletPath());       
+	   
        return this.pathInfo;
    }
 }
