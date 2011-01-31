@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<error errorCode='404' detailCode='1000'>
+<error errorCode="404" detailCode="1000">
   <description>Document not found:THIS_ID_IS_BOGUS</description>
   <traceInformation>
   </traceInformation>

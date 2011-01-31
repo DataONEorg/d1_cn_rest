@@ -249,8 +249,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
+		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
 		assertThat("Nodelist null baseURL error produced-3", content, containsString("Error parsing Nodelist: cannot get baseURL"));
 	
 	}
@@ -277,8 +277,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("NodeList Invalid vs Schema error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("Nodelist Invalid vs Schema error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("NodeList Invalid vs Schema error produced-1", content, containsString("errorCode=\"500\""));
+		assertThat("Nodelist Invalid vs Schema error produced-2", content, containsString("detailCode=\"4150\""));
 		assertThat("Nodelist Invalid vs Schema error produced-3", content, containsString("document invalid against NodeList schema"));
 	}
 
@@ -304,8 +304,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
+		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
 		assertThat("Nodelist null baseURL error produced-3", content, containsString("Cannot parse NodeList"));
 	
 	}
@@ -541,8 +541,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
+		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
 		assertThat("systemMetadata unregistered node error produced-3", content, containsString("unregistered Node identifier"));
 	}
 
@@ -569,8 +569,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
+		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
 		assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
 	}
 	
@@ -597,8 +597,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\'500\'"));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\'4150\'"));
+		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
+		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
 		assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
 	}
 
@@ -625,8 +625,8 @@ public class TestingMyResolve {
 		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
 		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
 		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\'404\'"));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\'4140\'"));
+		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"404\""));
+		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4140\""));
 		assertThat("systemMetadata unregistered node error produced-3", content, containsString("The requested object is not presently available"));
 	}
 
