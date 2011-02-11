@@ -7,43 +7,47 @@ package org.dataone.service.cn.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
 import javax.servlet.ServletContext;
 import org.apache.log4j.Logger;
 import org.dataone.cn.batch.utils.TypeMarshaller;
-import org.dataone.cn.rest.proxy.service.ProxyObjectService;
-import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.cn.rest.proxy.http.ProxyHttpServletRequest;
 import org.dataone.cn.rest.proxy.http.ProxyHttpServletResponse;
 import org.dataone.cn.rest.proxy.http.ProxyHttpSession;
-import org.dataone.service.cn.CoordinatingNodeRegister;
+import org.dataone.cn.rest.proxy.service.ProxyObjectService;
+import org.dataone.cn.rest.proxy.util.AcceptType;
+import org.dataone.service.cn.CoordinatingNodeDataReplication;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.InvalidRequest;
+import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.AuthToken;
 import org.dataone.service.types.Identifier;
-import org.dataone.service.types.Node;
 import org.dataone.service.types.NodeList;
-import org.dataone.service.types.Services;
+import org.dataone.service.types.ReplicationStatus;
 import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 /**
- *
+ * the code in here is junk, just cut and paste from the NodeRegisterImpl
  * @author waltz
  */
-public class CoordinatingNodeRegisterImpl implements CoordinatingNodeRegister {
+@Service("dataReplicationServiceImpl")
+@Qualifier("dataReplicationService")
+public class CoordinatingNodeDataReplicationImpl implements CoordinatingNodeDataReplication {
     @Autowired
     @Qualifier("proxyObjectService")
     ProxyObjectService proxyObjectService;
     private ServletContext servletContext;
-    static final Logger logger = Logger.getLogger(CoordinatingNodeRegisterImpl.class.getName());
-    
+    static final Logger logger = Logger.getLogger(CoordinatingNodeDataReplicationImpl.class.getName());
+
+    // get metadata, set metadata replication status, update metadata
     @Override
-    public NodeList listNodes(AuthToken token) throws NotImplemented, ServiceFailure {
+    public boolean setReplicationStatus(AuthToken token, Identifier pid, ReplicationStatus status) throws ServiceFailure, NotImplemented, InvalidToken, NotAuthorized, InvalidRequest, NotFound {
         NodeList nodeList = null;
 //        System
         ProxyHttpServletResponse proxyResponse = new ProxyHttpServletResponse();
@@ -81,30 +85,7 @@ public class CoordinatingNodeRegisterImpl implements CoordinatingNodeRegister {
             throw new ServiceFailure("34505","Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         }
 //    } while (nodeList.)
-        return nodeList;
-    }
-
-    @Override
-    public Node get(AuthToken token, Identifier pid) throws NotImplemented, NotAuthorized, ServiceFailure, InvalidRequest {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean addNodeCapabilities(AuthToken token, Identifier pid, Services capabilities) throws NotImplemented, NotAuthorized, ServiceFailure, InvalidRequest {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Identifier register(AuthToken token, Services capabilities) throws NotImplemented, NotAuthorized, ServiceFailure, InvalidRequest {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public ServletContext getServletContext() {
-        return servletContext;
-    }
-
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
+        return true;
     }
 
 }

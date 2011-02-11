@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+            
+    <context:component-scan base-package="org.dataone.cn.rest.web.notify" />
+
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="alwaysUseFullPath" value="true"/>
+        <property name="urlDecode" value="false"/>
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+        <property name="alwaysUseFullPath" value="true"/>
+        <property name="urlDecode" value="false"/>
+        <property name="useDefaultSuffixPattern" value="false" />
+    </bean>
+    <!-- XXX USING THE DATA1 IMPLEMENTATION OF THE BELOW OBJECTS FOR NOW-->
+<!--
+    <bean id="fileUploadResource" class="org.springframework.core.io.ClassPathResource" >
+        <constructor-arg type="java.lang.String" value="org/dataone/mn/resources/upload/"/>
+    </bean>
+-->
+    <!-- one of the properties available; the maximum file size in bytes -->
+    <!-- Configure the multipart resolver-->
+<!--
+    <bean id="multipartRequestResolver" class="org.dataone.mimemultipart.MultipartRequestResolver">
+        <constructor-arg name="tmpUploadDir" type="java.lang.String" ref="fileUploadResource" />
+        <constructor-arg name="maxUploadSize" type="java.lang.Integer" value="10000000000" />
+        <constructor-arg name="maxInMemorySize" type="java.lang.Integer" value="10000"/>
+    </bean>
+-->
+</beans>

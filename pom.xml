@@ -15,7 +15,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
      <properties>
-        <org.springframework.version>3.0.3.RELEASE</org.springframework.version>
+        <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
     </properties>
     <build>
