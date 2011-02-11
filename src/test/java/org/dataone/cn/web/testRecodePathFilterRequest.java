@@ -4,9 +4,8 @@ package org.dataone.cn.web;
 import static org.junit.Assert.assertTrue;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
 import org.dataone.cn.rest.filter.RecodePathFilterRequest;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.junit.Before;
@@ -24,7 +23,7 @@ public class testRecodePathFilterRequest {
 	}
 
 	@Test
-	public void testURIParsing() throws DecoderException, ServiceFailure {
+	public void testURIParsing() throws EncoderException, ServiceFailure {
 	
 		
 		String startingString = "/cn/metacat/object/aaabbb%2Bccc";
