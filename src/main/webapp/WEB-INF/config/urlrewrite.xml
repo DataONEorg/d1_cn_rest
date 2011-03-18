@@ -37,10 +37,10 @@
 	    <from>^/object(\?qt=solr.*)$</from>
 	    <to>/mercury/object/$1</to>
 	</rule>
-	<rule match-type="regex">
+<!--	<rule match-type="regex">
 	    <from>^/node/?$</from>
 	    <to>/nodeList.xml</to>
-	</rule>
+	</rule> -->
         <!--
         TODO /metacat/object, /metacat/meta, /metacat/resolve regex path should exclude any queries, or those paths that have a ? directly
         after the /object/
@@ -65,9 +65,9 @@
 	    <from>^/mercury/object/(.+)$</from>
 	    <to>/object/$1</to>
 	</outbound-rule>
-	<outbound-rule>
+<!--	<outbound-rule>
 	    <from>^/nodeList\.xml$</from>
 	    <to>/node/</to>
-	</outbound-rule>
+	</outbound-rule> -->
 
 </urlrewrite>
