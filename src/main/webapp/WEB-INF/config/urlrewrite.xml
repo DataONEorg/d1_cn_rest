@@ -22,25 +22,14 @@
 	    <to>/metacat/resolve/$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/object/(\?qt=path.*)$</from>
-	    <to>/metacat/object/$1</to>
+	    <from>^/object/?\?(.*qt=path.*)$</from>
+	    <to>/metacat/object/?$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/object(\?qt=path.*)$</from>
-	    <to>/metacat/object/$1</to>
+	    <from>^/object/?\?(.*qt=solr.*)$</from>
+	    <to>/mercury/object/?$1</to>
 	</rule>
-	<rule match-type="regex">
-	    <from>^/object/(\?qt=solr.*)$</from>
-	    <to>/mercury/object/$1</to>
-	</rule>
-	<rule match-type="regex">
-	    <from>^/object(\?qt=solr.*)$</from>
-	    <to>/mercury/object/$1</to>
-	</rule>
-<!--	<rule match-type="regex">
-	    <from>^/node/?$</from>
-	    <to>/nodeList.xml</to>
-	</rule> -->
+
         <!--
         TODO /metacat/object, /metacat/meta, /metacat/resolve regex path should exclude any queries, or those paths that have a ? directly
         after the /object/
