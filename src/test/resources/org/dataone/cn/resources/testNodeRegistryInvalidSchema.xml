@@ -10,7 +10,7 @@
     -->
     <node replicate="true" type="mn" environment="dev" synchronize="true">
       <identifier>example_daac_mn_id</identifier>
-      <baseURL>http://eg.daacmn.dataone.utk.edu</baseURL>
+      <baseURL>http://eg.d1m3.dataone.utk.edu</baseURL>
       <services>
 	<service version="0.5" available="true">
 	  <name>mn_crud</name>
@@ -32,7 +32,7 @@
       <identifier>knb_mn_id</identifier>
       <name>example_knb_mn_entry</name>
       <description>a node full of goodness</description>
-      <baseURL>http://knb-mn.ecoinformatics.org</baseURL>
+      <baseURL>http://d1m2.ecoinformatics.org</baseURL>
       <services>
 	<service version="0.4" available="true">
 	  <name>mn_crud</name>

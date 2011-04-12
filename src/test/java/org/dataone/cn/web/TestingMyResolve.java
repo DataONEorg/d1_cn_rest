@@ -34,770 +34,645 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
+import org.dataone.cn.web.proxy.service.MockProxyObjectServiceImpl;
+import org.junit.runner.RunWith;
 
 
 import org.springframework.core.io.*;  //FileSystemResourceLoader;
 import org.springframework.mock.web.*;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"classpath:/org/dataone/cn/resources/web/mockObject-dispatcher.xml", "classpath:/org/dataone/cn/resources/web/mockObject-beans.xml"}, loader = ProxyWebApplicationContextLoader.class)
 public class TestingMyResolve {
-	private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
-	private static String validTestingNodelistLocation = "src/test/resources/resolveTesting/nodelist_0_5_valid.xml";
-	private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
-	private static boolean debuggingOutput = false;
-	private static String useSchemasString = "true";
 
-	// need to test that resolveFilter behaves properly under various conditions:
-	// (general)
-	// 1. All's well
+    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
+    private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
+    private static boolean debuggingOutput = false;
+    private static String useSchemasString = "true";
+    private WebApplicationContext wac;
+    private Resource nodeRegistryResource;
+    private MockProxyObjectServiceImpl testProxyObject;
+    // need to test that resolveFilter behaves properly under various conditions:
+    // (general)
+    // 1. All's well
 
-	// (init)
-	// 2. useSchemaValidation parameter is neither string "true" or "false"
-	// 3. refreshInterval parameter is not a number.
-	
-	// (runtime)
-	// 3. NodeList unavailable
-	// 4. NodeList malformed (not valid against the schema)
-	// 5. 1 or more empty baseURLs in the nodes of the nodelist
-	// 6. can forward error response from metacat
-	// 7. unregistered node in systemMetadata
-	// 8. invalid systemMetadata document returned
-	// 9. no replica nodes with completed status in the systemmetadata document
-	// 10. resolveFilter creates valid objectlocationlists
-	// 11. resolveFilter creates valid error xml documents
-	// 
-	// It's impractical for resolve to handle some runtime errors:
-	// so am not testing for them:
-	// (note that runtime errors include errors in the nodelist, as it changes between
-	// system deployments through a separate service) 
-	// 1. mangled urls (unfollowable)
-	// 2. connection timeout from metacat (/meta service)	
-	
+    // (init)
+    // 2. useSchemaValidation parameter is neither string "true" or "false"
+    // 3. refreshInterval parameter is not a number.
+    // (runtime)
+    // 3. NodeList unavailable
+    // 4. NodeList malformed (not valid against the schema)
+    // 5. 1 or more empty baseURLs in the nodes of the nodelist
+    // 6. can forward error response from metacat
+    // 7. unregistered node in systemMetadata
+    // 8. invalid systemMetadata document returned
+    // 9. no replica nodes with completed status in the systemmetadata document
+    // 10. resolveFilter creates valid objectlocationlists
+    // 11. resolveFilter creates valid error xml documents
+    //
+    // It's impractical for resolve to handle some runtime errors:
+    // so am not testing for them:
+    // (note that runtime errors include errors in the nodelist, as it changes between
+    // system deployments through a separate service)
+    // 1. mangled urls (unfollowable)
+    // 2. connection timeout from metacat (/meta service)
+    @Before
+    public void before() throws Exception {
+        wac = WebApplicationContextUtils.getRequiredWebApplicationContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
+        if (wac == null) {
+            throw new Exception("cannot find Web Application Context!");
+        }
+        testProxyObject = wac.getBean(MockProxyObjectServiceImpl.class);
+        nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
+        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+    }
 
-	@Before
-	public void setUp() throws Exception {
-	}
+    @Test
+    public void testInit() {
 
+        // Init reads in the parameters from webapp configuration file
+        // (not caching the nodelist anymore - no reason to...)
+        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
+        fc.addInitParameter("useSchemaValidation", useSchemasString);
+        fc.addInitParameter("nodelistRefreshIntervalSeconds", "1234");
+        ResolveFilter rf = new ResolveFilter();
 
-	@Test
-	public void testInit() {
+        try {
+            rf.init(fc);
+        } catch (ServletException se) {
+            //se.printStackTrace();
+            fail("servlet exception at ResolveFilter.init(fc)");
+        }
 
-		// Init reads in the parameters from webapp configuration file
-		// (not caching the nodelist anymore - no reason to...)
-		 
-		// building up a new ResolveFilter with the appropriate parameters
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemaValidation",useSchemasString);
-		fc.addInitParameter("nodelistRefreshIntervalSeconds","1234");
-		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
-		ResolveFilter rf = new ResolveFilter();	
+        if (rf.getRefreshInterval() != 1234) {
+            fail("failed to set nodelistRefreshIntervalSeconds parameter");
+        }
+    }
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			//se.printStackTrace();
-			fail("servlet exception at ResolveFilter.init(fc)");
-		}
+    @Test
+    public void testRefreshIntervalErrorCatching() {
 
-		if (rf.getRefreshInterval() != 1234) {
-			fail("failed to set nodelistRefreshIntervalSeconds parameter");
-		}
-	}
+        // building up a new ResolveFilter with the appropriate parameters
+        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
+        fc.addInitParameter("nodelistRefreshIntervalSeconds", "should be a number but is not");
+        ResolveFilter rf = new ResolveFilter();
 
-	@Test
-	public void testRefreshIntervalErrorCatching() {
+        try {
+            rf.init(fc);
+        } catch (ServletException se) {
+            assertThat("refreshInterval error checking", se, instanceOf(ServletException.class));
+            return;
+        }
+        fail("did not catch refreshInterval bad-value error");
+    }
 
-		// building up a new ResolveFilter with the appropriate parameters
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("nodelistRefreshIntervalSeconds","should be a number but is not");
-		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
-		ResolveFilter rf = new ResolveFilter();	
+    @Test
+    public void testuseSchemaValidationFlag() {
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			assertThat("refreshInterval error checking", se,  instanceOf(ServletException.class));
-			return;
-		}
-		fail("did not catch refreshInterval bad-value error");
-	}
-	
-	@Test
-	public void testuseSchemaValidationFlag() {
+        // building up a new ResolveFilter with the appropriate parameters
+        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
+        fc.addInitParameter("useSchemaValidation", "neitherTrueNorFalse");
+        ResolveFilter rf = new ResolveFilter();
 
-		// building up a new ResolveFilter with the appropriate parameters
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemaValidation","neitherTrueNorFalse");
-		ResolveFilter rf = new ResolveFilter();	
+        try {
+            rf.init(fc);
+        } catch (ServletException se) {
+            assertThat("useSchema error checking", se, instanceOf(ServletException.class));
+            return;
+        }
+        fail("did not catch useSchema bad-value error");
+    }
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			assertThat("useSchema error checking", se,  instanceOf(ServletException.class));
-			return;
-		}
-		fail("did not catch useSchema bad-value error");
-	}
-	
-	@Test
-	public void testLookupBaseURL() {	
-		 
-		// building up a new ResolveFilter with the appropriate parameters
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemaValidation",useSchemasString);
-		fc.addInitParameter("nodelistLocation", validTestingNodelistLocation);
-		ResolveFilter rf = new ResolveFilter();	
+    @Test
+    public void testDoFilter() throws FileNotFoundException {
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			//se.printStackTrace();
-			fail("servlet exception at ResolveFilter.init(fc)");
-		}
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+        settings.put("nodelistRefreshIntervalSeconds", "13579");
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
 
-		// read the baseURLmap to make sure it's working
-		String url = null;
-		try {
-			url = rf.lookupBaseURLbyNode("daacmn");
-		} catch (ServiceFailure e) {
-			fail("baseURLmap lookup error: "+ e);
-		}
-		if (url == null) 
-			fail("baseURLmap lookup error: returned null value");
-		else if(url.isEmpty())
-			fail("baseURLmap lookup error: url returned is empty");	
+        // examine contents of the response
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
 
-	}
-	
-	@Test
-	public void testNodeListUrlLookup() {	
-		 
-		// building up a new ResolveFilter with the appropriate parameters
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemaValidation",useSchemasString);
-//		fc.addInitParameter("nodelistLocation", deployedNodelistLocationURL);
-		ResolveFilter rf = new ResolveFilter();	
+        String content = new String(responseWrapper.getBuffer());
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			//se.printStackTrace();
-			fail("servlet exception at ResolveFilter.init(fc)");
-		}
+        assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
 
-		// read the baseURLmap to make sure it's working
-		String url = null;
-		try {
-			url = rf.lookupBaseURLbyNode("cn-dev");
-		} catch (ServiceFailure e) {
-			fail("baseURLmap lookup error: "+ e);
-		}
-		if (url == null) 
-			fail("baseURLmap lookup error: returned null value");
-		else if(url.isEmpty())
-			fail("baseURLmap lookup error: url returned is empty");	
+    }
 
-	}
+    @Test
+    public void testUrlEncodingAscii() throws FileNotFoundException {
 
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+        settings.put("nodelistRefreshIntervalSeconds", "13579");
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-disallowed-ascii.xml", settings);
 
-	@Test
-	public void testNodeListNullBaseURLError() throws FileNotFoundException {
+        // examine contents of the response
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
 
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemaValidation",useSchemasString);
-		fc.addInitParameter("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_nullBaseURL.xml");
-		ResolveFilter rf = new ResolveFilter();	
+        String content = new String(responseWrapper.getBuffer());
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			//se.printStackTrace();
-			fail("servlet exception at ResolveFilter.init(fc)");
-		}
-		
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_nullBaseURL.xml");
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+        assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
+        assertThat("wonky identifier is escaped in url", content, containsString("aAbBcC__%2F%3Fparam=5%23__12345</url>"));
+    }
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 500", httpStatus == 500);
+    @Test
+    public void testUrlEncodingNonAscii() throws FileNotFoundException {
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
-		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
-		assertThat("Nodelist null baseURL error produced-3", content, containsString("Error parsing Nodelist: cannot get baseURL"));
-	
-	}
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+        settings.put("nodelistRefreshIntervalSeconds", "13579");
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.utf8.xml", settings);
 
-	@Test
-	public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
+        // examine contents of the response
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation","true");
-		settings.put("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_invalid_schema.xml");
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+        String content = new String(responseWrapper.getBuffer());
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 500", httpStatus == 500);
+        //assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
+        assertThat("non-Ascii identifier is escaped in url", content, containsString("%E0%B8%89%E0%B8%B1%E0%B8%99%E0%B8%81%E0%B8%B4%E0%B8%99%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%88%E0%B8%81%E0%B9%84%E0%B8%94%E0%B9%89</url>"));
+    }
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("NodeList Invalid vs Schema error produced-1", content, containsString("errorCode=\"500\""));
-		assertThat("Nodelist Invalid vs Schema error produced-2", content, containsString("detailCode=\"4150\""));
-		assertThat("Nodelist Invalid vs Schema error produced-3", content, containsString("document invalid against NodeList schema"));
-	}
+    @Test
+    public void testValidOllXML() throws Exception {
 
-	@Test
-	public void testNodeListMalformedXML() throws FileNotFoundException {
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation","true");
-		settings.put("nodelistLocation", "src/test/resources/resolveTesting/nodelist_0_5_malformedXML.xml");
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 500", httpStatus == 500);
+        // examine contents of the response
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
-		assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
-		assertThat("Nodelist null baseURL error produced-3", content, containsString("Cannot parse NodeList"));
-	
-	}
+        String content = new String(responseWrapper.getBuffer());
 
-	
-	
-//	@Test
-	public void testDestroy() {
-		fail("Not yet implemented"); // TODO
-	}
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // create dom from output then validate against schema
 
-	@Test
-	public void testDoFilter() throws FileNotFoundException {
-
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistRefreshIntervalSeconds","13579");
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
-		
-		// examine contents of the response
-		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
-		
-		String content = new String(responseWrapper.getBuffer());
-
-		assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
-	}
-	
-	
-	@Test
-	public void testUrlEncodingAscii() throws FileNotFoundException {
-
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistRefreshIntervalSeconds","13579");
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-disallowed-ascii.xml", settings);
-		
-		// examine contents of the response
-		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
-		
-		String content = new String(responseWrapper.getBuffer());
-
-		assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
-		assertThat("wonky identifier is escaped in url", content, containsString("aAbBcC__%2F%3Fparam=5%23__12345</url>"));
-	}
-
-
-	@Test
-	public void testUrlEncodingNonAscii() throws FileNotFoundException {
-
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistRefreshIntervalSeconds","13579");
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.utf8.xml", settings);
-		
-		// examine contents of the response
-		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
-		
-		String content = new String(responseWrapper.getBuffer());
-
-		//assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
-		assertThat("non-Ascii identifier is escaped in url", content, containsString("%E0%B8%89%E0%B8%B1%E0%B8%99%E0%B8%81%E0%B8%B4%E0%B8%99%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%88%E0%B8%81%E0%B9%84%E0%B8%94%E0%B9%89</url>"));
-	}
-	
-	
-	@Test
-	public void testValidOllXML() throws Exception {
-
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
-		
-		// examine contents of the response
-		assertTrue("response is non-null",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null",responseWrapper.getBuffer().length > 0);
-		
-		String content = new String(responseWrapper.getBuffer());
-
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// create dom from output then validate against schema
-		
-		Validator validator;
+        Validator validator;
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		try {
-			URL xsdUrl = new URL(objectlocationlistUrl);
-			URLConnection xsdUrlConnection = xsdUrl.openConnection();
-			InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
-			Source schemaFile = new StreamSource(xsdUrlStream);
-			Schema schema = factory.newSchema(schemaFile);
-			validator = schema.newValidator();
-			XSDValidationErrorHandler xsdveh = new XSDValidationErrorHandler();
-			validator.setErrorHandler(xsdveh);
-		} catch (MalformedURLException e) {
-			throw new ServiceFailure("4150","error: malformed URL for schema: " + objectlocationlistUrl);	
-		} catch (IOException e) {
-			throw new ServiceFailure("4150","Error connecting to schema: " + objectlocationlistUrl);
-		} catch (SAXException e) {
-			throw new ServiceFailure("4150","error parsing schema for validation: " + objectlocationlistUrl );
-		}    
-		
-		// validate the output
-		try {
-			StreamSource ss = new StreamSource(new StringReader(content));
-			validator.validate(ss);
-		} catch (SAXParseException e) {
-			fail("invalid against schema for returned objectlocationlist: " + e);
-		} catch (SAXException e) {
-			fail("invalid xml for returned objectlocationlist: " + e);
-		} catch (IOException e) {
-			fail("IO error during xml validation test: " + e);
-		}
+        try {
+            URL xsdUrl = new URL(objectlocationlistUrl);
+            URLConnection xsdUrlConnection = xsdUrl.openConnection();
+            InputStream xsdUrlStream = xsdUrlConnection.getInputStream();
+            Source schemaFile = new StreamSource(xsdUrlStream);
+            Schema schema = factory.newSchema(schemaFile);
+            validator = schema.newValidator();
+            XSDValidationErrorHandler xsdveh = new XSDValidationErrorHandler();
+            validator.setErrorHandler(xsdveh);
+        } catch (MalformedURLException e) {
+            throw new ServiceFailure("4150", "error: malformed URL for schema: " + objectlocationlistUrl);
+        } catch (IOException e) {
+            throw new ServiceFailure("4150", "Error connecting to schema: " + objectlocationlistUrl);
+        } catch (SAXException e) {
+            throw new ServiceFailure("4150", "error parsing schema for validation: " + objectlocationlistUrl);
+        }
 
-		// follow up with test to make sure we can catch the schema error in the first place!
-		String invalidContent = content.replace("baseURL>", "baseHURL>");
-		try {
-			StreamSource ss = new StreamSource(new StringReader(invalidContent));
-			validator.validate(ss);
-		} catch (SAXParseException e) {
-			assertThat("oll schema testing error checking", e,  instanceOf(SAXParseException.class));
-			return;
-		} catch (SAXException e) {
-			fail("invalid xml for returned objectlocationlist: " + e);
-		} catch (IOException e) {
-			fail("IO error during xml validation test: " + e);
-		}
-		fail("did not catch invalid OLL error");
-	}
+        // validate the output
+        try {
+            StreamSource ss = new StreamSource(new StringReader(content));
+            validator.validate(ss);
+        } catch (SAXParseException e) {
+            fail("invalid against schema for returned objectlocationlist: " + e);
+        } catch (SAXException e) {
+            fail("invalid xml for returned objectlocationlist: " + e);
+        } catch (IOException e) {
+            fail("IO error during xml validation test: " + e);
+        }
 
-	@Test
-	public void testingNegativeControl() throws FileNotFoundException {
+        // follow up with test to make sure we can catch the schema error in the first place!
+        String invalidContent = content.replace("baseURL>", "baseHURL>");
+        try {
+            StreamSource ss = new StreamSource(new StringReader(invalidContent));
+            validator.validate(ss);
+        } catch (SAXParseException e) {
+            assertThat("oll schema testing error checking", e, instanceOf(SAXParseException.class));
+            return;
+        } catch (SAXException e) {
+            fail("invalid xml for returned objectlocationlist: " + e);
+        } catch (IOException e) {
+            fail("IO error during xml validation test: " + e);
+        }
+        fail("did not catch invalid OLL error");
+    }
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
+    @Test
+    public void testingNegativeControl() throws FileNotFoundException {
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		assertThat("testing negative control: can catch errors", content, not(containsString("errorCode=\"blahblah\"")));
-		
-	}
-	
-	@Test
-	public void testMetacatErrorGeneric() throws FileNotFoundException {
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
+        assertThat("testing negative control: can catch errors", content, not(containsString("errorCode=\"blahblah\"")));
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("metacat error code forwards", content, containsString("errorCode=\"123456\""));
-		assertThat("metacat error code forwards", content, containsString("detailCode=\"987654\""));
-		assertThat("metacat error code forwards", content, containsString("generic error from the /meta service to test forwarding capabilities of resolve."));
-	
-	}
-	
-	@Test
-	public void testMetacatErrorDocNotFound() throws FileNotFoundException {
+    }
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error-docNotFound.xml", settings);
+    @Test
+    public void testMetacatErrorGeneric() throws FileNotFoundException {
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 404", httpStatus == 404);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("metacat error code forwards", content, containsString("errorCode=\"404\""));
-		assertThat("metacat error code forwards", content, containsString("detailCode=\"1000\""));
-		assertThat("metacat error code forwards", content, containsString("Document not found"));
-	
-	}
-	
-	@Test
-	public void testSystemMetadataError() throws FileNotFoundException {
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml", settings);
-//		responseWrapper.getResponse().
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 500", httpStatus == 500);
+        assertThat("metacat error code forwards", content, containsString("errorCode=\"123456\""));
+        assertThat("metacat error code forwards", content, containsString("detailCode=\"987654\""));
+        assertThat("metacat error code forwards", content, containsString("generic error from the /meta service to test forwarding capabilities of resolve."));
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
-		assertThat("systemMetadata unregistered node error produced-3", content, containsString("unregistered Node identifier"));
-	}
+    }
 
-	@Test
-	public void testSystemMetadataInvalidVsSchema() throws FileNotFoundException {
+    @Test
+    public void testMetacatErrorDocNotFound() throws FileNotFoundException {
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
-		
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 500", httpStatus == 500);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error-docNotFound.xml", settings);
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
-		assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
-	}
-	
-	@Test
-	public void testSystemMetadataMalformedXMLError() throws FileNotFoundException {
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 404", httpStatus == 404);
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 500", httpStatus == 500);
+        assertThat("metacat error code forwards", content, containsString("errorCode=\"404\""));
+        assertThat("metacat error code forwards", content, containsString("detailCode=\"1000\""));
+        assertThat("metacat error code forwards", content, containsString("Document not found"));
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
-		assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
-	}
+    }
 
-	@Test
-	public void testSystemMetadataNoReplicasCompleted() throws FileNotFoundException {
+    @Test
+    public void testSystemMetadataError() throws FileNotFoundException {
 
-		Hashtable<String, String> settings = new Hashtable<String, String>();
-		settings.put("useSchemaValidation",useSchemasString);
-		settings.put("nodelistLocation", validTestingNodelistLocation);
-		
-		BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-noReplicasCompletedStatus.xml", settings);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
 
-		String content = new String(responseWrapper.getBuffer());
-		if (debuggingOutput) {
-			System.out.println("===== output =====");
-			System.out.print(content.toString());
-			System.out.println("------------------");
-		}
-		// examine status code
-		int httpStatus = responseWrapper.getStatus();
-		assertTrue("error response status is 404", httpStatus == 404);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml", settings);
 
-		// examine contents of the response
-		assertTrue("response is non-null-(1)",responseWrapper.getBufferSize() > 0);
-		assertTrue("response is non-null-(2)",responseWrapper.getBuffer().length > 0);
-		
-		assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"404\""));
-		assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4140\""));
-		assertThat("systemMetadata unregistered node error produced-3", content, containsString("The requested object is not presently available"));
-	}
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 500", httpStatus == 500);
 
-	
-	/* to test the refresh ability, the test points ResolveFilter to a nodelistLocation and first copies
-	 * the original valid nodelist to that location and does a baseURL lookup for a nodeIdentifier
-	 * then copies an altered nodelist file with different baseURL for the same nodeIdentifier,
-	 * sleeps for longer than the refresh interval, and repeats the lookup.
-	 * The results should be different.
-	 */
-	
-	@Test
-	public void testNodeListRefresh() throws InterruptedException, IOException {
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		fc.addInitParameter("useSchemaValidation",useSchemasString);
-		fc.addInitParameter("nodelistRefreshIntervalSeconds","2");
-		
-		String tmpNodelistLocation = "src/test/resources/resolveTesting/tmpNodelistCachingTest.xml";
-		fc.addInitParameter("nodelistLocation", tmpNodelistLocation);
+        assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
+        assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
+        assertThat("systemMetadata unregistered node error produced-3", content, containsString("unregistered Node identifier"));
+    }
 
-		// the two source versions of the nodelist
-		File origNodelistFile = new File(validTestingNodelistLocation);
-		File newNodelistFile = new File("src/test/resources/resolveTesting/nodelistCachingTest.xml");
+    @Test
+    public void testSystemMetadataInvalidVsSchema() throws FileNotFoundException {
 
-		File nodelistLocation = new File(tmpNodelistLocation);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
 
-		// copy the original nodelist file to the tmp location where Resolve will be looking for it
-		FileReader in = new FileReader(origNodelistFile);
-		FileWriter out = new FileWriter(nodelistLocation);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
 
-		int c;
-		while ((c = in.read()) != -1)  out.write(c);
-		in.close();
-		out.close();
-		
-		ResolveFilter rf = new ResolveFilter();
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 500", httpStatus == 500);
 
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			fail("servlet exception at ResolveFilter.init(fc)");
-		}
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-		// lookup a baseURL
-		String url = null;
-		try {
-			url = rf.lookupBaseURLbyNode("daacmn");
-		} catch (ServiceFailure e) {
-			fail("baseURLmap lookup error: "+ e);
-		}
-		if (url == null) 
-			fail("baseURLmap lookup error: returned null value");
-		else if(url.isEmpty())
-			fail("baseURLmap lookup error: url returned is empty");	
+        assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
+        assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
+        assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
+    }
 
-		// the wait is longer than the refresh interval
-		Thread.sleep( 5 * 1000);
-		
-		// after the refresh interval is over, we still shouldn't refresh unless
-		// the nodelist has changed.
-		// lookup the baseURL again
-		String url2 = null;
-		try {
-			url2 = rf.lookupBaseURLbyNode("daacmn");
-		} catch (ServiceFailure e) {
-			fail("baseURLmap lookup error: "+ e);
-		} finally {
-			nodelistLocation.delete();
-		}
-		if (url2 == null) 
-			fail("baseURLmap lookup error: returned null value");
-		else if(url2.isEmpty())
-			fail("baseURLmap lookup error: url returned is empty");	
+    @Test
+    public void testSystemMetadataMalformedXMLError() throws FileNotFoundException {
 
-		// urls should be different
-		assertTrue("cache should not refresh unless the file changes.",url.equals(url2));
-		
-		
-		
-		// copy the new nodelist to the designated location
-		in = new FileReader(newNodelistFile);
-		out = new FileWriter(nodelistLocation);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
 
-		while ((c = in.read()) != -1)  out.write(c);
-		in.close();
-		out.close();
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
 
-		// lookup the baseURL again
-		String url3 = null;
-		try {
-			url3 = rf.lookupBaseURLbyNode("daacmn");
-		} catch (ServiceFailure e) {
-			fail("baseURLmap lookup error: "+ e);
-		} finally {
-			nodelistLocation.delete();
-		}
-		if (url3 == null) 
-			fail("baseURLmap lookup error: returned null value");
-		else if(url3.isEmpty())
-			fail("baseURLmap lookup error: url returned is empty");	
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 500", httpStatus == 500);
 
-		// urls should be different
-		assertFalse("cache refresh failed - should have returned different url string. Got: " + url + " and " + url3,
-				url.equals(url3));
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-	}
-	
-	
-	// ==========================================================================================================
+        assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
+        assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
+        assertThat("systemMetadata unregistered node error produced-3", content, containsString("Error parsing /meta output"));
+    }
 
-	private BufferedHttpResponseWrapper callDoFilter(String outputFilename, Hashtable<String, String> params) {
-	
-		ResourceLoader fsrl = new FileSystemResourceLoader();
-		ServletContext sc = new MockServletContext("src/main/webapp",fsrl);
-		MockFilterConfig fc = new MockFilterConfig(sc,"ResolveFilter");
-		
-		Enumeration<String> pNames = params.keys();
-		while (pNames.hasMoreElements()) {
-			String name = pNames.nextElement(); 
-			String val = params.get(name);
-			fc.addInitParameter(name,val);		
-		}
-		
-		ResolveFilter rf = new ResolveFilter();	
-		try {
-			rf.init(fc);
-		} catch (ServletException se) {
-			//se.printStackTrace();
-			fail("servlet exception at ResolveFilter.init(fc)");
-		}
+    @Test
+    public void testSystemMetadataNoReplicasCompleted() throws FileNotFoundException {
 
-		MockHttpServletRequest request= new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
-		request.addHeader("accept", (Object) "text/xml");		
-		request.setMethod("POST");
-		
-		ResolveServlet testResolve = new ResolveServlet();
-		
-		try {
-			testResolve.setOutput(outputFilename);
-		} catch (FileNotFoundException e) {
-			fail("Test misconfiguration - output file not found" + e);
-		} catch (UnsupportedEncodingException e) {
-			fail("Test misconfiguration - unsupported file encoding error" + e);
-		}
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
 
-		FilterChain chain = new PassThroughFilterChain(testResolve);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-noReplicasCompletedStatus.xml", settings);
 
-		HttpServletResponse response = new MockHttpServletResponse();	
-		// need to wrap the response to examine
-		BufferedHttpResponseWrapper responseWrapper =
-            new BufferedHttpResponseWrapper((HttpServletResponse) response);
-		
-		try {
-			rf.doFilter(request,responseWrapper,chain);
-		} catch (ServletException se) {
-			fail("servlet exception at ResolveFilter.doFilter(): " + se);
-		} catch (IOException ioe) {
-			fail("IO exception at ResolveFilter.doFilter(): " + ioe);
-		}
-		return responseWrapper;
-	}
-	
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 404", httpStatus == 404);
 
-	class XSDValidationErrorHandler extends DefaultHandler  {
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-		public void error(SAXParseException e) throws SAXParseException {
-			throw e;
-		}
-		
-	}
+        assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"404\""));
+        assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4140\""));
+        assertThat("systemMetadata unregistered node error produced-3", content, containsString("The requested object is not presently available"));
+    }
+
+    @Test
+    public void testLookupBaseURL() {
+
+        // building up a new ResolveFilter with the appropriate parameters
+        ResourceLoader fsrl = new FileSystemResourceLoader();
+        ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
+        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
+        fc.addInitParameter("useSchemaValidation", useSchemasString);
+        ResolveFilter rf = new ResolveFilter();
+
+        try {
+            rf.init(fc);
+        } catch (ServletException se) {
+            //se.printStackTrace();
+            fail("servlet exception at ResolveFilter.init(fc)");
+        }
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+
+        MockHttpServletRequest request = new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
+        request.addHeader("accept", (Object) "text/xml");
+        request.setMethod("POST");
+
+        ResolveServlet testResolve = new ResolveServlet();
+
+        try {
+            testResolve.setOutput("systemMetadata-valid.xml");
+        } catch (FileNotFoundException e) {
+            fail("Test misconfiguration - output file not found" + e);
+        } catch (UnsupportedEncodingException e) {
+            fail("Test misconfiguration - unsupported file encoding error" + e);
+        }
+
+        FilterChain chain = new PassThroughFilterChain(testResolve);
+
+        HttpServletResponse response = new MockHttpServletResponse();
+        // need to wrap the response to examine
+        BufferedHttpResponseWrapper responseWrapper =
+                new BufferedHttpResponseWrapper((HttpServletResponse) response);
+
+        try {
+            rf.doFilter(request, responseWrapper, chain);
+        } catch (ServletException se) {
+            fail("servlet exception at ResolveFilter.doFilter(): " + se);
+        } catch (IOException ioe) {
+            fail("IO exception at ResolveFilter.doFilter(): " + ioe);
+        }
+        // read the baseURLmap to make sure it's working
+        String url = null;
+        try {
+            url = rf.lookupBaseURLbyNode("r2d2");
+        } catch (ServiceFailure e) {
+            fail("baseURLmap lookup error: " + e);
+        }
+        if (url == null) {
+            fail("baseURLmap lookup error: returned null value");
+        } else if (url.isEmpty()) {
+            fail("baseURLmap lookup error: url returned is empty");
+        }
+
+    }
+
+    @Test
+    public void testNodeListNullBaseURLError() throws FileNotFoundException {
+        nodeRegistryResource = wac.getBean("nodeRegistryNullBaseURLResource", Resource.class);
+        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        ResourceLoader fsrl = new FileSystemResourceLoader();
+        ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
+        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
+        fc.addInitParameter("useSchemaValidation", useSchemasString);
+        ResolveFilter rf = new ResolveFilter();
+
+        try {
+            rf.init(fc);
+        } catch (ServletException se) {
+            //se.printStackTrace();
+            fail("servlet exception at ResolveFilter.init(fc)");
+        }
+
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", useSchemasString);
+
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is " + httpStatus, httpStatus == 500);
+
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
+
+        assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
+        assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
+        assertThat("Nodelist null baseURL error produced-3", content, containsString("Error parsing Nodelist: cannot get baseURL"));
+
+    }
+
+    @Test
+    public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
+        nodeRegistryResource = wac.getBean("nodeRegistryInvalidSchemaResource", Resource.class);
+        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", "true");
+
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 500", httpStatus == 500);
+
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
+
+        assertThat("NodeList Invalid vs Schema error produced-1", content, containsString("errorCode=\"500\""));
+        assertThat("Nodelist Invalid vs Schema error produced-2", content, containsString("detailCode=\"4150\""));
+//        assertThat("Nodelist Invalid vs Schema error produced-3", content, containsString("document invalid against NodeList schema"));
+    }
+
+    @Test
+    public void testNodeListMalformedXML() throws FileNotFoundException {
+        nodeRegistryResource = wac.getBean("nodeRegistryMalformedXMLResource", Resource.class);
+        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        Hashtable<String, String> settings = new Hashtable<String, String>();
+        settings.put("useSchemaValidation", "true");
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+
+        String content = new String(responseWrapper.getBuffer());
+        if (debuggingOutput) {
+            System.out.println("===== output =====");
+            System.out.print(content.toString());
+            System.out.println("------------------");
+        }
+        // examine status code
+        int httpStatus = responseWrapper.getStatus();
+        assertTrue("error response status is 500", httpStatus == 500);
+
+        // examine contents of the response
+        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
+
+        assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
+        assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
+//        assertThat("Nodelist null baseURL error produced-3", content, containsString("Cannot parse NodeList"));
+
+    }
+
+//	@Test
+    public void testDestroy() {
+        fail("Not yet implemented"); // TODO
+    }
+
+    // ==========================================================================================================
+    private BufferedHttpResponseWrapper callDoFilter(String outputFilename, Hashtable<String, String> params) {
+
+        ResourceLoader fsrl = new FileSystemResourceLoader();
+        ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
+        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
+
+        Enumeration<String> pNames = params.keys();
+        while (pNames.hasMoreElements()) {
+            String name = pNames.nextElement();
+            String val = params.get(name);
+            fc.addInitParameter(name, val);
+        }
+
+        ResolveFilter rf = new ResolveFilter();
+        try {
+            rf.init(fc);
+        } catch (ServletException se) {
+            //se.printStackTrace();
+            fail("servlet exception at ResolveFilter.init(fc)");
+        }
+
+        MockHttpServletRequest request = new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
+        request.addHeader("accept", (Object) "text/xml");
+        request.setMethod("POST");
+
+        ResolveServlet testResolve = new ResolveServlet();
+
+        try {
+            testResolve.setOutput(outputFilename);
+        } catch (FileNotFoundException e) {
+            fail("Test misconfiguration - output file not found" + e);
+        } catch (UnsupportedEncodingException e) {
+            fail("Test misconfiguration - unsupported file encoding error" + e);
+        }
+
+        FilterChain chain = new PassThroughFilterChain(testResolve);
+
+        HttpServletResponse response = new MockHttpServletResponse();
+        // need to wrap the response to examine
+        BufferedHttpResponseWrapper responseWrapper =
+                new BufferedHttpResponseWrapper((HttpServletResponse) response);
+
+        try {
+            rf.doFilter(request, responseWrapper, chain);
+        } catch (ServletException se) {
+            fail("servlet exception at ResolveFilter.doFilter(): " + se);
+        } catch (IOException ioe) {
+            fail("IO exception at ResolveFilter.doFilter(): " + ioe);
+        }
+        return responseWrapper;
+    }
+
+    class XSDValidationErrorHandler extends DefaultHandler {
+
+        public void error(SAXParseException e) throws SAXParseException {
+            throw e;
+        }
+    }
 }

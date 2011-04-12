@@ -5,22 +5,6 @@
 	    <from>^/object/?$</from>
 	    <to>/metacat/object/</to>
 	</rule>
-        <!--
-        object,meta,resolve regex path should exclude any queries, or those paths that have a ? directly
-        after the /object/
-        -->
-	<rule match-type="regex">
-	    <from>^/object/([^\?]{1}.*)$</from>
-	    <to>/metacat/object/$1</to>
-	</rule>
-	<rule match-type="regex">
-	    <from>^/meta/([^\?]{1}.*)$</from>
-	    <to>/metacat/meta/$1</to>
-	</rule>
-	<rule match-type="regex">
-	    <from>^/resolve/([^\?]{1}.*)$</from>
-	    <to>/metacat/resolve/$1</to>
-	</rule>
 	<rule match-type="regex">
 	    <from>^/object/?\?(.*qt=path.*)$</from>
 	    <to>/metacat/object/?$1</to>
@@ -30,10 +14,6 @@
 	    <to>/mercury/object/?$1</to>
 	</rule>
 
-        <!--
-        TODO /metacat/object, /metacat/meta, /metacat/resolve regex path should exclude any queries, or those paths that have a ? directly
-        after the /object/
-        -->
 	<outbound-rule>
 	    <from>^/metacat/object/$</from>
 	    <to>/object/</to>
@@ -43,20 +23,8 @@
 	    <to>/object/$1</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/metacat/meta/(.+)$</from>
-	    <to>/meta/$1</to>
-	</outbound-rule>
-	<outbound-rule>
-	    <from>^/metacat/resolve/(.+)$</from>
-	    <to>/resolve/$1</to>
-	</outbound-rule>
-	<outbound-rule>
 	    <from>^/mercury/object/(.+)$</from>
 	    <to>/object/$1</to>
 	</outbound-rule>
-<!--	<outbound-rule>
-	    <from>^/nodeList\.xml$</from>
-	    <to>/node/</to>
-	</outbound-rule> -->
 
 </urlrewrite>

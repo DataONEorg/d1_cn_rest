@@ -34,22 +34,6 @@ public class ContextUrlRewriteTestCase {
         test.put("pathresult", "/metacat/object/");
         tests.put("^/object/?$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/object/([^\\?]{1}.*)$", test);
-        test = new HashMap<String, String>();
-        test.put("urlpath", "/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/metacat/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/meta/([^\\?]{1}.*)$", test);
-        test = new HashMap<String, String>();
-        test.put("urlpath", "/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/metacat/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/meta/([^\\?]{1}.*)$", test);
-        test = new HashMap<String, String>();
-        test.put("urlpath", "/resolve/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/metacat/resolve/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/resolve/([^\\?]{1}.*)$", test);
-        test = new HashMap<String, String>();
         test.put("urlpath", "/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         test.put("pathresult", "/metacat/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         tests.put("^/object/?\\?(.*qt=path.*)$", test);
@@ -58,10 +42,7 @@ public class ContextUrlRewriteTestCase {
         test.put("pathresult", "/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         tests.put("^/object/?\\?(.*qt=solr.*)$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/node");
-        test.put("pathresult", "/nodeList.xml");
-        tests.put("^/node/?$", test);
-        test = new HashMap<String, String>();
+
         test.put("urlpath", "/metacat/object/");
         test.put("pathresult", "/object/");
         tests.put("^/metacat/object/$", test);
@@ -70,21 +51,10 @@ public class ContextUrlRewriteTestCase {
         test.put("pathresult", "/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
         tests.put("^/metacat/object/(.+)$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/metacat/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/meta/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/metacat/meta/(.+)$", test);
-        test = new HashMap<String, String>();
-        test.put("urlpath", "/metacat/resolve/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/resolve/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/metacat/resolve/(.+)$", test);
-        test = new HashMap<String, String>();
         test.put("urlpath", "/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         test.put("pathresult", "/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
         tests.put("^/mercury/object/(.+)$", test);
-        test = new HashMap<String, String>();
-        test.put("urlpath", "/nodeList.xml");
-        test.put("pathresult", "/node/");
-        tests.put("^/nodeList\\.xml$", test);
+
 
 
     }

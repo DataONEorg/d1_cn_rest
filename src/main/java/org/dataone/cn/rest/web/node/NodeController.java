@@ -11,10 +11,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.dataone.cn.batch.utils.TypeMarshaller;
-import org.dataone.cn.rest.proxy.controller.AbstractWebController;
+import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.cn.rest.proxy.service.ProxyObjectService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.cn.rest.proxy.http.ProxyServletResponseWrapper;
+import org.dataone.service.Constants;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.AuthToken;
@@ -37,11 +38,12 @@ import org.springframework.web.servlet.ModelAndView;
  * This package will also edit and add to the registry
  * @author waltz
  */
-@Controller
-public class NodeController extends AbstractWebController implements ServletContextAware {
+@Controller("nodeController")
+public class NodeController extends AbstractProxyController implements ServletContextAware {
 
-    private static final String GET_NODELIST_PATH = "/node";
-    private static final String GET_NODE_PATH = "/node/";
+    private static final String GET_NODE_PATH = "/" + Constants.RESOURCE_NODE + "/";
+    private static final String GET_NODELIST_PATH = "/" + Constants.RESOURCE_NODE;
+
     @Autowired
     @Qualifier("proxyObjectService")
     ProxyObjectService proxyObjectService;
@@ -49,7 +51,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     private String nodeListIdentifier = "registry";
 
     @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET, headers = "accept=*/*")
-    public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure{
         NodeList nodeList = null;
         SystemMetadata systemMetadata = null;
         String metaNodeListPath = null;
@@ -74,7 +76,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             } catch (BaseException ex) {
                 throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
             } catch (Exception ex) {
-                throw new ServiceFailure("34501", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             }
             ByteArrayInputStream inputStream;
 
@@ -83,13 +85,13 @@ public class NodeController extends AbstractWebController implements ServletCont
             try {
                 systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
             } catch (IOException ex) {
-                throw new ServiceFailure("34502", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             } catch (InstantiationException ex) {
-                throw new ServiceFailure("34503", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             } catch (IllegalAccessException ex) {
-                throw new ServiceFailure("34504", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             } catch (JiBXException ex) {
-                throw new ServiceFailure("34505", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             }
             response.resetBuffer();
             response.reset();
@@ -100,7 +102,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         } catch (BaseException ex) {
             throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
         } catch (Exception ex) {
-            throw new ServiceFailure("34501", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         }
         // XXX Node list will grow, so this may need to be handled in some other fashion in future
         // maybe wrap the unmarshalTypeFromStream with an output stream call as well?
@@ -111,15 +113,14 @@ public class NodeController extends AbstractWebController implements ServletCont
         try {
             nodeList = TypeMarshaller.unmarshalTypeFromStream(NodeList.class, inputStream);
         } catch (IOException ex) {
-            throw new ServiceFailure("34502", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         } catch (InstantiationException ex) {
-            throw new ServiceFailure("34503", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         } catch (IllegalAccessException ex) {
-            throw new ServiceFailure("34504", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         } catch (JiBXException ex) {
-            throw new ServiceFailure("34505", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         }
-
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.NodeList", nodeList);
 
     }

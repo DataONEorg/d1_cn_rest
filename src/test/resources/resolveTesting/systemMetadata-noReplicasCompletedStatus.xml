@@ -32,27 +32,27 @@
 	<originMemberNode>OriginMemberNode0</originMemberNode>
 	<authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
 	<replica>
-    	<replicaMemberNode>mn-dev</replicaMemberNode>
+    	<replicaMemberNode>m0t1</replicaMemberNode>
    	 	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>dev-dryad-mn</replicaMemberNode>
+    	<replicaMemberNode>r2d2</replicaMemberNode>
     	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>daacmn</replicaMemberNode>
+    	<replicaMemberNode>d1m3</replicaMemberNode>
     	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>knb-mn</replicaMemberNode>
+    	<replicaMemberNode>d1m2</replicaMemberNode>
     	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>cn-unm-1</replicaMemberNode>
+    	<replicaMemberNode>d1c1</replicaMemberNode>
     	<replicationStatus>queued</replicationStatus>
     	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
