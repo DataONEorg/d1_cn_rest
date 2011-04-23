@@ -50,7 +50,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
     ServletContext servletContext;
     private String nodeListIdentifier = "registry";
 
-    @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET, headers = "accept=*/*")
+    @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure{
         NodeList nodeList = null;
         SystemMetadata systemMetadata = null;
@@ -121,11 +121,12 @@ public class NodeController extends AbstractProxyController implements ServletCo
         } catch (JiBXException ex) {
             throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
         }
+        // XXX figure out the content negotiating view resolver issue later, just return XML for now...
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.NodeList", nodeList);
 
     }
 
-    @RequestMapping(value = GET_NODE_PATH + "**", method = RequestMethod.GET, headers = "accept=*/*")
+    @RequestMapping(value = GET_NODE_PATH + "**", method = RequestMethod.GET)
     public void getNode(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         throw new Exception("search Not implemented Yet!");
