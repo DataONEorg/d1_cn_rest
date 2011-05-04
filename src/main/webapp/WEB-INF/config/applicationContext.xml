@@ -11,12 +11,19 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-<!--        <context:property-placeholder location="classpath:/org/dataone/cn/rest/resources/restService.properties"/> -->
+    <context:component-scan base-package="org.dataone.cn.rest.web.node" />
 
+    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
+        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.MetacatProxyObjectServiceImpl"/>
+        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxySearchServiceImpl)"/>
+    </context:component-scan>
 
-
-<!--  <context:component-scan base-package="org.dataone.cn.rest.dao" /> -->
-
+    <bean id="ResolveFilter" class="org.dataone.cn.rest.filter.ResolveFilter">
+        <property name="nodelistRefreshIntervalSeconds" value="180" />
+        <!-- the properties below are by not stable when testing in various environments... -->
+<!--    <property name="systemmetadataSchemaLocation" value="/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5_1/dataoneTypes.xsd" />
+        <property name="nodelistSchemaLocation" value="/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5_1/dataoneTypes.xsd" /> -->
+    </bean>
 
 <!--  
 	<oxm:jibx-marshaller id="jibxMarshallerResponse" target-class="org.dataone.service.types.ObjectList"/>

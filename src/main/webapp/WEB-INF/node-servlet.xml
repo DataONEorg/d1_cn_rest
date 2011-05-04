@@ -16,8 +16,10 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     <context:property-placeholder location="classpath:/org/dataone/cn/rest/resources/proxyMetacat.properties"/>
 
-    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" />
-    <context:component-scan base-package="org.dataone.cn.rest.web.node" />
+<!--    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" />
+    <context:component-scan base-package="org.dataone.cn.rest.web.node" /> -->
+    
+
 <!--    <context:component-scan base-package="org.dataone.service.cn.impl" >
         <context:include-filter type="regex" expression="org\.dataone\.service\.cn.impl\.metacat\.CoordinatingNodeRegisterImpl"/>
     </context:component-scan> -->

@@ -130,15 +130,12 @@
                 <version>${org.springframework.version}</version>
         	<type>jar</type>
         </dependency>
-
+        <dependency>
+          <groupId>cglib</groupId>
+          <artifactId>cglib-nodep</artifactId>
+          <version>2.2</version>
+        </dependency>
         <!--  Jackson JSON implementations -CURRENTLY NOT NEEDED
-                <dependency>
-                        <groupId>cglib</groupId>
-                        <artifactId>cglib-nodep</artifactId>
-                        <version>2.2</version>
-                        <type>jar</type>
-                        <scope>compile</scope>
-                </dependency>
                 <dependency>
                         <groupId>org.codehaus.jackson</groupId>
                         <artifactId>jackson-core-asl</artifactId>
@@ -154,7 +151,6 @@
                         <scope>compile</scope>
                 </dependency>
 -->		
-                <!--  we are going to remember to test all of this, right? -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

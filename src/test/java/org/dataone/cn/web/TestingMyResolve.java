@@ -5,10 +5,7 @@ import static org.junit.matchers.JUnitMatchers.*;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -16,7 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
 import java.util.Hashtable;
 //import org.springframework.test.web.*;
 
@@ -34,6 +30,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import org.dataone.cn.rest.web.node.NodeListRetrieval;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.cn.web.proxy.service.MockProxyObjectServiceImpl;
 import org.junit.runner.RunWith;
@@ -56,10 +53,12 @@ public class TestingMyResolve {
     private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
     private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
     private static boolean debuggingOutput = false;
-    private static String useSchemasString = "true";
+    private static boolean useSchemas = true;
+    private static Integer nodelistRefreshIntervalSeconds = 120;
     private WebApplicationContext wac;
     private Resource nodeRegistryResource;
     private MockProxyObjectServiceImpl testProxyObject;
+    private NodeListRetrieval testNodeListRetrieval;
     // need to test that resolveFilter behaves properly under various conditions:
     // (general)
     // 1. All's well
@@ -93,6 +92,7 @@ public class TestingMyResolve {
         testProxyObject = wac.getBean(MockProxyObjectServiceImpl.class);
         nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
         testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        testNodeListRetrieval = wac.getBean(NodeListRetrieval.class);
     }
 
     @Test
@@ -101,10 +101,9 @@ public class TestingMyResolve {
         // Init reads in the parameters from webapp configuration file
         // (not caching the nodelist anymore - no reason to...)
         MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
-        fc.addInitParameter("useSchemaValidation", useSchemasString);
-        fc.addInitParameter("nodelistRefreshIntervalSeconds", "1234");
-        ResolveFilter rf = new ResolveFilter();
 
+        ResolveFilter rf = new ResolveFilter();
+        rf.setNodelistRefreshIntervalSeconds(new Integer(1234));
         try {
             rf.init(fc);
         } catch (ServletException se) {
@@ -112,52 +111,17 @@ public class TestingMyResolve {
             fail("servlet exception at ResolveFilter.init(fc)");
         }
 
-        if (rf.getRefreshInterval() != 1234) {
+        if (rf.getNodelistRefreshIntervalSeconds() != 1234) {
             fail("failed to set nodelistRefreshIntervalSeconds parameter");
         }
     }
 
     @Test
-    public void testRefreshIntervalErrorCatching() {
-
-        // building up a new ResolveFilter with the appropriate parameters
-        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
-        fc.addInitParameter("nodelistRefreshIntervalSeconds", "should be a number but is not");
-        ResolveFilter rf = new ResolveFilter();
-
-        try {
-            rf.init(fc);
-        } catch (ServletException se) {
-            assertThat("refreshInterval error checking", se, instanceOf(ServletException.class));
-            return;
-        }
-        fail("did not catch refreshInterval bad-value error");
-    }
-
-    @Test
-    public void testuseSchemaValidationFlag() {
-
-        // building up a new ResolveFilter with the appropriate parameters
-        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
-        fc.addInitParameter("useSchemaValidation", "neitherTrueNorFalse");
-        ResolveFilter rf = new ResolveFilter();
-
-        try {
-            rf.init(fc);
-        } catch (ServletException se) {
-            assertThat("useSchema error checking", se, instanceOf(ServletException.class));
-            return;
-        }
-        fail("did not catch useSchema bad-value error");
-    }
-
-    @Test
     public void testDoFilter() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-        settings.put("nodelistRefreshIntervalSeconds", "13579");
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+
+        this.nodelistRefreshIntervalSeconds =  13579;
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
@@ -166,16 +130,14 @@ public class TestingMyResolve {
         String content = new String(responseWrapper.getBuffer());
 
         assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
-
+        this.nodelistRefreshIntervalSeconds =  120;
     }
 
     @Test
     public void testUrlEncodingAscii() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-        settings.put("nodelistRefreshIntervalSeconds", "13579");
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-disallowed-ascii.xml", settings);
+        this.nodelistRefreshIntervalSeconds =  13579;
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-disallowed-ascii.xml");
 
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
@@ -185,15 +147,14 @@ public class TestingMyResolve {
 
         assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
         assertThat("wonky identifier is escaped in url", content, containsString("aAbBcC__%2F%3Fparam=5%23__12345</url>"));
+        this.nodelistRefreshIntervalSeconds =  120;
     }
 
     @Test
     public void testUrlEncodingNonAscii() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-        settings.put("nodelistRefreshIntervalSeconds", "13579");
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.utf8.xml", settings);
+        this.nodelistRefreshIntervalSeconds =  13579;
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.utf8.xml");
 
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
@@ -203,15 +164,13 @@ public class TestingMyResolve {
 
         //assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
         assertThat("non-Ascii identifier is escaped in url", content, containsString("%E0%B8%89%E0%B8%B1%E0%B8%99%E0%B8%81%E0%B8%B4%E0%B8%99%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%88%E0%B8%81%E0%B9%84%E0%B8%94%E0%B9%89</url>"));
+        this.nodelistRefreshIntervalSeconds =  120;
     }
 
     @Test
     public void testValidOllXML() throws Exception {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
@@ -276,9 +235,7 @@ public class TestingMyResolve {
     @Test
     public void testingNegativeControl() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -296,9 +253,7 @@ public class TestingMyResolve {
     @Test
     public void testMetacatErrorGeneric() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -319,9 +274,7 @@ public class TestingMyResolve {
     @Test
     public void testMetacatErrorDocNotFound() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error-docNotFound.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("metacat-error-docNotFound.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -346,10 +299,7 @@ public class TestingMyResolve {
     @Test
     public void testSystemMetadataError() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -373,10 +323,7 @@ public class TestingMyResolve {
     @Test
     public void testSystemMetadataInvalidVsSchema() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -400,10 +347,7 @@ public class TestingMyResolve {
     @Test
     public void testSystemMetadataMalformedXMLError() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -427,10 +371,7 @@ public class TestingMyResolve {
     @Test
     public void testSystemMetadataNoReplicasCompleted() throws FileNotFoundException {
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-noReplicasCompletedStatus.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-noReplicasCompletedStatus.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -458,9 +399,10 @@ public class TestingMyResolve {
         ResourceLoader fsrl = new FileSystemResourceLoader();
         ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
         MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
-        fc.addInitParameter("useSchemaValidation", useSchemasString);
-        ResolveFilter rf = new ResolveFilter();
 
+        ResolveFilter rf = new ResolveFilter();
+        rf.setUseSchemaValidation(useSchemas);
+        rf.setNodeListRetrieval(testNodeListRetrieval);
         try {
             rf.init(fc);
         } catch (ServletException se) {
@@ -468,7 +410,6 @@ public class TestingMyResolve {
             fail("servlet exception at ResolveFilter.init(fc)");
         }
         Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
 
         MockHttpServletRequest request = new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
         request.addHeader("accept", (Object) "text/xml");
@@ -520,7 +461,7 @@ public class TestingMyResolve {
         ResourceLoader fsrl = new FileSystemResourceLoader();
         ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
         MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
-        fc.addInitParameter("useSchemaValidation", useSchemasString);
+        
         ResolveFilter rf = new ResolveFilter();
 
         try {
@@ -530,10 +471,7 @@ public class TestingMyResolve {
             fail("servlet exception at ResolveFilter.init(fc)");
         }
 
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", useSchemasString);
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -559,10 +497,8 @@ public class TestingMyResolve {
     public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
         nodeRegistryResource = wac.getBean("nodeRegistryInvalidSchemaResource", Resource.class);
         testProxyObject.setNodeRegistryResource(nodeRegistryResource);
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", "true");
 
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -587,9 +523,8 @@ public class TestingMyResolve {
     public void testNodeListMalformedXML() throws FileNotFoundException {
         nodeRegistryResource = wac.getBean("nodeRegistryMalformedXMLResource", Resource.class);
         testProxyObject.setNodeRegistryResource(nodeRegistryResource);
-        Hashtable<String, String> settings = new Hashtable<String, String>();
-        settings.put("useSchemaValidation", "true");
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml", settings);
+
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
@@ -617,20 +552,16 @@ public class TestingMyResolve {
     }
 
     // ==========================================================================================================
-    private BufferedHttpResponseWrapper callDoFilter(String outputFilename, Hashtable<String, String> params) {
+    private BufferedHttpResponseWrapper callDoFilter(String outputFilename) {
 
         ResourceLoader fsrl = new FileSystemResourceLoader();
         ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
         MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
 
-        Enumeration<String> pNames = params.keys();
-        while (pNames.hasMoreElements()) {
-            String name = pNames.nextElement();
-            String val = params.get(name);
-            fc.addInitParameter(name, val);
-        }
-
         ResolveFilter rf = new ResolveFilter();
+        rf.setUseSchemaValidation(this.useSchemas);
+        rf.setNodelistRefreshIntervalSeconds(this.nodelistRefreshIntervalSeconds);
+        rf.setNodeListRetrieval(testNodeListRetrieval);
         try {
             rf.init(fc);
         } catch (ServletException se) {

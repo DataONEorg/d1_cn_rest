@@ -30,14 +30,13 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
-import org.dataone.cn.rest.web.node.NodeController;
+import org.dataone.cn.rest.web.node.NodeListRetrieval;
 import org.dataone.service.EncodingUtilities;
 import org.dataone.service.exceptions.*;
 import org.dataone.service.types.Node;
 import org.dataone.service.types.NodeList;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -86,10 +85,14 @@ public class ResolveFilter implements Filter {
     private static String oll_d1namespaceVersion = "http://dataone.org/service/types/0.5.1";
     private static String oll_publicSchemaLocation =
             "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
+    @Autowired
+    @Qualifier("nodeListRetrieval")
+    NodeListRetrieval nodeListRetrieval;
 
     /**
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
      */
+    @Override
     public void destroy() {
         this.filterConfig = null;
         this.baseUrlMap = null;
@@ -99,39 +102,15 @@ public class ResolveFilter implements Filter {
     /*
      * @see javax.servlet.Filter#destroy(javax.servlet.FilterConfig)
      */
+    /**
+     *
+     * @param filterConfig
+     * @throws ServletException
+     */
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
-
-        if (filterConfig.getInitParameter("nodelistRefreshIntervalSeconds") != null) {
-            try {
-                this.nodelistRefreshIntervalSeconds = Integer.parseInt(filterConfig.getInitParameter("nodelistRefreshIntervalSeconds"));
-            } catch (NumberFormatException e) {
-                throw new ServletException(e);
-            }
-        }
-
-        // TODO: implement targetEnvironment in node selection
-        if (filterConfig.getInitParameter("targetEnvironment") != null) {
-            this.targetEnvironment = filterConfig.getInitParameter("targetEnvironment");
-        }
-
-        if (filterConfig.getInitParameter("useSchemaValidation") != null) {
-            if (filterConfig.getInitParameter("useSchemaValidation") == "false") {
-                this.useSchemaValidation = false;
-            } else if (filterConfig.getInitParameter("useSchemaValidation") == "true") {
-                this.useSchemaValidation = true;
-            } else {
-                throw new ServletException("bad value for input parameter 'useSchemaValidation'");
-            }
-        }
-        if (filterConfig.getInitParameter("nodelistSchemaLocation") != null) {
-            this.nodelistSchemaLocation = filterConfig.getInitParameter("nodelistSchemaLocation");
-        }
-
-        if (filterConfig.getInitParameter("systemmetadataSchemaLocation") != null) {
-            this.systemmetadataSchemaLocation = filterConfig.getInitParameter("systemmetadataSchemaLocation");
-        }
 
         this.xFactory = XPathFactory.newInstance();
     }
@@ -148,23 +127,26 @@ public class ResolveFilter implements Filter {
         }
 
         if (this.baseUrlMap == null) {
-            baseUrlMap = new HashMap<String, String>();
-            WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(filterConfig.getServletContext());
+            HashMap<String, String> cacheUrlMap = new HashMap<String, String>();
 
-            NodeController nodeController = (NodeController) wac.getBean("nodeController");
+            ServletContext sc = filterConfig.getServletContext();
+
             try {
-                ModelAndView mav = nodeController.getNodeList(request, response);
-                nodeList = (NodeList) mav.getModel().get("org.dataone.service.types.NodeList");
+                nodeList = nodeListRetrieval.retrieveNodeList(request, response, sc);
             } catch (ServiceFailure sf) {
                 sf.setDetail_code("4150");
                 throw sf;
+            }
+            if (nodeList.sizeNodeList() == 0) {
+                throw new ServiceFailure("4150", "Error parsing Nodelist: nodeList is Empty!");
             }
             for (Node node : nodeList.getNodeList()) {
                 if (node.getBaseURL().isEmpty()) {
                     throw new ServiceFailure("4150", "Error parsing Nodelist: cannot get baseURL for node id: " + node.getIdentifier().getValue());
                 }
-                baseUrlMap.put(node.getIdentifier().getValue(), node.getBaseURL());
+                cacheUrlMap.put(node.getIdentifier().getValue(), node.getBaseURL());
             }
+            this.baseUrlMap = cacheUrlMap;
         }
 
     }
@@ -182,7 +164,7 @@ public class ResolveFilter implements Filter {
         df.format(now);
 
         // convert seconds to milliseconds
-        long refreshIntervalMS = getRefreshInterval() * 1000;
+        long refreshIntervalMS = this.getNodelistRefreshIntervalSeconds() * 1000L;
         if (nowMS - this.lastRefreshTimeMS > refreshIntervalMS) {
             this.lastRefreshTimeMS = nowMS;
             logger.info("  nodelist refresh: new cached time: " + df.format(now));
@@ -257,6 +239,7 @@ public class ResolveFilter implements Filter {
      *  For general information on doFilter:
      *  @see javax.servlet.Filter#doFilter(javax.servlet.FilterConfig)
      */
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
         try {
@@ -279,11 +262,12 @@ public class ResolveFilter implements Filter {
     private void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException, ServiceFailure, NotFound {
 
+        logger.debug("doFilterDelegate 1");
         // return if init has not been called - it's the setter for filterConfig
         if (filterConfig == null) {
             return;
         }
-
+        logger.debug("doFilterDelegate 2");
         // compiles without the subtyping to Http versions of request and response.
         // why is the check here?
         if (!(res instanceof HttpServletResponse) || !(req instanceof HttpServletRequest)) {
@@ -294,7 +278,7 @@ public class ResolveFilter implements Filter {
 
         cacheNodeListURLs(request, response);
         //  ****** Handle request before passing control to next filter or servlet  *********
-
+        logger.debug("doFilterDelegate 3");
         // we are going to return xml no matter what
 
 
@@ -314,7 +298,7 @@ public class ResolveFilter implements Filter {
         // BufferedHttpResponseWrapper's OutputStream. This means that the
         // XML output array is empty when this happens. The following
         // code is a workaround:
-
+        logger.debug("doFilterDelegate 4");
         byte[] origXML = responseWrapper.getBuffer();
 //       String forDebug = new String(origXML);
         if (origXML == null || origXML.length == 0) {
@@ -338,7 +322,7 @@ public class ResolveFilter implements Filter {
         // parse the input stream, determining if it's sysMD or error
         Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation, this.useSchemaValidation);
         DocumentBuilder sysMDparser = createNSDOMParser();
-
+        logger.debug("doFilterDelegate 5");
         Document metaDoc = null;
         try {
             metaDoc = sysMDparser.parse(xmlSource);
@@ -360,7 +344,7 @@ public class ResolveFilter implements Filter {
         } catch (XPathExpressionException e) {
             throw new ServiceFailure("4150", "error compiling the xpath expressions");
         }
-
+        logger.debug("doFilterDelegate 6");
         // apply expressions to get data from systemmetadata
         ArrayList<String> targetID = null;
         ArrayList<String> replicaIDs = null;
@@ -373,7 +357,7 @@ public class ResolveFilter implements Filter {
             throw new ServiceFailure("4150", "error extracting data from metcat response. " + e2);
         }
 
-
+        logger.debug("doFilterDelegate 7");
         // -------------------- create the response content
 
         Document returnDoc = null;
@@ -399,7 +383,7 @@ public class ResolveFilter implements Filter {
             targetIdentifier = EncodingUtilities.decodeXmlDataItems(targetIdentifier);
             returnDoc = createObjectLocationList(targetIdentifier, replicaIDs);
         }
-
+        logger.debug("doFilterDelegate 8");
         // -------- transform return Document to XML  -----------
 
         DOMSource domSource = new DOMSource(returnDoc);
@@ -416,11 +400,12 @@ public class ResolveFilter implements Filter {
             serializer.transform(domSource, new StreamResult(resultBuf));
 
 //        logger.info("ResolveFilter: response from /meta: " + response + "...");        	
-
+            logger.debug("doFilterDelegate 9");
             response.setContentLength(resultBuf.size());
 //      	      response.setContentType(type);
             response.getOutputStream().write(resultBuf.toByteArray());
             response.flushBuffer();
+            logger.debug("doFilterDelegate 10");
         } catch (TransformerConfigurationException e) {
             throw new ServiceFailure("4150", "error setting up the document transformer");
         } catch (TransformerException e) {
@@ -517,18 +502,59 @@ public class ResolveFilter implements Filter {
     }
 
     //  ------   Getters and Setters --------------//
+    public NodeListRetrieval getNodeListRetrieval() {
+        return nodeListRetrieval;
+    }
+
+    public void setNodeListRetrieval(NodeListRetrieval nodeListRetrieval) {
+        this.nodeListRetrieval = nodeListRetrieval;
+    }
+
     /**
      *  @return the refresh interval for the nodelist information cache, in seconds
      */
-    public Integer getRefreshInterval() {
-        return this.nodelistRefreshIntervalSeconds;
+    public Integer getNodelistRefreshIntervalSeconds() {
+        return nodelistRefreshIntervalSeconds;
     }
 
     /**
      *
      * @param i  in seconds, the minimum interval between nodelist information cache refreshes
      */
-    public void setRefreshInterval(Integer i) {
-        this.nodelistRefreshIntervalSeconds = i;
+    public void setNodelistRefreshIntervalSeconds(Integer nodelistRefreshIntervalSeconds) {
+        this.nodelistRefreshIntervalSeconds = nodelistRefreshIntervalSeconds;
+    }
+
+    public String getNodelistSchemaLocation() {
+        return nodelistSchemaLocation;
+    }
+
+    public void setNodelistSchemaLocation(String nodelistSchemaLocation) {
+        this.nodelistSchemaLocation = nodelistSchemaLocation;
+    }
+
+    public String getSystemmetadataSchemaLocation() {
+        return systemmetadataSchemaLocation;
+    }
+
+    public void setSystemmetadataSchemaLocation(String systemmetadataSchemaLocation) {
+        this.systemmetadataSchemaLocation = systemmetadataSchemaLocation;
+    }
+// TODO: implement targetEnvironment in node selection
+
+    public String getTargetEnvironment() {
+        return targetEnvironment;
+    }
+
+    public void setTargetEnvironment(String targetEnvironment) {
+        this.targetEnvironment = targetEnvironment;
+    }
+
+    public boolean isUseSchemaValidation() {
+        return useSchemaValidation;
+    }
+
+    public void setUseSchemaValidation(boolean useSchemaValidation) {
+        this.useSchemaValidation = useSchemaValidation;
     }
 }
