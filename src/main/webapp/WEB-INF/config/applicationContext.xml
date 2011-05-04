@@ -11,7 +11,10 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <context:component-scan base-package="org.dataone.cn.rest.web.node" />
+    <context:component-scan base-package="org.dataone.cn.rest.web.node"  >
+        <context:include-filter type="regex" expression="org.dataone.cn.rest.web.node.NodeListRetrieval"/>
+        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.web.node.NodeController"/>
+    </context:component-scan>
 
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
         <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.MetacatProxyObjectServiceImpl"/>

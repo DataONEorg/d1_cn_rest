@@ -262,12 +262,11 @@ public class ResolveFilter implements Filter {
     private void doFilterDelegate(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException, ServiceFailure, NotFound {
 
-        logger.debug("doFilterDelegate 1");
         // return if init has not been called - it's the setter for filterConfig
         if (filterConfig == null) {
             return;
         }
-        logger.debug("doFilterDelegate 2");
+
         // compiles without the subtyping to Http versions of request and response.
         // why is the check here?
         if (!(res instanceof HttpServletResponse) || !(req instanceof HttpServletRequest)) {
@@ -278,7 +277,7 @@ public class ResolveFilter implements Filter {
 
         cacheNodeListURLs(request, response);
         //  ****** Handle request before passing control to next filter or servlet  *********
-        logger.debug("doFilterDelegate 3");
+
         // we are going to return xml no matter what
 
 
@@ -298,7 +297,7 @@ public class ResolveFilter implements Filter {
         // BufferedHttpResponseWrapper's OutputStream. This means that the
         // XML output array is empty when this happens. The following
         // code is a workaround:
-        logger.debug("doFilterDelegate 4");
+
         byte[] origXML = responseWrapper.getBuffer();
 //       String forDebug = new String(origXML);
         if (origXML == null || origXML.length == 0) {
@@ -322,7 +321,7 @@ public class ResolveFilter implements Filter {
         // parse the input stream, determining if it's sysMD or error
         Schema sysMDschema = createXsdSchema(this.systemmetadataSchemaLocation, this.useSchemaValidation);
         DocumentBuilder sysMDparser = createNSDOMParser();
-        logger.debug("doFilterDelegate 5");
+
         Document metaDoc = null;
         try {
             metaDoc = sysMDparser.parse(xmlSource);
@@ -344,7 +343,7 @@ public class ResolveFilter implements Filter {
         } catch (XPathExpressionException e) {
             throw new ServiceFailure("4150", "error compiling the xpath expressions");
         }
-        logger.debug("doFilterDelegate 6");
+
         // apply expressions to get data from systemmetadata
         ArrayList<String> targetID = null;
         ArrayList<String> replicaIDs = null;
@@ -357,7 +356,6 @@ public class ResolveFilter implements Filter {
             throw new ServiceFailure("4150", "error extracting data from metcat response. " + e2);
         }
 
-        logger.debug("doFilterDelegate 7");
         // -------------------- create the response content
 
         Document returnDoc = null;
@@ -383,7 +381,7 @@ public class ResolveFilter implements Filter {
             targetIdentifier = EncodingUtilities.decodeXmlDataItems(targetIdentifier);
             returnDoc = createObjectLocationList(targetIdentifier, replicaIDs);
         }
-        logger.debug("doFilterDelegate 8");
+
         // -------- transform return Document to XML  -----------
 
         DOMSource domSource = new DOMSource(returnDoc);
@@ -400,12 +398,12 @@ public class ResolveFilter implements Filter {
             serializer.transform(domSource, new StreamResult(resultBuf));
 
 //        logger.info("ResolveFilter: response from /meta: " + response + "...");        	
-            logger.debug("doFilterDelegate 9");
+
             response.setContentLength(resultBuf.size());
 //      	      response.setContentType(type);
             response.getOutputStream().write(resultBuf.toByteArray());
             response.flushBuffer();
-            logger.debug("doFilterDelegate 10");
+
         } catch (TransformerConfigurationException e) {
             throw new ServiceFailure("4150", "error setting up the document transformer");
         } catch (TransformerException e) {
