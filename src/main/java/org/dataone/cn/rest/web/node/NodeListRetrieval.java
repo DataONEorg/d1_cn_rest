@@ -71,16 +71,12 @@ public class NodeListRetrieval {
             try {
                 systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
             } catch (IOException ex) {
-                ex.printStackTrace();
                 throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:"  + ex.getMessage());
             } catch (InstantiationException ex) {
-                ex.printStackTrace();
                 throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             } catch (IllegalAccessException ex) {
-                ex.printStackTrace();
                 throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             } catch (JiBXException ex) {
-                ex.printStackTrace();
                 throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
             }
             response.resetBuffer();
