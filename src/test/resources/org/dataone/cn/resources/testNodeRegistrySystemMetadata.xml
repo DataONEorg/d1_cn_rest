@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<d1:systemMetadata xmlns:d1="http://dataone.org/service/types/0.5.1"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<d1:systemMetadata xmlns:d1="http://ns.dataone.org/service/types/0.6.1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://ns.dataone.org/service/types/0.6.1 https://repository.dataone.org/software/cicore/branches/D1_SCHEMA_0_6_1/dataoneTypes.xsd">
     <identifier>testNodeRegistry.xml</identifier>
     <objectFormat>application/octet-stream</objectFormat>
     <size>1</size>
     <submitter>DataONE</submitter>
     <rightsHolder>DataONE</rightsHolder>
+    <accessPolicy>
+        <allow>
+            <subject>DataONE</subject>
+            <permission>read</permission>
+            <resource>this</resource>
+        </allow>
+    </accessPolicy>
     <checksum algorithm="SHA-512">7a6a426b5ffec73fcb57e07f3eb0d98c211f5cfa</checksum>
-    <accessRule rule="allow" service="read" principal="public"/>
     <dateUploaded>2006-05-04T18:13:51.0Z</dateUploaded>
     <dateSysMetadataModified>2006-05-04T18:13:51.0Z</dateSysMetadataModified>
     <originMemberNode>cn.dataone.org</originMemberNode>

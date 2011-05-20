@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<d1:systemMetadata xmlns:d1="http://dataone.org/service/types/0.5.1"
+<d1:systemMetadata xmlns:d1="http://ns.dataone.org/service/types/0.6.1"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://dataone.org/service/types/0.5.1 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd">
+      xsi:schemaLocation="http://ns.dataone.org/service/types/0.6.1 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd">
 	<identifier>aAbBcC12345</identifier>
 	<objectFormat>eml://ecoinformatics.org/eml-2.0.1</objectFormat>
 	<size>0</size>
 	<submitter>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</submitter>
 	<rightsHolder>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</rightsHolder>
+	<accessPolicy>
+		<allow>
+			<subject>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</subject>
+			<permission>read</permission>
+			<resource>this</resource>
+		</allow>
+	</accessPolicy>
 	<obsoletes>Obsoletes0</obsoletes>
 	<obsoletes>Obsoletes1</obsoletes>
 	<obsoletedBy>ObsoletedBy0</obsoletedBy>
@@ -19,42 +26,33 @@
 	<describedBy>DescribedBy1</describedBy>
 	<checksum algorithm="SHA-1">2e01e17467891f7c933dbaa00e1459d23db3fe4f</checksum>
 	<embargoExpires>2006-05-04T18:13:51.0Z</embargoExpires>
-	<accessRule rule="allow" service="read" principal="Principal0"/>
-	<accessRule rule="allow" service="read" principal="Principal1"/>
-	<replicationPolicy replicationAllowed="true" numberReplicas="2">
-    	<preferredMemberNode>MemberNode12</preferredMemberNode>
-    	<preferredMemberNode>MemberNode13</preferredMemberNode>
-    	<blockedMemberNode>MemberNode6</blockedMemberNode>
-    	<blockedMemberNode>MemberNode7</blockedMemberNode>
-	</replicationPolicy>
 	<dateUploaded>2006-05-04T18:13:51.0Z</dateUploaded>
 	<dateSysMetadataModified>2006-05-04T18:13:51.0Z</dateSysMetadataModified>
 	<originMemberNode>OriginMemberNode0</originMemberNode>
 	<authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
 	<replica>
-		<!-- a fake value for testing -->
-    	<replicaMemberNode>testUnregisteredNode</replicaMemberNode>
-   	 	<replicationStatus>completed</replicationStatus>
-    	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+		<replicaMemberNode>m0t1</replicaMemberNode>
+		<replicationStatus>completed</replicationStatus>
+		<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>r2d2</replicaMemberNode>
-    	<replicationStatus>queued</replicationStatus>
-    	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+		<replicaMemberNode>r2d2</replicaMemberNode>
+		<replicationStatus>queued</replicationStatus>
+		<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>d1m3</replicaMemberNode>
-    	<replicationStatus>completed</replicationStatus>
-    	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+		<replicaMemberNode>d1m3</replicaMemberNode>
+		<replicationStatus>completed</replicationStatus>
+		<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>d1m2</replicaMemberNode>
-    	<replicationStatus>completed</replicationStatus>
-    	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+		<replicaMemberNode>sqrf</replicaMemberNode>
+		<replicationStatus>completed</replicationStatus>
+		<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 	<replica>
-    	<replicaMemberNode>d1c1</replicaMemberNode>
-    	<replicationStatus>queued</replicationStatus>
-    	<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+		<replicaMemberNode>d1c1</replicaMemberNode>
+		<replicationStatus>queued</replicationStatus>
+		<replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
 	</replica>
 </d1:systemMetadata>

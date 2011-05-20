@@ -5,13 +5,13 @@
     <groupId>org.dataone.cn</groupId>
     <artifactId>d1_cn_rest</artifactId>
     <packaging>war</packaging>
-    <version>0.5.0</version>
+    <version>0.6.1-SNAPSHOT</version>
     <name>DataONE_Cn_Rest</name>
     <url>http://dataone.org</url>
     <parent>
         <groupId>org.dataone</groupId>
         <artifactId>d1_cn_service</artifactId>
-        <version>0.5.0</version>
+        <version>0.6.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
      <properties>
@@ -192,13 +192,13 @@
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_common_java</artifactId>
-            <version>0.5.0</version>
+            <version>0.6.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
         	<groupId>org.dataone</groupId>
         	<artifactId>d1_cn_rest_proxy</artifactId>
-        	<version>0.5.0</version>
+        	<version>0.6.1-SNAPSHOT</version>
         	<type>jar</type>
         	<scope>compile</scope>
         </dependency>

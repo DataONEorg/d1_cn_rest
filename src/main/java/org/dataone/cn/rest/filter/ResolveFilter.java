@@ -75,16 +75,16 @@ public class ResolveFilter implements Filter {
     // parameters and their default values  (defaulting for production environment)
     // (see d1_cn_rest/src/main/webapp/WEB-INF/web.xml for std settings of these parameters) 
     private Integer nodelistRefreshIntervalSeconds = 2 * 60;
-    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
-    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
+    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd";
+    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd";
     private String targetEnvironment = "prod";
     private boolean useSchemaValidation = true;
     // static for this deployment of the dataone architecture
     // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
-    private static String oll_d1namespaceVersion = "http://dataone.org/service/types/0.5.1";
+    private static String oll_d1namespaceVersion = "http://ns.dataone.org/service/types/0.6.1";
     private static String oll_publicSchemaLocation =
-            "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
+            "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd";
     @Autowired
     @Qualifier("nodeListRetrieval")
     NodeListRetrieval nodeListRetrieval;

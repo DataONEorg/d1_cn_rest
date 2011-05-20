@@ -60,7 +60,7 @@ public class NodeRegistryTestCase {
             nodeList = (NodeList) mav.getModel().get("org.dataone.service.types.NodeList");
 
         } catch (ServiceFailure ex) {
-            fail("Test misconfiguration" + ex);
+            fail("Test misconfiguration " + ex);
         }
 
         assertNotNull(nodeList);

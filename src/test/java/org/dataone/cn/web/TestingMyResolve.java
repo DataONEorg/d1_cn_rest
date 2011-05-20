@@ -50,9 +50,9 @@ import org.xml.sax.helpers.DefaultHandler;
 @ContextConfiguration(locations = {"classpath:/org/dataone/cn/resources/web/mockObject-dispatcher.xml", "classpath:/org/dataone/cn/resources/web/mockObject-beans.xml"}, loader = ProxyWebApplicationContextLoader.class)
 public class TestingMyResolve {
 
-    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_5_1/dataoneTypes.xsd";
+    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd";
     private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
-    private static boolean debuggingOutput = false;
+    private static boolean debuggingOutput = true;
     private static boolean useSchemas = true;
     private static Integer nodelistRefreshIntervalSeconds = 120;
     private WebApplicationContext wac;
@@ -303,8 +303,10 @@ public class TestingMyResolve {
 
         String content = new String(responseWrapper.getBuffer());
         if (debuggingOutput) {
+            System.out.println("testSystemMetadataError");
             System.out.println("===== output =====");
             System.out.print(content.toString());
+            System.out.print("http response code = " + responseWrapper.getStatus());
             System.out.println("------------------");
         }
         // examine status code
