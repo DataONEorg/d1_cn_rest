@@ -8,9 +8,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
+
+import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.web.identity.IdentityController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.Person;
+import org.dataone.service.types.Subject;
 import org.dataone.service.types.SubjectList;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +30,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
- * @author rwaltz
+ * @author leinfelder
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -78,6 +83,38 @@ public class IdentityTestCase {
 
         assertNotNull(subjectList);
         assertTrue(subjectList.getGroupList().size() > 0);
+        
+    }
+    
+    @Test
+    public void registerAccount() throws Exception {
+
+    	String subjectValue = "cn=test1,dc=dataone,dc=org";
+        Subject subject = new Subject();
+        subject.setValue(subjectValue);
+        Person person = new Person();
+        person.setSubject(subject);
+        person.addGivenName("test");
+        person.setFamilyName("test");
+        person.addEmail("test@dataone.org");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(person, baos);
+        String personValue = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts");
+        request.addParameter("person", personValue);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        Subject retSubject = null;
+        try {
+            ModelAndView mav = testController.registerAccount(request, response);
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.Subject");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertNotNull(retSubject);
+        assertTrue(retSubject.getValue().equals(subjectValue));
         
     }
     
