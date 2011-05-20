@@ -63,4 +63,22 @@ public class IdentityTestCase {
         
     }
     
+    @Test
+    public void getSubjectInfo() throws Exception {
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/accounts/cn=testGroup,dc=dataone,dc=org");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        SubjectList subjectList = null;
+        try {
+            ModelAndView mav = testController.listSubjects(request, response);
+            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.SubjectList");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertNotNull(subjectList);
+        assertTrue(subjectList.getGroupList().size() > 0);
+        
+    }
+    
 }
