@@ -30,5 +30,13 @@
             <oxm:jibx-marshaller id="jibxSubjectMarshallerResponse" target-class="org.dataone.service.types.Subject"/>
         </property>
     </bean>
+    
+    <bean id="xmlBooleanViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="java.lang.Boolean"/>
+        <property name="contentType" value="text/xml" />
+        <property name="marshaller">
+            <oxm:jibx-marshaller id="jibxBooleanMarshallerResponse" target-class="java.lang.Boolean"/>
+        </property>
+    </bean>
 
 </beans>

@@ -20,6 +20,7 @@ import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.Person;
@@ -109,6 +110,27 @@ public class IdentityController extends AbstractProxyController implements Servl
 		Subject subject = cnIdentity.registerAccount(session, person);
 
         return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.Subject", subject);
+
+    }
+    
+    @RequestMapping(value = ACCOUNTS_PATH + "/map", method = RequestMethod.POST)
+    public ModelAndView mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// TODO: get the Session object from?
+    	Session session = null;
+    	// get params from request
+        Subject subject = null;
+    	String subjectString = request.getParameter("subject");
+    	try {
+			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(subjectString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create Subject from input");
+		}
+    	
+		boolean success = cnIdentity.mapIdentity(session, subject);
+
+        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
 
     }
 
