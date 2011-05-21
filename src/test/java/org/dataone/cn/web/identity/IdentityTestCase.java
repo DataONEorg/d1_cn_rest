@@ -118,6 +118,31 @@ public class IdentityTestCase {
         
     }
     
+    @Test
+    public void verifyAccount() throws Exception {
+
+    	// create the account first
+    	registerAccount();
+    	
+    	String subjectValue = "cn=test1,dc=dataone,dc=org";
+        Subject subject = new Subject();
+        subject.setValue(subjectValue);
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts/" + subjectValue);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        boolean success = false;
+        try {
+            ModelAndView mav = testController.verifyAccount(request, response);
+            success = (Boolean) mav.getModel().get("java.lang.Boolean");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertTrue(success);
+        
+    }
+    
     /**
      * Requires session in order to work!
      * @throws Exception
@@ -143,6 +168,117 @@ public class IdentityTestCase {
             result = (Boolean) mav.getModel().get("java.lang.Boolean");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
+        }
+
+        assertTrue(result);
+        
+    }
+    
+    @Test
+    public void createGroup() throws Exception {
+
+    	String value = "cn=testGroup,dc=dataone,dc=org";
+        Subject group = new Subject();
+        group.setValue(value);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, baos);
+        String groupString = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/groups");
+        request.addParameter("group", groupString);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        boolean result = false;
+        try {
+            ModelAndView mav = testController.createGroup(request, response);
+            result = (Boolean) mav.getModel().get("java.lang.Boolean");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertTrue(result);
+        
+    }
+    
+    @Test
+    public void addGroupMembers() throws Exception {
+
+    	String value = "cn=testGroup,dc=dataone,dc=org";
+        Subject group = new Subject();
+        group.setValue(value);
+        
+        String subjectValue = "cn=test1,dc=dataone,dc=org";
+        Subject subject = new Subject();
+        subject.setValue(subjectValue);
+        Person person = new Person();
+        person.setSubject(subject);
+        person.addGivenName("test");
+        person.setFamilyName("test");
+        person.addEmail("test@dataone.org");
+        SubjectList members = new SubjectList();
+        members.addPerson(person);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, baos);
+        String groupString = baos.toString("UTF-8");
+        
+        baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(members, baos);
+        String membersString = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/Mock/groups");
+        request.addParameter("groupName", groupString);
+        request.addParameter("members", membersString);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        boolean result = false;
+        try {
+            ModelAndView mav = testController.addGroupMembers(request, response);
+            result = (Boolean) mav.getModel().get("java.lang.Boolean");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration: " + ex);
+        }
+
+        assertTrue(result);
+        
+    }
+    
+    @Test
+    public void removeGroupMembers() throws Exception {
+
+    	String value = "cn=testGroup,dc=dataone,dc=org";
+        Subject group = new Subject();
+        group.setValue(value);
+        
+        String subjectValue = "cn=test1,dc=dataone,dc=org";
+        Subject subject = new Subject();
+        subject.setValue(subjectValue);
+        Person person = new Person();
+        person.setSubject(subject);
+        person.addGivenName("test");
+        person.setFamilyName("test");
+        person.addEmail("test@dataone.org");
+        SubjectList members = new SubjectList();
+        members.addPerson(person);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, baos);
+        String groupString = baos.toString("UTF-8");
+        
+        baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(members, baos);
+        String membersString = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/Mock/groups");
+        request.addParameter("groupName", groupString);
+        request.addParameter("members", membersString);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        boolean result = false;
+        try {
+            ModelAndView mav = testController.removeGroupMembers(request, response);
+            result = (Boolean) mav.getModel().get("java.lang.Boolean");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration: " + ex);
         }
 
         assertTrue(result);

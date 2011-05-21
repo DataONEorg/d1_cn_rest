@@ -45,6 +45,8 @@ import org.springframework.web.servlet.ModelAndView;
 public class IdentityController extends AbstractProxyController implements ServletContextAware {
 
     private static final String ACCOUNTS_PATH = "/accounts";
+    private static final String GROUPS_PATH = "/groups";
+
     private ServletContext servletContext;
 
     
@@ -113,6 +115,23 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
+    @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.POST)
+    public ModelAndView verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+
+    	// TODO: get the Session object from?
+    	Session session = null;
+    	// get params from request
+    	String requesUri = request.getRequestURI();
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf("/") + 1);
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+    	
+		boolean success = cnIdentity.verifyAccount(session, subject);
+
+        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
+
+    }
+    
     @RequestMapping(value = ACCOUNTS_PATH + "/map", method = RequestMethod.POST)
     public ModelAndView mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
@@ -129,6 +148,85 @@ public class IdentityController extends AbstractProxyController implements Servl
 		}
     	
 		boolean success = cnIdentity.mapIdentity(session, subject);
+
+        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
+
+    }
+    
+    @RequestMapping(value = GROUPS_PATH, method = RequestMethod.POST)
+    public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// TODO: get the Session object from?
+    	Session session = null;
+    	// get params from request
+        Subject group = null;
+    	String groupString = request.getParameter("group");
+    	try {
+			group = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(groupString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create Group from input");
+		}
+    	
+		boolean success = cnIdentity.createGroup(session, group);
+
+        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
+
+    }
+    
+    @RequestMapping(value = GROUPS_PATH, method = RequestMethod.PUT)
+    public ModelAndView addGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// TODO: get the Session object from?
+    	Session session = null;
+    	// get params from request
+        Subject group = null;
+    	String groupString = request.getParameter("groupName");
+    	try {
+			group = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(groupString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create Group from input");
+		}
+		SubjectList members = null;
+    	String memberString = request.getParameter("members");
+    	try {
+			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, new ByteArrayInputStream(memberString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create SubjectList from members input");
+		}
+    	
+		boolean success = cnIdentity.addGroupMembers(session, group, members);
+
+        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
+
+    }
+    
+    @RequestMapping(value = GROUPS_PATH, method = RequestMethod.DELETE)
+    public ModelAndView removeGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// TODO: get the Session object from?
+    	Session session = null;
+    	// get params from request
+        Subject group = null;
+    	String groupString = request.getParameter("groupName");
+    	try {
+			group = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(groupString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create Group from input");
+		}
+		SubjectList members = null;
+    	String memberString = request.getParameter("members");
+    	try {
+			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, new ByteArrayInputStream(memberString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create SubjectList from members input");
+		}
+    	
+		boolean success = cnIdentity.removeGroupMembers(session, group, members);
 
         return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
 
