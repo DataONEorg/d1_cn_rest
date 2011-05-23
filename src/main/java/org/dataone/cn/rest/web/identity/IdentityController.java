@@ -115,6 +115,27 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
+    @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.PUT)
+    public ModelAndView updateAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+
+    	// TODO: get the Session object from?
+    	Session session = null;
+    	// get params from request
+        Person person = null;
+    	String personString = request.getParameter("person");
+    	try {
+			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, new ByteArrayInputStream(personString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create Person from input");
+		}
+    	
+		Subject subject = cnIdentity.updateAccount(session, person);
+
+        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.Subject", subject);
+
+    }
+    
     @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.POST)
     public ModelAndView verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 

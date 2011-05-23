@@ -119,6 +119,42 @@ public class IdentityTestCase {
     }
     
     @Test
+    public void updateAccount() throws Exception {
+
+    	// register
+    	registerAccount();
+    	
+    	// now update
+    	String subjectValue = "cn=test1,dc=dataone,dc=org";
+        Subject subject = new Subject();
+        subject.setValue(subjectValue);
+        Person person = new Person();
+        person.setSubject(subject);
+        person.addGivenName("update");
+        person.setFamilyName("update");
+        person.addEmail("update@dataone.org");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(person, baos);
+        String personValue = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/Mock/accounts");
+        request.addParameter("person", personValue);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        Subject retSubject = null;
+        try {
+            ModelAndView mav = testController.updateAccount(request, response);
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.Subject");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertNotNull(retSubject);
+        assertTrue(retSubject.getValue().equals(subjectValue));        
+        
+    }
+    
+    @Test
     public void verifyAccount() throws Exception {
 
     	// create the account first
