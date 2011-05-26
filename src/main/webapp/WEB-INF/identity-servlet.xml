@@ -19,7 +19,7 @@
         <!--  <context:include-filter type="regex" expression="org.dataone.cn.rest.web.identity.IdentityController"/> -->
     </context:component-scan>
     
-    <bean name="cnIdentity" class="org.dataone.service.cn.tier2.impl.CNIdentityLDAPImpl">
+    <bean name="cnIdentity" class="org.dataone.service.cn.impl.CNIdentityLDAPImpl">
         <property name="server" value="ldap://fred.msi.ucsb.edu:389"/>
     </bean>
     

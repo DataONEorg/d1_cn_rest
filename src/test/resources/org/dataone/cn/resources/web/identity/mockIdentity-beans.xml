@@ -23,7 +23,7 @@
 		</spring:property>
 	</spring:bean>
         
-	<spring:bean id="cnIdentity" class="org.dataone.service.cn.tier2.impl.CNIdentityLDAPImpl">
+	<spring:bean id="cnIdentity" class="org.dataone.service.cn.impl.CNIdentityLDAPImpl">
        	<spring:property name="server" value="ldap://fred.msi.ucsb.edu:389"/>
    	</spring:bean>
 	<context:component-scan base-package="org.dataone.cn.rest.web.identity" />
