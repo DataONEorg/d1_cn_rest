@@ -210,6 +210,40 @@ public class IdentityTestCase {
         
     }
     
+    /**
+     * Requires session in order to work!
+     * @throws Exception
+     */
+    @Test
+    public void confirmMapIdentity() throws Exception {
+
+    	// make the mapping request before trying to confirm
+    	this.mapIdentity();
+    	
+    	String value = "cn=test2,dc=dataone,dc=org";
+        Subject subject = new Subject();
+        subject.setValue(value);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(subject, baos);
+        String subjectString = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts/confirm");
+        request.addParameter("subject", subjectString);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        boolean result = false;
+        try {
+            ModelAndView mav = testController.confirmMapIdentity(request, response);
+            result = (Boolean) mav.getModel().get("java.lang.Boolean");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertTrue(result);
+        
+    }
+    
     @Test
     public void createGroup() throws Exception {
 
