@@ -18,6 +18,7 @@ import org.dataone.service.types.Person;
 import org.dataone.service.types.Subject;
 import org.dataone.service.types.SubjectList;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -183,6 +184,7 @@ public class IdentityTestCase {
      * Requires session in order to work!
      * @throws Exception
      */
+    @Ignore
     @Test
     public void mapIdentity() throws Exception {
 
@@ -214,6 +216,7 @@ public class IdentityTestCase {
      * Requires session in order to work!
      * @throws Exception
      */
+    @Ignore
     @Test
     public void confirmMapIdentity() throws Exception {
 
@@ -243,7 +246,7 @@ public class IdentityTestCase {
         assertTrue(result);
         
     }
-    
+    @Ignore
     @Test
     public void createGroup() throws Exception {
 
@@ -270,7 +273,7 @@ public class IdentityTestCase {
         assertTrue(result);
         
     }
-    
+    @Ignore
     @Test
     public void addGroupMembers() throws Exception {
 
@@ -312,7 +315,8 @@ public class IdentityTestCase {
         assertTrue(result);
         
     }
-    
+
+    @Ignore
     @Test
     public void removeGroupMembers() throws Exception {
 
