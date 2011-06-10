@@ -75,7 +75,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.GET)
-    public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented {
+    public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
     	// TODO: get the Session object from?
     	Session session = null;
