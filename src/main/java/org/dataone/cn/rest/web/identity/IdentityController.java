@@ -10,6 +10,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.service.cn.CNIdentity;
@@ -56,7 +57,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented {
 
     	// TODO: get the Session object from?
-    	Session session = null;
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String query = request.getParameter("query");
     	int start = 0;
