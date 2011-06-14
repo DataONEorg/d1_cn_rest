@@ -31,11 +31,11 @@
         </property>
     </bean>
     
-    <bean id="xmlBooleanViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="java.lang.Boolean"/>
+    <bean id="xmlSuccessFlagViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="org.dataone.service.types.SuccessFlag"/>
         <property name="contentType" value="text/xml" />
         <property name="marshaller">
-            <oxm:jibx-marshaller id="jibxBooleanMarshallerResponse" target-class="java.lang.Boolean"/>
+            <oxm:jibx-marshaller id="jibxSuccessFlagMarshallerResponse" target-class="org.dataone.service.types.SuccessFlag"/>
         </property>
     </bean>
 
