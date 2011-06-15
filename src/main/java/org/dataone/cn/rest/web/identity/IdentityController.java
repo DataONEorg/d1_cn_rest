@@ -56,7 +56,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.GET)
     public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented {
 
-    	// TODO: get the Session object from?
+    	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String query = request.getParameter("query");
@@ -78,8 +78,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.GET)
     public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
     	String subjectString = requesUri.substring(requesUri.lastIndexOf("/") + 1);
@@ -95,8 +95,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.POST)
     public ModelAndView registerAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Person person = null;
     	String personString = request.getParameter("person");
@@ -116,8 +116,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.PUT)
     public ModelAndView updateAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Person person = null;
     	String personString = request.getParameter("person");
@@ -137,8 +137,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.POST)
     public ModelAndView verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
     	String subjectString = requesUri.substring(requesUri.lastIndexOf("/") + 1);
@@ -154,8 +154,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH + "/map", method = RequestMethod.POST)
     public ModelAndView mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Subject subject = null;
     	String subjectString = request.getParameter("subject");
@@ -175,8 +175,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH + "/confirm", method = RequestMethod.POST)
     public ModelAndView confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Subject subject = null;
     	String subjectString = request.getParameter("subject");
@@ -196,8 +196,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.POST)
     public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Subject group = null;
     	String groupString = request.getParameter("group");
@@ -217,8 +217,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.PUT)
     public ModelAndView addGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Subject group = null;
     	String groupString = request.getParameter("groupName");
@@ -246,8 +246,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.DELETE)
     public ModelAndView removeGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
-    	// TODO: get the Session object from?
-    	Session session = null;
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
         Subject group = null;
     	String groupString = request.getParameter("groupName");
