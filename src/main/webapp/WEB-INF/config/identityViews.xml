@@ -30,13 +30,5 @@
             <oxm:jibx-marshaller id="jibxSubjectMarshallerResponse" target-class="org.dataone.service.types.Subject"/>
         </property>
     </bean>
-    
-    <bean id="xmlSuccessFlagViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.SuccessFlag"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
-            <oxm:jibx-marshaller id="jibxSuccessFlagMarshallerResponse" target-class="org.dataone.service.types.SuccessFlag"/>
-        </property>
-    </bean>
 
 </beans>

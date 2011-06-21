@@ -135,7 +135,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.POST)
-    public ModelAndView verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -147,12 +147,10 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		boolean success = cnIdentity.verifyAccount(session, subject);
 
-        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
-
     }
     
     @RequestMapping(value = ACCOUNTS_PATH + "/map", method = RequestMethod.POST)
-    public ModelAndView mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -168,12 +166,10 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		boolean success = cnIdentity.mapIdentity(session, subject);
 
-        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
-
     }
     
     @RequestMapping(value = ACCOUNTS_PATH + "/confirm", method = RequestMethod.POST)
-    public ModelAndView confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -189,12 +185,10 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		boolean success = cnIdentity.confirmMapIdentity(session, subject);
 
-        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
-
     }
     
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.POST)
-    public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -210,12 +204,10 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		boolean success = cnIdentity.createGroup(session, group);
 
-        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
-
     }
     
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.PUT)
-    public ModelAndView addGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void addGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -239,7 +231,6 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		boolean success = cnIdentity.addGroupMembers(session, group, members);
 
-        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
 
     }
     
