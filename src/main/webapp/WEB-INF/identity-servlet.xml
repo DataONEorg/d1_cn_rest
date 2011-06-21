@@ -20,7 +20,7 @@
     </context:component-scan>
     
     <bean name="cnIdentity" class="org.dataone.service.cn.impl.CNIdentityLDAPImpl">
-        <property name="server" value="ldap://fred.msi.ucsb.edu:389"/>
+        <property name="server" value="ldap://localhost:389"/>
     </bean>
     
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
