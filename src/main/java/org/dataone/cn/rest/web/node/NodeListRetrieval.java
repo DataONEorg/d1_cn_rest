@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.proxy.http.ProxyServletResponseWrapper;
-import org.dataone.cn.rest.proxy.service.ProxyObjectService;
+import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.ServiceFailure;
@@ -36,7 +36,7 @@ public class NodeListRetrieval {
     private String nodeListIdentifier = "registry";
     @Autowired
     @Qualifier("proxyObjectService")
-    ProxyObjectService proxyObjectService;
+    ProxyCNReadService proxyObjectService;
     public NodeList retrieveNodeList (HttpServletRequest request, HttpServletResponse response, ServletContext servletContext) throws ServiceFailure{
                 NodeList nodeList = null;
         SystemMetadata systemMetadata = null;

@@ -6,6 +6,7 @@
     <objectFormat>
         <fmtid>eml://ecoinformatics.org/eml-2.0.1</fmtid>
         <formatName>Ecological Metadata Language, version 2.0.1</formatName>
+        <scienceMetadata>true</scienceMetadata>
     </objectFormat>
 	<!-- 
 		introducing an error to simulate malformed systemmetadata returned (not closing size element)

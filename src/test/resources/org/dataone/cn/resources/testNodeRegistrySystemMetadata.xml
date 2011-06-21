@@ -6,6 +6,7 @@
     <objectFormat>
         <fmtid>application/octet-stream</fmtid>
         <formatName>Octet Stream</formatName>
+        <scienceMetadata>false</scienceMetadata>
     </objectFormat>
     <size>1</size>
     <submitter>DataONE</submitter>

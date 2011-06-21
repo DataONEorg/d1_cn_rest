@@ -11,8 +11,8 @@
 <!--        <context:property-placeholder location="classpath:/org/dataone/cn/rest/resources/proxyMetacat.properties"/> -->
 
         <context:component-scan base-package="org.dataone.cn.rest.proxy.controller" >
-            <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.ObjectCollectionController"/>
-            <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?:ObjectController|AbstractProxyController)"/>
+            <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.SearchController"/>
+            <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?:CNReadController|AbstractProxyController)"/>
           <!--  <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?!ObjectCollectionController)"/> -->
         </context:component-scan>
 <!--        <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" /> -->

@@ -17,7 +17,7 @@
     </context:component-scan>
 
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
-        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.MetacatProxyObjectServiceImpl"/>
+        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxyCNReadServiceImpl|MetacatProxyCNCoreServiceImpl)"/>
         <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxySearchServiceImpl)"/>
     </context:component-scan>
 
@@ -33,15 +33,5 @@
 	
 	<oxm:jibx-marshaller id="jibxMarshallerSystemMetadata" target-class="org.dataone.service.types.SystemMetadata"/>
 -->	
-
-<!-- Not certain about AOP just yet, autowire first, and then think about aspect impl
-	<aop:config>
-	  <aop:aspect id="crudService" ref="crudServiceImpl" />
-	</aop:config>
-	
-	<aop:config>
-	  <aop:aspect id="logService" ref="logServiceImpl" />
-	</aop:config> 
--->
 	
 </beans>

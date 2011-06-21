@@ -154,11 +154,43 @@
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
-
+    <servlet>
+        <servlet-name>metacatCNCore</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/formats/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/formats/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/formats</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/log</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/log/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/reserve</url-pattern>
+    </servlet-mapping>
+   <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/reserve/</url-pattern>
+    </servlet-mapping>
     <servlet>
         <servlet-name>metacatSearch</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>metacatSearch</servlet-name>
@@ -167,31 +199,31 @@
     <servlet>
         <servlet-name>mercurySearch</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
+        <load-on-startup>3</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>mercurySearch</servlet-name>
         <url-pattern>/mercury/*</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>metacatObject</servlet-name>
+        <servlet-name>metacatCNRead</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
+        <load-on-startup>4</load-on-startup>c
     </servlet>
     <servlet-mapping>
-        <servlet-name>metacatObject</servlet-name>
+        <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/object/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>metacatObject</servlet-name>
+        <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/meta/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>metacatObject</servlet-name>
+        <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/resolve/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>metacatObject</servlet-name>
+        <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/checksum/*</url-pattern>
     </servlet-mapping>
 
@@ -215,11 +247,11 @@
     <servlet>
         <servlet-name>node</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>4</load-on-startup>
+         <load-on-startup>5</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>node</servlet-name>
+        <servlet-name>cnCoreNode</servlet-name>
         <url-pattern>/node</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
@@ -234,7 +266,7 @@
     <servlet>
         <servlet-name>identity</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>5</load-on-startup>
+         <load-on-startup>6</load-on-startup>
     </servlet>
     
     <servlet-mapping>

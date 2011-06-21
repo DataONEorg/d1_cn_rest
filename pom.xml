@@ -48,6 +48,16 @@
     </build>
     <repositories>
         <repository>
+            <id>dataone.org</id>
+            <url>http://dev-testing.dataone.org/maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>sonatype.org</id>
             <url>http://repository.sonatype.org/content/repositories/central</url>
             <releases>

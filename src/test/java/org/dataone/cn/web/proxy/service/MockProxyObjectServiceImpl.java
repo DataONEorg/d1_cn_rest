@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.dataone.cn.rest.proxy.service.ProxyObjectService;
+import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.ServiceFailure;
@@ -26,7 +26,7 @@ import org.springframework.core.io.Resource;
  */
 @Service("mockProxyObjectServiceImpl")
 @Qualifier("proxyObjectService")
-public class MockProxyObjectServiceImpl implements ProxyObjectService {
+public class MockProxyObjectServiceImpl implements ProxyCNReadService {
 
     static final int SIZE = 8192;
     @Autowired
@@ -65,7 +65,10 @@ public class MockProxyObjectServiceImpl implements ProxyObjectService {
     public void getChecksum(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    @Override
+    public void assertRelation(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     public void writeToResponse(InputStream in, OutputStream out) throws IOException {
         try {
             BufferedInputStream f = new BufferedInputStream(in);
@@ -100,4 +103,6 @@ public class MockProxyObjectServiceImpl implements ProxyObjectService {
     public void setNodeSystemMetadataResource(Resource nodeSystemMetadataResource) {
         this.nodeSystemMetadataResource = nodeSystemMetadataResource;
     }
+
+
 }

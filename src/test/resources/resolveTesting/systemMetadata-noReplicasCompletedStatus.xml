@@ -6,6 +6,7 @@
     <objectFormat>
         <fmtid>eml://ecoinformatics.org/eml-2.0.1</fmtid>
         <formatName>Ecological Metadata Language, version 2.0.1</formatName>
+        <scienceMetadata>true</scienceMetadata>
     </objectFormat>
     <size>0</size>
     <submitter>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</submitter>
