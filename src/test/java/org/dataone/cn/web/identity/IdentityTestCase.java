@@ -170,10 +170,10 @@ public class IdentityTestCase {
         
         boolean success = false;
         try {
-            ModelAndView mav = testController.verifyAccount(request, response);
-            success = (Boolean) mav.getModel().get("java.lang.Boolean");
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration" + ex);
+            testController.verifyAccount(request, response);
+            success = true;
+        } catch (Exception ex) {
+            fail("Test fail" + ex);
         }
 
         assertTrue(success);
@@ -202,10 +202,10 @@ public class IdentityTestCase {
         
         boolean result = false;
         try {
-            ModelAndView mav = testController.mapIdentity(request, response);
-            result = (Boolean) mav.getModel().get("java.lang.Boolean");
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration" + ex);
+            testController.mapIdentity(request, response);
+            result = true;
+        } catch (Exception ex) {
+            fail("Test fail" + ex);
         }
 
         assertTrue(result);
@@ -237,10 +237,10 @@ public class IdentityTestCase {
         
         boolean result = false;
         try {
-            ModelAndView mav = testController.confirmMapIdentity(request, response);
-            result = (Boolean) mav.getModel().get("java.lang.Boolean");
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration" + ex);
+            testController.confirmMapIdentity(request, response);
+            result = true;
+        } catch (Exception ex) {
+            fail("Test fail" + ex);
         }
 
         assertTrue(result);
@@ -264,10 +264,10 @@ public class IdentityTestCase {
         
         boolean result = false;
         try {
-            ModelAndView mav = testController.createGroup(request, response);
-            result = (Boolean) mav.getModel().get("java.lang.Boolean");
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration" + ex);
+            testController.createGroup(request, response);
+            result = true;
+        } catch (Exception ex) {
+            fail("Test fail" + ex);
         }
 
         assertTrue(result);
@@ -306,10 +306,10 @@ public class IdentityTestCase {
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean result = false;
         try {
-            ModelAndView mav = testController.addGroupMembers(request, response);
-            result = (Boolean) mav.getModel().get("java.lang.Boolean");
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration: " + ex);
+            testController.addGroupMembers(request, response);
+            result = true;
+        } catch (Exception ex) {
+            fail("Test fail" + ex);
         }
 
         assertTrue(result);
