@@ -255,11 +255,11 @@
         <url-pattern>/node</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>node</servlet-name>
+        <servlet-name>cnCoreNode</servlet-name>
         <url-pattern>/node/</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>node</servlet-name>
+        <servlet-name>cnCoreNode</servlet-name>
         <url-pattern>/node/*</url-pattern>
     </servlet-mapping>
     
