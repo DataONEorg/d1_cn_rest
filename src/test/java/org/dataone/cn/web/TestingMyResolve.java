@@ -32,7 +32,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import org.dataone.cn.rest.web.node.NodeListRetrieval;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
-import org.dataone.cn.web.proxy.service.MockProxyObjectServiceImpl;
+import org.dataone.cn.web.proxy.service.MockProxyCNReadServiceImpl;
 import org.junit.runner.RunWith;
 
 
@@ -57,7 +57,7 @@ public class TestingMyResolve {
     private static Integer nodelistRefreshIntervalSeconds = 120;
     private WebApplicationContext wac;
     private Resource nodeRegistryResource;
-    private MockProxyObjectServiceImpl testProxyObject;
+    private MockProxyCNReadServiceImpl testProxyObject;
     private NodeListRetrieval testNodeListRetrieval;
     // need to test that resolveFilter behaves properly under various conditions:
     // (general)
@@ -89,7 +89,7 @@ public class TestingMyResolve {
         if (wac == null) {
             throw new Exception("cannot find Web Application Context!");
         }
-        testProxyObject = wac.getBean(MockProxyObjectServiceImpl.class);
+        testProxyObject = wac.getBean(MockProxyCNReadServiceImpl.class);
         nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
         testProxyObject.setNodeRegistryResource(nodeRegistryResource);
         testNodeListRetrieval = wac.getBean(NodeListRetrieval.class);

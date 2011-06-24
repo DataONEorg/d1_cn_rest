@@ -7,7 +7,7 @@ package org.dataone.cn.web;
 import org.dataone.cn.rest.web.node.NodeController;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
-import org.dataone.cn.web.proxy.service.MockProxyObjectServiceImpl;
+import org.dataone.cn.web.proxy.service.MockProxyCNReadServiceImpl;
 import org.dataone.service.types.NodeList;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -34,7 +34,7 @@ public class NodeRegistryTestCase {
     private WebApplicationContext wac;
     private NodeController testController;
     private Resource nodeRegistryResource;
-    private MockProxyObjectServiceImpl testProxyObject;
+    private MockProxyCNReadServiceImpl testProxyObject;
 
     @Before
     public void before() throws Exception {
@@ -42,7 +42,7 @@ public class NodeRegistryTestCase {
         if (wac == null) {
             throw new Exception("cannot find Web Application Context!");
         }
-        testProxyObject = wac.getBean(MockProxyObjectServiceImpl.class);
+        testProxyObject = wac.getBean(MockProxyCNReadServiceImpl.class);
         nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
         testController = wac.getBean(NodeController.class);
     }

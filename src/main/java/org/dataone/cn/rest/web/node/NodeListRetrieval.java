@@ -35,8 +35,8 @@ import org.springframework.stereotype.Component;
 public class NodeListRetrieval {
     private String nodeListIdentifier = "registry";
     @Autowired
-    @Qualifier("proxyObjectService")
-    ProxyCNReadService proxyObjectService;
+    @Qualifier("proxyCNReadService")
+    ProxyCNReadService proxyCNReadService;
     public NodeList retrieveNodeList (HttpServletRequest request, HttpServletResponse response, ServletContext servletContext) throws ServiceFailure{
                 NodeList nodeList = null;
         SystemMetadata systemMetadata = null;
@@ -58,7 +58,7 @@ public class NodeListRetrieval {
             }
             ProxyServletResponseWrapper metaResponse = new ProxyServletResponseWrapper(response);
             try {
-                proxyObjectService.getSystemMetadata(servletContext, request, metaResponse, currentNodeListIdentifier, AcceptType.XML);
+                proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, currentNodeListIdentifier, AcceptType.XML);
             } catch (BaseException ex) {
                 throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
             } catch (Exception ex) {
@@ -84,7 +84,7 @@ public class NodeListRetrieval {
         } while (!(systemMetadata.getObsoletedByList().isEmpty()));
         ProxyServletResponseWrapper objectResponse = new ProxyServletResponseWrapper(response);
         try {
-            proxyObjectService.get(servletContext, request, objectResponse, systemMetadata.getIdentifier().getValue(), AcceptType.XML);
+            proxyCNReadService.get(servletContext, request, objectResponse, systemMetadata.getIdentifier().getValue(), AcceptType.XML);
         } catch (BaseException ex) {
             throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
         } catch (Exception ex) {

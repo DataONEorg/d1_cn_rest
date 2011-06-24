@@ -24,9 +24,9 @@ import org.springframework.core.io.Resource;
  *
  * @author waltz
  */
-@Service("mockProxyObjectServiceImpl")
-@Qualifier("proxyObjectService")
-public class MockProxyObjectServiceImpl implements ProxyCNReadService {
+@Service("mockProxyCNReadServiceImpl")
+@Qualifier("proxyCNReadService")
+public class MockProxyCNReadServiceImpl implements ProxyCNReadService {
 
     static final int SIZE = 8192;
     @Autowired
