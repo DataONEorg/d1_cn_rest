@@ -75,8 +75,8 @@ public class ResolveFilter implements Filter {
     // parameters and their default values  (defaulting for production environment)
     // (see d1_cn_rest/src/main/webapp/WEB-INF/web.xml for std settings of these parameters) 
     private Integer nodelistRefreshIntervalSeconds = 2 * 60;
-    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/d1_schemas/dataoneTypes.xsd";
-    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/trunk/d1_schemas/dataoneTypes.xsd";
+    private String nodelistSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_2/dataoneTypes.xsd";
+    private String systemmetadataSchemaLocation = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_2/dataoneTypes.xsd";
     private String targetEnvironment = "prod";
     private boolean useSchemaValidation = true;
     // static for this deployment of the dataone architecture
