@@ -21,6 +21,7 @@
     
     <bean name="cnIdentity" class="org.dataone.service.cn.impl.CNIdentityLDAPImpl">
         <property name="server" value="ldap://localhost:389"/>
+        <property name="password" value="PASSWORD"/>
     </bean>
     
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
