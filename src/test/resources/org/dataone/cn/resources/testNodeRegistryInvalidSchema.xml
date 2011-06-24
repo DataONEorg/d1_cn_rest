@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <d1:nodeList xmlns:d1="http://ns.dataone.org/service/types/0.6.1"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- 	xsi:schemaLocation="http://ns.dataone.org/service/types/0.6.1 https://repository.dataone.org/software/cicore/branches/D1_SCHEMA_0_6_2/dataoneTypes.xsd">
+ 	xsi:schemaLocation="http://ns.dataone.org/service/types/0.6.1 https://repository.dataone.org/software/cicore/trunk/d1_schemas/dataoneTypes.xsd">
     <!-- This instance document was generated for testing purposes
          It contains no useful information.
     
 	Making invalid by removing name and description elements from the sequence
 
     -->
-    <node replicate="true" type="mn" environment="dev" synchronize="true">
+    <node replicate="true" type="mn"  synchronize="true">
       <identifier>example_daac_mn_id</identifier>
       <baseURL>http://eg.d1m3.dataone.utk.edu</baseURL>
       <services>
 	<service version="0.5" available="true">
 	  <name>mn_crud</name>
-	  <method name="get" rest="object/${GUID}" implemented="true" />
-	  <method name="getSystemMetadata" rest="meta/${GUID}" implemented="true" />
+	  
+	  
 	  </service>
 	</services>
       <synchronization>
@@ -28,7 +28,7 @@
 	<status dateChecked="2010-08-23T11:11:11.123456" success="false"/>
 	</health>
       </node>
-    <node replicate="true" type="mn" environment="prod" synchronize="true">
+    <node replicate="true" type="mn"  synchronize="true">
       <identifier>knb_mn_id</identifier>
       <name>example_knb_mn_entry</name>
       <description>a node full of goodness</description>
@@ -36,12 +36,12 @@
       <services>
 	<service version="0.4" available="true">
 	  <name>mn_crud</name>
-	  <method name="get" rest="object/${GUID}" implemented="true"/>
-	  <method name="getSystemMetadata" rest="meta/${GUID}" implemented="true"/>
+	  
+	  
 	  </service>
 	<service version="0.4" available="true">
 	  <name>mn_replication</name>
-	  <method name="listObjects" rest="GET object" implemented="true"/>
+	  
 	  </service>
 	
 	</services>
