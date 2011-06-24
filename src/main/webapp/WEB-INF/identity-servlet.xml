@@ -19,6 +19,7 @@
         <!--  <context:include-filter type="regex" expression="org.dataone.cn.rest.web.identity.IdentityController"/> -->
     </context:component-scan>
     
+    <!-- configure to match the LDAP server configuration -->
     <bean name="cnIdentity" class="org.dataone.service.cn.impl.CNIdentityLDAPImpl">
         <property name="server" value="ldap://localhost:389"/>
         <property name="password" value="PASSWORD"/>
