@@ -33,5 +33,7 @@
 	
 	<oxm:jibx-marshaller id="jibxMarshallerSystemMetadata" target-class="org.dataone.service.types.SystemMetadata"/>
 -->	
-	
+	<bean id="nodeRegistryResource" class="org.springframework.core.io.ClassPathResource" >
+            <constructor-arg type="java.lang.String" value="org/dataone/cn/rest/resources/nodeRegistry.xml"/>
+        </bean>
 </beans>

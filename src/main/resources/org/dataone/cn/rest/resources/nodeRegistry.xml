@@ -6,7 +6,7 @@
         <identifier>c3p0</identifier>
         <name>cn_dev</name>
         <description>Development Protocol Coordinating Node</description>
-        <baseURL>http://cn-dev.dataone.org/cn/</baseURL>
+        <baseURL>https://cn-dev.dataone.org/cn/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>cn_crud</name>
@@ -26,10 +26,10 @@
         <identifier>r2d2</identifier>
         <name>dryad</name>
         <description>Development AstroMech Member Node</description>
-        <baseURL>http://gmn-dev.dyndns.org/mn/</baseURL>
+        <baseURL>https://gmn-dev.dyndns.org/mn/</baseURL>
         <services>
             <service version="0.6" available="true">
-                <name>mn_crud</name>    
+                <name>mn_crud</name>
             </service>
         </services>
         <synchronization>
@@ -46,7 +46,7 @@
         <identifier>m0t1</identifier>
         <name>knb</name>
         <description>Development Member node</description>
-        <baseURL>http://knb-test-1.dataone.org/knb/d1</baseURL>
+        <baseURL>https://knb-test-1.dataone.org/knb/d1</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>mn_crud</name>
@@ -66,7 +66,7 @@
         <identifier>d1m1</identifier>
         <name>dryad</name>
         <description>Production Member node with Dryad Data</description>
-        <baseURL>http://r2d2.dataone.org/mn/</baseURL>
+        <baseURL>https://r2d2.dataone.org/mn/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>mn_crud</name>
@@ -86,7 +86,7 @@
         <identifier>d1m2</identifier>
         <name>knb</name>
         <description>Production Member node with KNB Data</description>
-        <baseURL>http://d1m2.ecoinformatics.org/knb/d1/</baseURL>
+        <baseURL>https://d1m2.ecoinformatics.org/knb/d1/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>mn_crud</name>
@@ -106,7 +106,7 @@
         <identifier>d1m3</identifier>
         <name>ornldaac</name>
         <description>Production Member node with DAAC Data</description>
-        <baseURL>http://daacmn.dataone.utk.edu/mn/</baseURL>
+        <baseURL>https://daacmn.dataone.utk.edu/mn/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>mn_crud</name>
@@ -126,7 +126,7 @@
         <identifier>d1c0</identifier>
         <name>cn</name>
         <description>Production Coordinating Node</description>
-        <baseURL>http://cn.dataone.org/cn/</baseURL>
+        <baseURL>https://cn.dataone.org/cn/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>cn_crud</name>
@@ -137,10 +137,10 @@
         <identifier>d1c1</identifier>
         <name>cn-unm-1</name>
         <description>Production Coordinating node at University of New Mexico</description>
-        <baseURL>http://cn-unm-1.dataone.org/cn/</baseURL>
+        <baseURL>https://cn-unm-1.dataone.org/cn/</baseURL>
         <services>
             <service version="0.6" available="true">
-                <name>cn_crud</name> 
+                <name>cn_crud</name>
             </service>
         </services>
         <health state="up">
@@ -152,7 +152,7 @@
         <identifier>d1c2</identifier>
         <name>cn-ucsb-1</name>
         <description>Production Coordinating node at University of California Santa Barbara</description>
-        <baseURL>http://cn-ucsb-1.dataone.org/cn/</baseURL>
+        <baseURL>https://cn-ucsb-1.dataone.org/cn/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>cn_crud</name>
@@ -167,83 +167,10 @@
         <identifier>d1c3</identifier>
         <name>cn-orc-1</name>
         <description>Production Coordinating node at Oak Ridge National Laboratories UTK Campus</description>
-        <baseURL>http://cn-orc-1.dataone.org/cn/</baseURL>
+        <baseURL>https://cn-orc-1.dataone.org/cn/</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>cn_crud</name>
-            </service>
-        </services>
-        <health state="up">
-            <ping success="true" lastSuccess="1900-01-01T00:00:00Z"/>
-            <status success="false" dateChecked="1900-01-01T00:00:00Z"/>
-        </health>
-    </node>
-    <node replicate="true" synchronize="true" type="mn" >
-        <identifier>s1m1</identifier>
-        <name>knb</name>
-        <description>Dynamic Development Member Node 1</description>
-        <baseURL>http://mn-rpw-silo1.communalware.net/mn/</baseURL>
-        <services>
-            <service version="0.6" available="true">
-                <name>mn_crud</name>
-            </service>
-        </services>
-        <synchronization>
-            <schedule hour="*" mday="*" min="10,40" mon="*" sec="0" wday="*" year="*"/>
-            <lastHarvested>1900-01-01T00:00:00Z</lastHarvested>
-            <lastCompleteHarvest>1900-01-01T00:00:00Z</lastCompleteHarvest>
-        </synchronization>
-        <health state="up">
-            <ping success="true" lastSuccess="1900-01-01T00:00:00Z"/>
-            <status success="false" dateChecked="1900-01-01T00:00:00Z"/>
-        </health>
-    </node>
-    <node replicate="true" synchronize="true" type="mn" >
-        <identifier>s1m2</identifier>
-        <name>dryad</name>
-        <description>Dynamic Development Member Node 2</description>
-        <baseURL>http://mn-rpw-silo2.communalware.net/mn/</baseURL>
-        <services>
-            <service version="0.6" available="true">
-                <name>mn_crud</name>
-            </service>
-        </services>
-        <synchronization>
-            <schedule hour="*" mday="*" min="10,40" mon="*" sec="0" wday="*" year="*"/>
-            <lastHarvested>1900-01-01T00:00:00Z</lastHarvested>
-            <lastCompleteHarvest>1900-01-01T00:00:00Z</lastCompleteHarvest>
-        </synchronization>
-        <health state="up">
-            <ping success="true" lastSuccess="1900-01-01T00:00:00Z"/>
-            <status success="false" dateChecked="1900-01-01T00:00:00Z"/>
-        </health>
-    </node>
-    <node replicate="true" synchronize="true" type="cn" >
-        <identifier>c1c1</identifier>
-        <name>cn_rpw_orc</name>
-        <description>Development Coordinating Node 1</description>
-        <baseURL>http://cn-rpw-orc.communalware.net/cn/</baseURL>
-        <services>
-            <service version="0.6" available="true">
-                <name>cn_crud</name>
-            </service>
-        </services>
-        <health state="up">
-            <ping success="true" lastSuccess="1900-01-01T00:00:00Z"/>
-            <status success="false" dateChecked="1900-01-01T00:00:00Z"/>
-        </health>
-    </node>
-    <node replicate="true" synchronize="true" type="cn" >
-        <identifier>c1c2</identifier>
-        <name>cn_rpw_unm</name>
-        <description>Development Coordinating Node 2</description>
-        <baseURL>http://cn-rpw-unm.communalware.net/cn/</baseURL>
-        <services>
-            <service version="0.5" available="true">
-                <name>cn_crud</name>
-                
-                
-                
             </service>
         </services>
         <health state="up">
