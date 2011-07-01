@@ -8,6 +8,7 @@ package org.dataone.cn.rest.web.node;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,86 +28,109 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * This Component retrieves the nodeList from a store.
+ * Currently, the store is the filesystem, but it will soon
+ * be the Dataone LDAP.
+ * Eventually, this class will be replaced by a separate
+ * component that will be used by various cn processes
+ * 
  * @author waltz
  */
 @Component
 @Qualifier("nodeListRetrieval")
 public class NodeListRetrieval {
-    private String nodeListIdentifier = "registry";
-    @Autowired
-    @Qualifier("proxyCNReadService")
-    ProxyCNReadService proxyCNReadService;
-    public NodeList retrieveNodeList (HttpServletRequest request, HttpServletResponse response, ServletContext servletContext) throws ServiceFailure{
-                NodeList nodeList = null;
-        SystemMetadata systemMetadata = null;
-        String metaNodeListPath = null;
-        String currentNodeListIdentifier = nodeListIdentifier;
-        AuthToken token = new AuthToken();
-        token.setToken("public");
-        // Flip through all the registry entries to find the most up-to-date!
-        // XXX probably need to do determine a way to cache this so that
-        // we don't always have to query metacat for it,
-        // but to make it efficient, we will have to base a cache upon
-        // some kind of signal of update with metacat, So re-evaluate code
-        // when JMS is implemented
-        do {
-            // we have made at least one pass of the loop if systemMetadata is not null
-            if (systemMetadata != null) {
-                List<Identifier> obsoletedBy = systemMetadata.getObsoletedByList();
-                currentNodeListIdentifier = obsoletedBy.get(obsoletedBy.size() - 1).getValue();
-            }
-            ProxyServletResponseWrapper metaResponse = new ProxyServletResponseWrapper(response);
-            try {
-                proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, currentNodeListIdentifier, AcceptType.XML);
-            } catch (BaseException ex) {
-                throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
-            } catch (Exception ex) {
-                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-            }
-            ByteArrayInputStream inputStream;
+//    private String nodeListIdentifier = "registry";
+//    @Autowired
+//    @Qualifier("proxyCNReadService")
+//    ProxyCNReadService proxyCNReadService;
+//    public NodeList retrieveNodeList (HttpServletRequest request, HttpServletResponse response, ServletContext servletContext) throws ServiceFailure{
+//                NodeList nodeList = null;
+//        SystemMetadata systemMetadata = null;
+//        String metaNodeListPath = null;
+//        String currentNodeListIdentifier = nodeListIdentifier;
+//        AuthToken token = new AuthToken();
+//        token.setToken("public");
+//        // Flip through all the registry entries to find the most up-to-date!
+//        // XXX probably need to do determine a way to cache this so that
+//        // we don't always have to query metacat for it,
+//        // but to make it efficient, we will have to base a cache upon
+//        // some kind of signal of update with metacat, So re-evaluate code
+//        // when JMS is implemented
+//        do {
+//            // we have made at least one pass of the loop if systemMetadata is not null
+//            if (systemMetadata != null) {
+//                List<Identifier> obsoletedBy = systemMetadata.getObsoletedByList();
+//                currentNodeListIdentifier = obsoletedBy.get(obsoletedBy.size() - 1).getValue();
+//            }
+//            ProxyServletResponseWrapper metaResponse = new ProxyServletResponseWrapper(response);
+//            try {
+//                proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, currentNodeListIdentifier, AcceptType.XML);
+//            } catch (BaseException ex) {
+//                throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
+//            } catch (Exception ex) {
+//                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//            }
+//            ByteArrayInputStream inputStream;
+//
+//            inputStream = new ByteArrayInputStream(metaResponse.getData());
+//
+//            try {
+//                systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
+//            } catch (IOException ex) {
+//                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:"  + ex.getMessage());
+//            } catch (InstantiationException ex) {
+//                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//            } catch (IllegalAccessException ex) {
+//                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//            } catch (JiBXException ex) {
+//                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//            }
+//            response.resetBuffer();
+//            response.reset();
+//        } while (!(systemMetadata.getObsoletedByList().isEmpty()));
+//        ProxyServletResponseWrapper objectResponse = new ProxyServletResponseWrapper(response);
+//        try {
+//            proxyCNReadService.get(servletContext, request, objectResponse, systemMetadata.getIdentifier().getValue(), AcceptType.XML);
+//        } catch (BaseException ex) {
+//            throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
+//        } catch (Exception ex) {
+//            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//        }
+//        // XXX Node list will grow, so this may need to be handled in some other fashion in future
+//        // maybe wrap the unmarshalTypeFromStream with an output stream call as well?
+//        ByteArrayInputStream inputStream;
+//
+//        inputStream = new ByteArrayInputStream(objectResponse.getData());
+//
+//        try {
+//            nodeList = TypeMarshaller.unmarshalTypeFromStream(NodeList.class, inputStream);
+//        } catch (IOException ex) {
+//            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//        } catch (InstantiationException ex) {
+//            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//        } catch (IllegalAccessException ex) {
+//            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//        } catch (JiBXException ex) {
+//            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
+//        }
+//        return nodeList;
+//    }
 
-            inputStream = new ByteArrayInputStream(metaResponse.getData());
+        private org.springframework.core.io.Resource nodeRegistryResource;
 
-            try {
-                systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
-            } catch (IOException ex) {
-                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:"  + ex.getMessage());
-            } catch (InstantiationException ex) {
-                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-            } catch (IllegalAccessException ex) {
-                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-            } catch (JiBXException ex) {
-                throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-            }
-            response.resetBuffer();
-            response.reset();
-        } while (!(systemMetadata.getObsoletedByList().isEmpty()));
-        ProxyServletResponseWrapper objectResponse = new ProxyServletResponseWrapper(response);
-        try {
-            proxyCNReadService.get(servletContext, request, objectResponse, systemMetadata.getIdentifier().getValue(), AcceptType.XML);
-        } catch (BaseException ex) {
-            throw new ServiceFailure(ex.getDetail_code(), "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getDescription());
-        } catch (Exception ex) {
-            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-        }
-        // XXX Node list will grow, so this may need to be handled in some other fashion in future
-        // maybe wrap the unmarshalTypeFromStream with an output stream call as well?
-        ByteArrayInputStream inputStream;
 
-        inputStream = new ByteArrayInputStream(objectResponse.getData());
+    // this is the junk solution that is no good for anybody
+    // read a resource that is a nodeList and return it to the controller
+    public NodeList retrieveNodeList() throws ServiceFailure, IOException, InstantiationException, IllegalAccessException, JiBXException{
 
-        try {
-            nodeList = TypeMarshaller.unmarshalTypeFromStream(NodeList.class, inputStream);
-        } catch (IOException ex) {
-            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-        } catch (InstantiationException ex) {
-            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-        } catch (IllegalAccessException ex) {
-            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-        } catch (JiBXException ex) {
-            throw new ServiceFailure("4801", "Proxied from CoordinatingNodeRegisterImpl.listNodes:" + ex.getMessage());
-        }
+        NodeList nodeList = TypeMarshaller.unmarshalTypeFromStream(NodeList.class, nodeRegistryResource.getInputStream());
         return nodeList;
+
+    }
+    // corresponding junk resource to aforementioned solution
+    // Spring will inject the resource from configuration
+    @Resource
+    public void setNodeRegistryResource(org.springframework.core.io.Resource nodeRegistryResource) {
+        this.nodeRegistryResource = nodeRegistryResource;
     }
 }

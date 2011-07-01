@@ -32,18 +32,11 @@ public class MockProxyCNReadServiceImpl implements ProxyCNReadService {
     @Autowired
     @Qualifier("nodeSystemMetadataResource")
     private Resource nodeSystemMetadataResource;
-    @Autowired
-    @Qualifier("nodeRegistryResource")
-    private Resource nodeRegistryResource;
+
 
     @Override
     public void get(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
-        try {
-            this.writeToResponse(nodeRegistryResource.getInputStream(), response.getOutputStream());
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new ServiceFailure("1030", ex.getMessage());
-        }
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -86,14 +79,6 @@ public class MockProxyCNReadServiceImpl implements ProxyCNReadService {
                 out.close();
             }
         }
-    }
-
-    public Resource getNodeRegistryResource() {
-        return nodeRegistryResource;
-    }
-
-    public void setNodeRegistryResource(Resource nodeRegistryResource) {
-        this.nodeRegistryResource = nodeRegistryResource;
     }
 
     public Resource getNodeSystemMetadataResource() {

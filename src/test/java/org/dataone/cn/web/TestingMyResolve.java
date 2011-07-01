@@ -57,8 +57,9 @@ public class TestingMyResolve {
     private static Integer nodelistRefreshIntervalSeconds = 120;
     private WebApplicationContext wac;
     private Resource nodeRegistryResource;
-    private MockProxyCNReadServiceImpl testProxyObject;
+    private MockProxyCNReadServiceImpl testProxyCNReadService;
     private NodeListRetrieval testNodeListRetrieval;
+ 
     // need to test that resolveFilter behaves properly under various conditions:
     // (general)
     // 1. All's well
@@ -89,10 +90,11 @@ public class TestingMyResolve {
         if (wac == null) {
             throw new Exception("cannot find Web Application Context!");
         }
-        testProxyObject = wac.getBean(MockProxyCNReadServiceImpl.class);
+        testProxyCNReadService = wac.getBean(MockProxyCNReadServiceImpl.class);
         nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
-        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        
         testNodeListRetrieval = wac.getBean(NodeListRetrieval.class);
+        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
     }
 
     @Test
@@ -456,10 +458,12 @@ public class TestingMyResolve {
 
     }
 
+
     @Test
     public void testNodeListNullBaseURLError() throws FileNotFoundException {
         nodeRegistryResource = wac.getBean("nodeRegistryNullBaseURLResource", Resource.class);
-        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
+
         ResourceLoader fsrl = new FileSystemResourceLoader();
         ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
         MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
@@ -498,8 +502,7 @@ public class TestingMyResolve {
     @Test
     public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
         nodeRegistryResource = wac.getBean("nodeRegistryInvalidSchemaResource", Resource.class);
-        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
-
+        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
         BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         String content = new String(responseWrapper.getBuffer());
@@ -524,8 +527,7 @@ public class TestingMyResolve {
     @Test
     public void testNodeListMalformedXML() throws FileNotFoundException {
         nodeRegistryResource = wac.getBean("nodeRegistryMalformedXMLResource", Resource.class);
-        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
-
+        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
         BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         String content = new String(responseWrapper.getBuffer());

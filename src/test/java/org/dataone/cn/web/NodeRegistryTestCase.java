@@ -5,6 +5,7 @@
 package org.dataone.cn.web;
 
 import org.dataone.cn.rest.web.node.NodeController;
+import org.dataone.cn.rest.web.node.NodeListRetrieval;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.cn.web.proxy.service.MockProxyCNReadServiceImpl;
@@ -34,7 +35,7 @@ public class NodeRegistryTestCase {
     private WebApplicationContext wac;
     private NodeController testController;
     private Resource nodeRegistryResource;
-    private MockProxyCNReadServiceImpl testProxyObject;
+    private NodeListRetrieval testNodeListRetrieval;
 
     @Before
     public void before() throws Exception {
@@ -42,7 +43,7 @@ public class NodeRegistryTestCase {
         if (wac == null) {
             throw new Exception("cannot find Web Application Context!");
         }
-        testProxyObject = wac.getBean(MockProxyCNReadServiceImpl.class);
+        testNodeListRetrieval = wac.getBean(NodeListRetrieval.class);
         nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
         testController = wac.getBean(NodeController.class);
     }
@@ -73,7 +74,7 @@ public class NodeRegistryTestCase {
         String nodeListString = new String(nodeListOutput.toByteArray());
 
         ByteArrayOutputStream nodeRegistryOutput = new ByteArrayOutputStream();
-        testProxyObject.writeToResponse(nodeRegistryResource.getInputStream(), nodeRegistryOutput);
+        testNodeListRetrieval.writeToResponse(nodeRegistryResource.getInputStream(), nodeRegistryOutput);
         String nodeRegistryString = new String(nodeRegistryOutput.toByteArray());
 
 
@@ -90,11 +91,11 @@ public class NodeRegistryTestCase {
          */
     }
     //XXX Temporary ignore, this should work once we are complete with new NodeRegistry impl
-    @Ignore
+
     @Test
     public void testInvalidSchemaNodeList() throws Exception {
         nodeRegistryResource = wac.getBean("nodeRegistryInvalidSchemaResource", Resource.class);
-        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
         testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/node/");
@@ -112,11 +113,11 @@ public class NodeRegistryTestCase {
         fail("InvalidSchema should have failed on Service Failure!");
     }
     //XXX Temporary ignore, this should work once we are complete with new NodeRegistry impl
-    @Ignore
+
     @Test
     public void testMalformedXMLSchemaNodeList() throws Exception {
         nodeRegistryResource = wac.getBean("nodeRegistryMalformedXMLResource", Resource.class);
-        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
         testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/node/");
@@ -139,7 +140,7 @@ public class NodeRegistryTestCase {
 //    @Test
 //    public void testNullBaseURLSchemaNodeList() throws Exception {
 //        nodeRegistryResource = wac.getBean("nodeRegistryNullBaseURLResource", Resource.class);
-//        testProxyObject.setNodeRegistryResource(nodeRegistryResource);
+//        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
 //        testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
 //
 //        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/node/");

@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -35,6 +36,7 @@ import org.dataone.service.EncodingUtilities;
 import org.dataone.service.exceptions.*;
 import org.dataone.service.types.Node;
 import org.dataone.service.types.NodeList;
+import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -129,13 +131,24 @@ public class ResolveFilter implements Filter {
         if (this.baseUrlMap == null) {
             HashMap<String, String> cacheUrlMap = new HashMap<String, String>();
 
-            ServletContext sc = filterConfig.getServletContext();
+//            ServletContext sc = filterConfig.getServletContext();
 
             try {
-                nodeList = nodeListRetrieval.retrieveNodeList(request, response, sc);
+
+                    //                nodeList = nodeListRetrieval.retrieveNodeList(request, response, sc);
+                    nodeList = nodeListRetrieval.retrieveNodeList();
+
             } catch (ServiceFailure sf) {
                 sf.setDetail_code("4150");
                 throw sf;
+            } catch (IOException ex) {
+                throw new ServiceFailure("4150", "Error retrieving Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
+            } catch (InstantiationException ex) {
+                throw new ServiceFailure("4150", "Error instantiating Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
+            } catch (IllegalAccessException ex) {
+                throw new ServiceFailure("4150", "Error accessing Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
+            } catch (JiBXException ex) {
+                throw new ServiceFailure("4150", "Error serializing Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
             }
             if (nodeList.sizeNodeList() == 0) {
                 throw new ServiceFailure("4150", "Error parsing Nodelist: nodeList is Empty!");

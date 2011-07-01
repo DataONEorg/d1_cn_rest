@@ -5,6 +5,8 @@
 package org.dataone.cn.rest.web.node;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -36,40 +38,38 @@ public class NodeController extends AbstractProxyController implements ServletCo
     private static final String GET_NODE_PATH = "/" + Constants.RESOURCE_NODE + "/";
     private static final String GET_NODELIST_PATH = "/" + Constants.RESOURCE_NODE;
     private ServletContext servletContext;
-    /* This should be uncommented out when a real solution is in place
+
     @Autowired
     @Qualifier("nodeListRetrieval")
     NodeListRetrieval  nodeListRetrieval;
     @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure{
 
-        NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
-
+        //NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
+        NodeList nodeList;
+        try {
+            nodeList = nodeListRetrieval.retrieveNodeList();
+        } catch (IOException ex) {
+           throw new ServiceFailure("4801", "Error retrieving Nodelist: " + ex.getMessage());
+        } catch (InstantiationException ex) {
+            throw new ServiceFailure("4801", "Error instantiating Nodelist: " + ex.getMessage());
+        } catch (IllegalAccessException ex) {
+           throw new ServiceFailure("4801", "Error accessing Nodelist: "+ ex.getMessage());
+        } catch (JiBXException ex) {
+           throw new ServiceFailure("4801", "Error serializing Nodelist: " + ex.getMessage());
+        }
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.NodeList", nodeList);
 
     }
-    */
-    private org.springframework.core.io.Resource nodeRegistryResource;
 
-    // this is the junk solution that is no good for anybody
-    @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET)
-    public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, IOException, InstantiationException, IllegalAccessException, JiBXException{
 
-        NodeList nodeList = TypeMarshaller.unmarshalTypeFromStream(NodeList.class, nodeRegistryResource.getInputStream());
-        return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.NodeList", nodeList);
-
-    }
     @RequestMapping(value = GET_NODE_PATH + "**", method = RequestMethod.GET)
     public void getNode(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         throw new Exception("search Not implemented Yet!");
 
     }
-    // corresponding junk resource to aforementioned solution
-    @Resource
-    public void setTestLogFilePersistDataName(org.springframework.core.io.Resource nodeRegistryResource) {
-        this.nodeRegistryResource = nodeRegistryResource;
-    }
+
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;
