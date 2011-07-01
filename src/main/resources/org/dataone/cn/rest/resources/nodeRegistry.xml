@@ -46,7 +46,7 @@
         <identifier>m0t1</identifier>
         <name>knb</name>
         <description>Development Member node</description>
-        <baseURL>https://knb-test-1.dataone.org/knb/d1</baseURL>
+        <baseURL>https://knb-test-1.dataone.org/knb/d1/mn</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>mn_crud</name>
@@ -86,7 +86,7 @@
         <identifier>d1m2</identifier>
         <name>knb</name>
         <description>Production Member node with KNB Data</description>
-        <baseURL>https://d1m2.ecoinformatics.org/knb/d1/</baseURL>
+        <baseURL>https://d1m2.ecoinformatics.org/knb/d1/mn</baseURL>
         <services>
             <service version="0.6" available="true">
                 <name>mn_crud</name>
