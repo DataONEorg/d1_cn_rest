@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
+import org.dataone.service.Constants;
 import org.dataone.service.cn.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
@@ -42,8 +43,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller("identityController")
 public class IdentityController extends AbstractProxyController implements ServletContextAware {
 
-    private static final String ACCOUNTS_PATH = "/accounts";
-    private static final String GROUPS_PATH = "/groups";
+    private static final String ACCOUNTS_PATH = "/" + Constants.RESOURCE_ACCOUNTS;
+    private static final String GROUPS_PATH = "/" + Constants.RESOURCE_GROUPS;
 
     private ServletContext servletContext;
 
