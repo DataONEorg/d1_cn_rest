@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
 //import org.springframework.test.web.*;
+import javax.annotation.Resource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,13 +31,16 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import org.dataone.cn.rest.web.node.NodeListRetrieval;
+import org.dataone.cn.ldap.LdapPopulation;
+import org.dataone.cn.service.ldap.impl.CNCoreLDAPImpl;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
-import org.dataone.cn.web.proxy.service.MockProxyCNReadServiceImpl;
+import org.dataone.service.cn.CNCore;
+import org.junit.After;
 import org.junit.runner.RunWith;
 
 
-import org.springframework.core.io.*;  //FileSystemResourceLoader;
+import org.springframework.core.io.FileSystemResourceLoader;  //FileSystemResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,16 +54,12 @@ import org.xml.sax.helpers.DefaultHandler;
 @ContextConfiguration(locations = {"classpath:/org/dataone/cn/resources/web/mockObject-dispatcher.xml", "classpath:/org/dataone/cn/resources/web/mockObject-beans.xml"}, loader = ProxyWebApplicationContextLoader.class)
 public class TestingMyResolve {
 
-    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd";
-    private static String deployedNodelistLocationURL = "http://cn-dev.dataone.org/cn/node";
+    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_2/dataoneTypes.xsd";
     private static boolean debuggingOutput = true;
     private static boolean useSchemas = true;
     private static Integer nodelistRefreshIntervalSeconds = 120;
-    private WebApplicationContext wac;
-    private Resource nodeRegistryResource;
-    private MockProxyCNReadServiceImpl testProxyCNReadService;
-    private NodeListRetrieval testNodeListRetrieval;
- 
+    private CNCore cnLdapCore;
+    private LdapPopulation cnLdapPopulation;
     // need to test that resolveFilter behaves properly under various conditions:
     // (general)
     // 1. All's well
@@ -84,19 +84,23 @@ public class TestingMyResolve {
     // system deployments through a separate service)
     // 1. mangled urls (unfollowable)
     // 2. connection timeout from metacat (/meta service)
+
+    @Resource
+    public void setTestController(CNCoreLDAPImpl cnLdapCore) {
+        this.cnLdapCore = cnLdapCore;
+    }
+    @Resource
+    public void setCNLdapPopulation(LdapPopulation ldapPopulation) {
+        this.cnLdapPopulation = ldapPopulation;
+    }
     @Before
     public void before() throws Exception {
-        wac = WebApplicationContextUtils.getRequiredWebApplicationContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
-        if (wac == null) {
-            throw new Exception("cannot find Web Application Context!");
-        }
-        testProxyCNReadService = wac.getBean(MockProxyCNReadServiceImpl.class);
-        nodeRegistryResource = wac.getBean("nodeRegistryResource", Resource.class);
-        
-        testNodeListRetrieval = wac.getBean(NodeListRetrieval.class);
-        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
+        cnLdapPopulation.populateTestMNs();
     }
-
+    @After
+    public void after() throws Exception {
+        cnLdapPopulation.deletePopulatedMns();
+    }
     @Test
     public void testInit() {
 
@@ -406,7 +410,7 @@ public class TestingMyResolve {
 
         ResolveFilter rf = new ResolveFilter();
         rf.setUseSchemaValidation(useSchemas);
-        rf.setNodeListRetrieval(testNodeListRetrieval);
+        rf.setNodeListRetrieval(cnLdapCore);
         try {
             rf.init(fc);
         } catch (ServletException se) {
@@ -459,97 +463,6 @@ public class TestingMyResolve {
     }
 
 
-    @Test
-    public void testNodeListNullBaseURLError() throws FileNotFoundException {
-        nodeRegistryResource = wac.getBean("nodeRegistryNullBaseURLResource", Resource.class);
-        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
-
-        ResourceLoader fsrl = new FileSystemResourceLoader();
-        ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
-        MockFilterConfig fc = new MockFilterConfig(ProxyWebApplicationContextLoader.SERVLET_CONTEXT, "ResolveFilter");
-        
-        ResolveFilter rf = new ResolveFilter();
-
-        try {
-            rf.init(fc);
-        } catch (ServletException se) {
-            //se.printStackTrace();
-            fail("servlet exception at ResolveFilter.init(fc)");
-        }
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
-
-        String content = new String(responseWrapper.getBuffer());
-        if (debuggingOutput) {
-            System.out.println("===== output =====");
-            System.out.print(content.toString());
-            System.out.println("------------------");
-        }
-        // examine status code
-        int httpStatus = responseWrapper.getStatus();
-        assertTrue("error response status is " + httpStatus, httpStatus == 500);
-
-        // examine contents of the response
-        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
-        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
-
-        assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
-        assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
-        assertThat("Nodelist null baseURL error produced-3", content, containsString("Error parsing Nodelist: cannot get baseURL"));
-
-    }
-
-    @Test
-    public void testNodeListInvalidVsSchemaError() throws FileNotFoundException {
-        nodeRegistryResource = wac.getBean("nodeRegistryInvalidSchemaResource", Resource.class);
-        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
-
-        String content = new String(responseWrapper.getBuffer());
-        if (debuggingOutput) {
-            System.out.println("===== output =====");
-            System.out.print(content.toString());
-            System.out.println("------------------");
-        }
-        // examine status code
-        int httpStatus = responseWrapper.getStatus();
-        assertTrue("error response status is 500", httpStatus == 500);
-
-        // examine contents of the response
-        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
-        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
-
-        assertThat("NodeList Invalid vs Schema error produced-1", content, containsString("errorCode=\"500\""));
-        assertThat("Nodelist Invalid vs Schema error produced-2", content, containsString("detailCode=\"4150\""));
-//        assertThat("Nodelist Invalid vs Schema error produced-3", content, containsString("document invalid against NodeList schema"));
-    }
-
-    @Test
-    public void testNodeListMalformedXML() throws FileNotFoundException {
-        nodeRegistryResource = wac.getBean("nodeRegistryMalformedXMLResource", Resource.class);
-        testNodeListRetrieval.setNodeRegistryResource(nodeRegistryResource);
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
-
-        String content = new String(responseWrapper.getBuffer());
-        if (debuggingOutput) {
-            System.out.println("===== output =====");
-            System.out.print(content.toString());
-            System.out.println("------------------");
-        }
-        // examine status code
-        int httpStatus = responseWrapper.getStatus();
-        assertTrue("error response status is 500", httpStatus == 500);
-
-        // examine contents of the response
-        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
-        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
-
-        assertThat("NodeList null baseURL error produced-1", content, containsString("errorCode=\"500\""));
-        assertThat("Nodelist null baseURL error produced-2", content, containsString("detailCode=\"4150\""));
-//        assertThat("Nodelist null baseURL error produced-3", content, containsString("Cannot parse NodeList"));
-
-    }
-
 //	@Test
     public void testDestroy() {
         fail("Not yet implemented"); // TODO
@@ -565,7 +478,7 @@ public class TestingMyResolve {
         ResolveFilter rf = new ResolveFilter();
         rf.setUseSchemaValidation(this.useSchemas);
         rf.setNodelistRefreshIntervalSeconds(this.nodelistRefreshIntervalSeconds);
-        rf.setNodeListRetrieval(testNodeListRetrieval);
+        rf.setNodeListRetrieval(cnLdapCore);
         try {
             rf.init(fc);
         } catch (ServletException se) {

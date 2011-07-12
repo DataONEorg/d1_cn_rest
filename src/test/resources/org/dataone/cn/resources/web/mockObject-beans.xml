@@ -10,66 +10,41 @@
         http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-2.0.xsd">
-	<spring:bean id="log4jInitialization"
+
+
+    <spring:bean id="mylog"
+    class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
+        <spring:property name="logName" value="log"/>
+    </spring:bean>
+    <spring:bean id="log4jInitialization"
 		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<spring:property name="targetClass">
-			<spring:value>org.springframework.util.Log4jConfigurer</spring:value>
-		</spring:property>
-		<spring:property name="targetMethod" value="initLogging" />
-		<spring:property name="arguments">
-			<spring:list>
-				<spring:value>classpath:org/dataone/cn/resources/web/log4j.properties</spring:value>
-			</spring:list>
-		</spring:property>
-	</spring:bean>
+        <spring:property name="targetClass">
+            <spring:value>org.springframework.util.Log4jConfigurer</spring:value>
+        </spring:property>
+        <spring:property name="targetMethod" value="initLogging" />
+        <spring:property name="arguments">
+            <spring:list>
+                <spring:value>classpath:org/dataone/cn/resources/web/log4j.properties</spring:value>
+            </spring:list>
+        </spring:property>
+    </spring:bean>
 
-        <spring:bean id="nodeRegistryNullBaseURLXmlResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/testNodeRegistryNullBaseURL.xml"/>
-        </spring:bean>
+    <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
 
-        <spring:bean id="nodeRegistryNullBaseURLResource" class="org.springframework.aop.framework.ProxyFactoryBean">
-            <spring:property name="proxyInterfaces" value="org.springframework.core.io.Resource"/>
-            <spring:property name="target" ref="nodeRegistryNullBaseURLXmlResource"/>
-        </spring:bean>
-
-        <spring:bean id="nodeRegistryMalformedXMLXmlResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/testNodeRegistryMalformedXML.xml"/>
-        </spring:bean>
-
-        <spring:bean id="nodeRegistryMalformedXMLResource" class="org.springframework.aop.framework.ProxyFactoryBean">
-            <spring:property name="proxyInterfaces" value="org.springframework.core.io.Resource"/>
-            <spring:property name="target" ref="nodeRegistryMalformedXMLXmlResource"/>
-        </spring:bean>
-
-        <spring:bean id="nodeRegistryInvalidSchemaXmlResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/testNodeRegistryInvalidSchema.xml"/>
-        </spring:bean>
-
-        <spring:bean id="nodeRegistryInvalidSchemaResource" class="org.springframework.aop.framework.ProxyFactoryBean">
-            <spring:property name="proxyInterfaces" value="org.springframework.core.io.Resource"/>
-            <spring:property name="target" ref="nodeRegistryInvalidSchemaXmlResource"/>
-        </spring:bean>
-
-        <spring:bean id="nodeRegistryXmlResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/testNodeRegistry.xml"/>
-        </spring:bean>
-
-        <spring:bean id="nodeRegistryResource" class="org.springframework.aop.framework.ProxyFactoryBean">
-            <spring:qualifier value="nodeRegistryResource"/>
-            <spring:property name="proxyInterfaces" value="org.springframework.core.io.Resource"/>
-            <spring:property name="target" ref="nodeRegistryXmlResource"/>
-        </spring:bean>
-        
-        <spring:bean id="nodeSystemMetadataXmlResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/testNodeRegistrySystemMetadata.xml"/>
-        </spring:bean>
-
-        <spring:bean id="nodeSystemMetadataResource" class="org.springframework.aop.framework.ProxyFactoryBean">
-            <spring:qualifier value="nodeSystemMetadataResource"/>
-            <spring:property name="proxyInterfaces" value="org.springframework.core.io.Resource"/>
-            <spring:property name="target" ref="nodeSystemMetadataXmlResource"/>
-        </spring:bean>
-
-        <context:component-scan base-package="org.dataone.cn.web.proxy.service" />
-        <context:component-scan base-package="org.dataone.cn.rest.web.node" />
+    <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
+        factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
+    <spring:bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+        <spring:constructor-arg ref="contextSource" />
+    </spring:bean>
+<!--
+    <spring:bean id="cnRegisterLDAPImpl" class="org.dataone.cn.service.ldap.impl.CNRegisterLDAPImpl" >
+        <spring:property name="ldapTemplate" ref="ldapTemplate" />
+        <spring:qualifier value="cnCoreLDAP" />
+    </spring:bean>
+    -->
+    <context:annotation-config/>
+    <context:component-scan base-package="org.dataone.cn.service.ldap.impl"  />
+    <context:component-scan base-package="org.dataone.cn.web.proxy.service" />
+    <context:component-scan base-package="org.dataone.cn.rest.web.node" />
+    <context:component-scan base-package="org.dataone.cn.ldap" />
 </spring:beans>

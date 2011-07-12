@@ -34,27 +34,12 @@
     <originMemberNode>OriginMemberNode0</originMemberNode>
     <authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
     <replica>
-        <replicaMemberNode>m0t1</replicaMemberNode>
+        <replicaMemberNode>sq1d</replicaMemberNode>
         <replicationStatus>queued</replicationStatus>
         <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
     </replica>
     <replica>
-        <replicaMemberNode>r2d2</replicaMemberNode>
-        <replicationStatus>queued</replicationStatus>
-        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
-    </replica>
-    <replica>
-        <replicaMemberNode>d1m3</replicaMemberNode>
-        <replicationStatus>queued</replicationStatus>
-        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
-    </replica>
-    <replica>
-        <replicaMemberNode>d1m2</replicaMemberNode>
-        <replicationStatus>queued</replicationStatus>
-        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
-    </replica>
-    <replica>
-        <replicaMemberNode>d1c1</replicaMemberNode>
+        <replicaMemberNode>sqR1</replicaMemberNode>
         <replicationStatus>queued</replicationStatus>
         <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
     </replica>

@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.service.Constants;
+import org.dataone.service.cn.CNCore;
+import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.NodeList;
 import org.jibx.runtime.JiBXException;
@@ -40,24 +42,17 @@ public class NodeController extends AbstractProxyController implements ServletCo
     private ServletContext servletContext;
 
     @Autowired
-    @Qualifier("nodeListRetrieval")
-    NodeListRetrieval  nodeListRetrieval;
+    @Qualifier("cnCoreLDAP")
+    CNCore  nodeListRetrieval;
+    
     @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET)
-    public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure{
+    public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented{
 
         //NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
         NodeList nodeList;
-        try {
-            nodeList = nodeListRetrieval.retrieveNodeList();
-        } catch (IOException ex) {
-           throw new ServiceFailure("4801", "Error retrieving Nodelist: " + ex.getMessage());
-        } catch (InstantiationException ex) {
-            throw new ServiceFailure("4801", "Error instantiating Nodelist: " + ex.getMessage());
-        } catch (IllegalAccessException ex) {
-           throw new ServiceFailure("4801", "Error accessing Nodelist: "+ ex.getMessage());
-        } catch (JiBXException ex) {
-           throw new ServiceFailure("4801", "Error serializing Nodelist: " + ex.getMessage());
-        }
+ 
+        nodeList = nodeListRetrieval.listNodes();
+
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.NodeList", nodeList);
 
     }

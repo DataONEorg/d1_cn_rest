@@ -10,11 +10,11 @@
 		http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-
-    <context:component-scan base-package="org.dataone.cn.rest.web.node"  >
-        <context:include-filter type="regex" expression="org.dataone.cn.rest.web.node.NodeListRetrieval"/>
-        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.web.node.NodeController"/>
-    </context:component-scan>
+    <bean id="mylog"
+    class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
+        <property name="logName" value="log"/>
+    </bean>
+    
 
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
         <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxyCNReadServiceImpl|MetacatProxyCNCoreServiceImpl)"/>
@@ -32,8 +32,14 @@
 	<oxm:jibx-marshaller id="jibxMarshallerResponse" target-class="org.dataone.service.types.ObjectList"/>
 	
 	<oxm:jibx-marshaller id="jibxMarshallerSystemMetadata" target-class="org.dataone.service.types.SystemMetadata"/>
--->	
-	<bean id="nodeRegistryResource" class="org.springframework.core.io.ClassPathResource" >
-            <constructor-arg type="java.lang.String" value="org/dataone/cn/rest/resources/nodeRegistry.xml"/>
-        </bean>
+-->
+    <bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
+    <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
+        factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
+    <bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+        <constructor-arg ref="contextSource" />
+        <qualifier value="ldapTemplate"/>
+    </bean>
+    <context:component-scan base-package="org.dataone.cn.service.ldap.impl"  />
+
 </beans>

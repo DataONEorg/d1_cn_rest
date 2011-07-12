@@ -10,12 +10,15 @@
         http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-2.0.xsd">
-	<spring:bean id="log4jInitialization"
-		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<spring:property name="targetClass">
-			<spring:value>org.springframework.util.Log4jConfigurer</spring:value>
-		</spring:property>
-		<spring:property name="targetMethod" value="initLogging" />
+    <spring:bean id="log" class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
+        <spring:property name="logName" value="identitylog"/>
+    </spring:bean>
+
+    <spring:bean id="log4jInitialization"
+     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <spring:property name="targetClass"
+      value="org.springframework.util.Log4jConfigurer" />
+        <spring:property name="targetMethod" value="initLogging" />
 		<spring:property name="arguments">
 			<spring:list>
 				<spring:value>classpath:org/dataone/cn/resources/web/identity/log4j.properties</spring:value>
@@ -23,9 +26,20 @@
 		</spring:property>
 	</spring:bean>
         
+       <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
+
+        <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
+            factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
+        <spring:bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+            <spring:constructor-arg ref="contextSource" />
+        </spring:bean>
+
 	<spring:bean id="cnIdentity" class="org.dataone.service.cn.impl.CNIdentityLDAPImpl">
-       	<spring:property name="server" value="ldap://localhost:389"/>
+            <spring:property name="server" value="ldap://localhost:389"/>
+            <spring:qualifier value="cnIdentity" />
    	</spring:bean>
+        
+        <context:annotation-config/>
 	<context:component-scan base-package="org.dataone.cn.rest.web.identity" />
-		
+	<context:component-scan base-package="org.dataone.cn.ldap" />
 </spring:beans>

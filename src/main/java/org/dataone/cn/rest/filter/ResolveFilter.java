@@ -10,7 +10,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.logging.Level;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -31,12 +30,11 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
-import org.dataone.cn.rest.web.node.NodeListRetrieval;
 import org.dataone.service.EncodingUtilities;
+import org.dataone.service.cn.CNCore;
 import org.dataone.service.exceptions.*;
 import org.dataone.service.types.Node;
 import org.dataone.service.types.NodeList;
-import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -84,12 +82,12 @@ public class ResolveFilter implements Filter {
     // static for this deployment of the dataone architecture
     // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
-    private static String oll_d1namespaceVersion = "http://ns.dataone.org/service/types/0.6.1";
+    private static String oll_d1namespaceVersion = "http://ns.dataone.org/service/types/0.6.2";
     private static String oll_publicSchemaLocation =
-            "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_1/dataoneTypes.xsd";
+            "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_2/dataoneTypes.xsd";
     @Autowired
-    @Qualifier("nodeListRetrieval")
-    NodeListRetrieval nodeListRetrieval;
+    @Qualifier("cnCoreLDAP")
+    CNCore nodeListRetrieval;
 
     /**
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
@@ -131,25 +129,16 @@ public class ResolveFilter implements Filter {
         if (this.baseUrlMap == null) {
             HashMap<String, String> cacheUrlMap = new HashMap<String, String>();
 
-//            ServletContext sc = filterConfig.getServletContext();
-
             try {
 
-                    //                nodeList = nodeListRetrieval.retrieveNodeList(request, response, sc);
-                    nodeList = nodeListRetrieval.retrieveNodeList();
+                    nodeList = nodeListRetrieval.listNodes();
 
             } catch (ServiceFailure sf) {
                 sf.setDetail_code("4150");
                 throw sf;
-            } catch (IOException ex) {
-                throw new ServiceFailure("4150", "Error retrieving Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
-            } catch (InstantiationException ex) {
-                throw new ServiceFailure("4150", "Error instantiating Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
-            } catch (IllegalAccessException ex) {
-                throw new ServiceFailure("4150", "Error accessing Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
-            } catch (JiBXException ex) {
-                throw new ServiceFailure("4150", "Error serializing Nodelist: cannot return for baseURL " + this.baseUrlMap + ": " + ex.getMessage());
-            }
+            } catch (NotImplemented ex) {
+                throw new ServiceFailure("4150", "Error retrieving Nodelist: Not Implemented"  + ": " + ex.getMessage());
+            } 
             if (nodeList.sizeNodeList() == 0) {
                 throw new ServiceFailure("4150", "Error parsing Nodelist: nodeList is Empty!");
             }
@@ -513,11 +502,11 @@ public class ResolveFilter implements Filter {
     }
 
     //  ------   Getters and Setters --------------//
-    public NodeListRetrieval getNodeListRetrieval() {
+    public CNCore getNodeListRetrieval() {
         return nodeListRetrieval;
     }
 
-    public void setNodeListRetrieval(NodeListRetrieval nodeListRetrieval) {
+    public void setNodeListRetrieval(CNCore nodeListRetrieval) {
         this.nodeListRetrieval = nodeListRetrieval;
     }
 
