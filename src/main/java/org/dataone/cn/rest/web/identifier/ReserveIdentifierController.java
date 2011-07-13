@@ -42,9 +42,9 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
 
     private ServletContext servletContext;
     
-//    @Autowired
-//    @Qualifier("reserveIdentifierService")
-//    ReserveIdentifierService  reserveIdentifierService;
+    @Autowired
+    @Qualifier("reserveIdentifierService")
+    ReserveIdentifierService  reserveIdentifierService;
     public ReserveIdentifierController() {}
     
     @RequestMapping(value = "/" + Constants.RESOURCE_RESERVE, method = RequestMethod.POST)
@@ -64,7 +64,7 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
 		String format = request.getParameter("format");
 		String scope = request.getParameter("scope");
 		
-		pid = ReserveIdentifierService.getInstance().reserveIdentifier(session, pid, scope, format);
+		pid = reserveIdentifierService.reserveIdentifier(session, pid, scope, format);
 
         return new ModelAndView("xmlIdentifierViewResolver", "org.dataone.service.types.Identifier", pid);
 

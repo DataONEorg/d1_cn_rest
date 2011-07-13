@@ -34,6 +34,12 @@
             <spring:constructor-arg ref="contextSource" />
         </spring:bean>
         
+    <!-- configure to match the LDAP server configuration -->
+    <spring:bean name="reserveIdentifierService" class="org.dataone.service.cn.ReserveIdentifierService">
+        <spring:property name="server" value="ldap://localhost:389"/>
+        <spring:property name="password" value="password"/>
+    </spring:bean>
+    
         <context:annotation-config/>
 	<context:component-scan base-package="org.dataone.cn.rest.web.identifier" />
 	<context:component-scan base-package="org.dataone.cn.ldap" />

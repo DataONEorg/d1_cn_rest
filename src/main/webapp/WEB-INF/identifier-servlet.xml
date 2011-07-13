@@ -20,12 +20,10 @@
     </context:component-scan>
     
     <!-- configure to match the LDAP server configuration -->
-    <!--  
     <bean name="reserveIdentifierService" class="org.dataone.service.cn.ReserveIdentifierService">
         <property name="server" value="ldap://localhost:389"/>
         <property name="password" value="password"/>
     </bean>
-    -->
     
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
         <property name="alwaysUseFullPath" value="true"/>
