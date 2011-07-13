@@ -10,6 +10,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dataone.client.D1Client;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
@@ -20,10 +21,12 @@ import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.Identifier;
 import org.dataone.service.types.Session;
+import org.dataone.service.types.SystemMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -64,10 +67,51 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
 		String format = request.getParameter("format");
 		String scope = request.getParameter("scope");
 		
+		// look for existing use of the ID
+		try {
+			SystemMetadata sysmeta = D1Client.getCN().getSystemMetadata(session, pid);
+			if (sysmeta != null) {
+				throw new IdentifierNotUnique("4210", "The given pid is already in use: " + pid.getValue());
+			}
+		} catch (NotFound e) {
+			// continue - the ID can be used
+		}
+		
+		// place the reservation
 		pid = reserveIdentifierService.reserveIdentifier(session, pid, scope, format);
 
         return new ModelAndView("xmlIdentifierViewResolver", "org.dataone.service.types.Identifier", pid);
 
+    }
+    
+    @RequestMapping(value = "/" + Constants.RESOURCE_RESERVE, method = RequestMethod.GET)
+    public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+        Identifier pid = null;
+    	String pidString = request.getParameter("pid");
+    	try {
+			pid = TypeMarshaller.unmarshalTypeFromStream(Identifier.class, new ByteArrayInputStream(pidString.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create pid from input");
+		}
+		
+		// check the reservation
+		boolean hasReservation = reserveIdentifierService.hasReservation(session, pid);
+		
+		// look for existing use of the ID if there is no reservation
+		if (!hasReservation) {
+			SystemMetadata sysmeta = D1Client.getCN().getSystemMetadata(session, pid);
+			if (sysmeta != null) {
+				throw new IdentifierNotUnique(null, "The given pid is already in use: " + pid.getValue());
+			}
+		}
+		
+		// if we got here, we have the reservation
+		
     }
     
     @Override
