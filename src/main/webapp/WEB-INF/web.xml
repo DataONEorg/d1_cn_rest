@@ -208,7 +208,7 @@
     <servlet>
         <servlet-name>metacatCNRead</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>c
+        <load-on-startup>4</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
