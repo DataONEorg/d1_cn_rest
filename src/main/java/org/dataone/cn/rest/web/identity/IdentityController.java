@@ -189,7 +189,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.POST)
-    public void createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -203,7 +203,10 @@ public class IdentityController extends AbstractProxyController implements Servl
 			throw new ServiceFailure(null, "Could not create Group from input");
 		}
     	
-		boolean success = cnIdentity.createGroup(session, group);
+		Subject retGroup = cnIdentity.createGroup(session, group);
+		
+        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.Subject", retGroup);
+
 
     }
     
@@ -236,7 +239,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = GROUPS_PATH, method = RequestMethod.DELETE)
-    public ModelAndView removeGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void removeGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -259,8 +262,6 @@ public class IdentityController extends AbstractProxyController implements Servl
 		}
     	
 		boolean success = cnIdentity.removeGroupMembers(session, group, members);
-
-        return new ModelAndView("xmlBooleanViewResolver", "java.lang.Boolean", success);
 
     }
 
