@@ -10,10 +10,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.dataone.client.D1Client;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
+import org.dataone.cn.rest.proxy.http.ProxyServletResponseWrapper;
+import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
+import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.service.Constants;
 import org.dataone.service.cn.ReserveIdentifierService;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -48,6 +50,8 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
     @Autowired
     @Qualifier("reserveIdentifierService")
     ReserveIdentifierService  reserveIdentifierService;
+    @Qualifier("proxyCNReadService")
+    ProxyCNReadService proxyCNReadService;
     public ReserveIdentifierController() {}
     
     @RequestMapping(value = "/" + Constants.RESOURCE_RESERVE, method = RequestMethod.POST)
@@ -67,14 +71,24 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
 		String format = request.getParameter("format");
 		String scope = request.getParameter("scope");
 		
-		// look for existing use of the ID
+		// look for existing use of the Identifier
+		ProxyServletResponseWrapper metaResponse = new ProxyServletResponseWrapper(response);
 		try {
-			SystemMetadata sysmeta = D1Client.getCN().getSystemMetadata(session, pid);
-			if (sysmeta != null) {
+			proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, pid.getValue(), AcceptType.XML);
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(metaResponse.getData());
+			SystemMetadata systemMetadata = null;
+			try {
+				systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new ServiceFailure("1090", "Problem deserializing system metadata, " + e.getMessage());
+			}
+			// is there system meta data for the Identifier?
+			if (systemMetadata != null) {
 				throw new IdentifierNotUnique("4210", "The given pid is already in use: " + pid.getValue());
 			}
 		} catch (NotFound e) {
-			// continue - the ID can be used
+			// Identifier is not in use, continue
 		}
 		
 		// place the reservation
@@ -104,9 +118,20 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
 		
 		// look for existing use of the ID if there is no reservation
 		if (!hasReservation) {
-			SystemMetadata sysmeta = D1Client.getCN().getSystemMetadata(session, pid);
-			if (sysmeta != null) {
-				throw new IdentifierNotUnique(null, "The given pid is already in use: " + pid.getValue());
+			// look for existing use of the Identifier
+			ProxyServletResponseWrapper metaResponse = new ProxyServletResponseWrapper(response);
+			proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, pid.getValue(), AcceptType.XML);
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(metaResponse.getData());
+			SystemMetadata systemMetadata = null;
+			try {
+				systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new ServiceFailure("1090", "Problem deserializing system metadata, " + e.getMessage());
+			}
+			// is there system meta data for the Identifier?
+			if (systemMetadata != null) {
+				throw new IdentifierNotUnique("4210", "The given pid is already in use: " + pid.getValue());
 			}
 		}
 		
