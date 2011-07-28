@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.batch.utils.TypeMarshaller;
 import org.dataone.cn.ldap.LdapPopulation;
 import org.dataone.cn.rest.web.identity.IdentityController;
@@ -134,6 +135,36 @@ public class IdentityTestCase {
         Subject subjectPop = new Subject();
         subjectPop.setValue(subjectValuePop);
         cnLdapPopulation.testSubjectList.add(subjectPop);
+        
+    }
+    
+    @Test
+    public void registerAccountFromCertificate() throws Exception {
+        log.info("Test registerAccountFromCertificate");
+        String subjectValue = CertificateManager.getInstance().loadCertificate().getSubjectDN().toString();
+        
+        Subject subject = new Subject();
+        subject.setValue(subjectValue);
+        Person person = new Person();
+        person.setSubject(subject);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(person, baos);
+        String personValue = baos.toString("UTF-8");
+        
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts");
+        request.addParameter("person", personValue);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        
+        Subject retSubject = null;
+        try {
+            ModelAndView mav = testController.registerAccount(request, response);
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.Subject");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertNotNull(retSubject);
+        assertTrue(retSubject.getValue().equals(subjectValue));
         
     }
 
@@ -367,8 +398,8 @@ public class IdentityTestCase {
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean result = false;
         try {
-            ModelAndView mav = testController.removeGroupMembers(request, response);
-            result = (Boolean) mav.getModel().get("java.lang.Boolean");
+            testController.removeGroupMembers(request, response);
+            result = true;
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration: " + ex);
         }
