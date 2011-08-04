@@ -43,8 +43,8 @@
     </spring:bean>
     -->
     <context:annotation-config/>
-    <context:component-scan base-package="org.dataone.cn.service.ldap.impl"  />
+    <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
     <context:component-scan base-package="org.dataone.cn.web.proxy.service" />
     <context:component-scan base-package="org.dataone.cn.rest.web.node" />
-    <context:component-scan base-package="org.dataone.cn.ldap" />
+    <context:component-scan base-package="org.dataone.cn.ldap.v1" />
 </spring:beans>

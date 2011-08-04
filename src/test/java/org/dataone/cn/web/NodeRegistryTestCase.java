@@ -4,12 +4,13 @@
  */
 package org.dataone.cn.web;
 
-import org.dataone.cn.ldap.LdapPopulation;
+import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
 import javax.annotation.Resource;
+import org.dataone.cn.ldap.v1.NodeLdapPopulation;
 import org.dataone.cn.rest.web.node.NodeController;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
-import org.dataone.service.types.NodeList;
+import org.dataone.service.types.v1.NodeList;
 import org.junit.*;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
@@ -31,9 +32,9 @@ public class NodeRegistryTestCase {
     /** the servlet */
 
     private NodeController testController;
-    private LdapPopulation cnLdapPopulation;
+    private NodeLdapPopulation cnLdapPopulation;
     @Resource
-    public void setCNLdapPopulation(LdapPopulation ldapPopulation) {
+    public void setCNLdapPopulation(NodeLdapPopulation ldapPopulation) {
         this.cnLdapPopulation = ldapPopulation;
     }
     @Resource
@@ -59,7 +60,7 @@ public class NodeRegistryTestCase {
         NodeList nodeList = null;
         try {
             ModelAndView mav = testController.getNodeList(request, response);
-            nodeList = (NodeList) mav.getModel().get("org.dataone.service.types.NodeList");
+            nodeList = (NodeList) mav.getModel().get("org.dataone.service.types.v1.NodeList");
 
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration " + ex);

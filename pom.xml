@@ -5,13 +5,13 @@
     <groupId>org.dataone.cn</groupId>
     <artifactId>d1_cn_rest</artifactId>
     <packaging>war</packaging>
-    <version>0.6.2-SNAPSHOT</version>
+    <version>0.6.3-SNAPSHOT</version>
     <name>DataONE_Cn_Rest</name>
     <url>http://dataone.org</url>
     <parent>
         <groupId>org.dataone</groupId>
         <artifactId>d1_cn_service</artifactId>
-        <version>0.6.2-SNAPSHOT</version>
+        <version>0.6.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <properties>
@@ -174,7 +174,12 @@
             <version>1.2.9</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.0.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -196,38 +201,54 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
- 
+     <dependency>
+        <groupId>org.jibx</groupId>
+        <artifactId>jibx-run</artifactId>
+        <version>1.2.3</version>
+    </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcmail-jdk16</artifactId>
+            <version>1.46</version>
+            <scope>test</scope>
+        </dependency>
         <!--  and we have dependencies on re-usable projects that we maintain -->
 
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_common_java</artifactId>
-            <version>0.6.2-SNAPSHOT</version>
+            <version>0.6.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_libclient_java</artifactId>
-            <version>0.6.2-SNAPSHOT</version>
+            <version>0.6.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_identity_manager</artifactId>
-            <version>0.6.2-SNAPSHOT</version>
+            <version>0.6.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_rest_proxy</artifactId>
-            <version>0.6.2-SNAPSHOT</version>
+            <version>0.6.3-SNAPSHOT</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_noderegistry</artifactId>
-            <version>0.6.2-SNAPSHOT</version>
+            <version>0.6.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>

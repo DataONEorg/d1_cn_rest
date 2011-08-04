@@ -30,30 +30,30 @@ public class ContextUrlRewriteTestCase {
         /* TODO add some that will test failure as well as other conditions */
 
         HashMap<String, String> test = new HashMap<String, String>();
-        test.put("urlpath", "/object");
-        test.put("pathresult", "/metacat/object/");
-        tests.put("^/object/?$", test);
+        test.put("urlpath", "/v1/object");
+        test.put("pathresult", "/v1/metacat/object/");
+        tests.put("^/v1/object/?$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
-        test.put("pathresult", "/metacat/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
-        tests.put("^/object/?\\?(.*qt=path.*)$", test);
+        test.put("urlpath", "/v1/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
+        test.put("pathresult", "/v1/metacat/object/?qt=path&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
+        tests.put("^/v1/object/?\\?(.*qt=path.*)$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
-        test.put("pathresult", "/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
-        tests.put("^/object/?\\?(.*qt=solr.*)$", test);
+        test.put("urlpath", "/v1/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
+        test.put("pathresult", "/v1/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
+        tests.put("^/v1/object/?\\?(.*qt=solr.*)$", test);
         test = new HashMap<String, String>();
 
-        test.put("urlpath", "/metacat/object/");
-        test.put("pathresult", "/object/");
-        tests.put("^/metacat/object/$", test);
+        test.put("urlpath", "/v1/metacat/object/");
+        test.put("pathresult", "/v1/object/");
+        tests.put("^/v1/metacat/object/$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        test.put("pathresult", "/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
-        tests.put("^/metacat/object/(.+)$", test);
+        test.put("urlpath", "/v1/metacat/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
+        test.put("pathresult", "/v1/object/http%3A%2F%2Ffoo.com%2Fmeta%2F18");
+        tests.put("^/v1/metacat/object/(.+)$", test);
         test = new HashMap<String, String>();
-        test.put("urlpath", "/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
-        test.put("pathresult", "/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
-        tests.put("^/mercury/object/(.+)$", test);
+        test.put("urlpath", "/v1/mercury/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
+        test.put("pathresult", "/v1/object/?qt=solr&q=carbon&start=0&rows=20&sort=dateSysMetadataModified%20desc,%20size%20asc");
+        tests.put("^/v1/mercury/object/(.+)$", test);
 
 
 

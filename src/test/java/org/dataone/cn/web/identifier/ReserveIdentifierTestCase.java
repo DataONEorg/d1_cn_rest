@@ -4,26 +4,28 @@
  */
 package org.dataone.cn.web.identifier;
 
+import java.security.cert.X509Certificate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.io.ByteArrayOutputStream;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.cn.batch.utils.TypeMarshaller;
-import org.dataone.cn.ldap.LdapPopulation;
+import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
+import org.dataone.cn.rest.proxy.service.impl.mock.ProxyCNReadServiceImpl;
 import org.dataone.cn.rest.web.identifier.ReserveIdentifierController;
+import org.dataone.cn.auth.X509CertificateGenerator;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
+import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.Identifier;
-import org.junit.After;
-import org.junit.Before;
+import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.util.EncodingUtilities;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,52 +40,97 @@ import org.springframework.web.servlet.ModelAndView;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/org/dataone/cn/resources/web/identifier/mockIdentifier-beans.xml"}, loader = ProxyWebApplicationContextLoader.class)
 public class ReserveIdentifierTestCase {
+
     public static Log log = LogFactory.getLog(ReserveIdentifierTestCase.class);
     /** the servlet */
     private ReserveIdentifierController testController;
-    private LdapPopulation cnLdapPopulation;
+    private SubjectLdapPopulation cnLdapPopulation;
+    private ProxyCNReadServiceImpl proxyCNReadService;
+    private X509CertificateGenerator x509CertificateGenerator;
+    private ClassPathResource readSystemMetadataResource;
+
     @Resource
-    public void setCNLdapPopulation(LdapPopulation ldapPopulation) {
+    public void setCNLdapPopulation(SubjectLdapPopulation ldapPopulation) {
         this.cnLdapPopulation = ldapPopulation;
     }
+
+    @Resource
+    public void setProxyCNReadServiceImpl(ProxyCNReadServiceImpl proxyCNReadService) {
+        this.proxyCNReadService = proxyCNReadService;
+    }
+
     @Resource
     public void setTestController(ReserveIdentifierController testController) {
         this.testController = testController;
     }
-    @Before
-    public void before() throws Exception {
-        cnLdapPopulation.populateTestIdentities();
+
+    @Resource
+    public void setX509CertificateGenerator(X509CertificateGenerator x509CertificateGenerator) {
+        this.x509CertificateGenerator = x509CertificateGenerator;
     }
-    @After
-    public void after() throws Exception {
-        cnLdapPopulation.deletePopulatedSubjects();
+
+    @Resource
+    public void readSystemMetadataResource(ClassPathResource readSystemMetadataResource) {
+        this.readSystemMetadataResource = readSystemMetadataResource;
     }
-    
+
     @Test
-    public void reserveIdentifier() throws Exception {
-        log.info("Test reserveIdentifier");
-        
-    	Identifier pid = new Identifier();
-    	pid.setValue("test");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(pid, baos);
-        String pidValue = baos.toString("UTF-8");
-        
+    public void failReserveIdentifier() throws Exception {
+        log.info("Test failReserveIdentifier");
+        // should fail with a IdentifierNotUnique because it is able to discover metadata
+        this.proxyCNReadService.setNodeSystemMetadataResource(readSystemMetadataResource);
+        String pidValue = "MD_ORNLDAAC_122_030320010095920";
+        pidValue = EncodingUtilities.encodeUrlQuerySegment(pidValue);
+
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/reserve");
         request.addParameter("pid", pidValue);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        
+
         Identifier result = null;
         try {
             ModelAndView mav = testController.reserveIdentifier(request, response);
-            result = (Identifier) mav.getModel().get("org.dataone.service.types.Identifier");
+            result = (Identifier) mav.getModel().get("org.dataone.service.types.v1.Identifier");
+        } catch (IdentifierNotUnique ex) {
+            assertEquals(ex.getDescription(), "The given pid is already in use: MD_ORNLDAAC_122_030320010095920");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+    }
+
+    @Test
+    public void reserveIdentifier() throws Exception {
+        log.info("Test reserveIdentifier");
+        ClassPathResource nonExistantMetadata = new ClassPathResource("nothere");
+        this.proxyCNReadService.setNodeSystemMetadataResource(nonExistantMetadata);
+        String pidValue = "test" + Long.toHexString(System.currentTimeMillis());
+        pidValue = EncodingUtilities.encodeUrlQuerySegment(pidValue);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/reserve");
+        request.addParameter("pid", pidValue);
+
+        // the ssl_session may be important, but it does not appear to have a
+        // purpose in the CertificateManager other than to print
+        // a null if not found
+
+        Object bogus = new Object();
+        request.setAttribute("javax.servlet.request.ssl_session", bogus);
+
+        X509Certificate cert = x509CertificateGenerator.generateDataOneCert("test1");
+        X509Certificate[] certificates = {cert};
+        request.setAttribute("javax.servlet.request.X509Certificate", certificates);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        Identifier result = null;
+        try {
+            ModelAndView mav = testController.reserveIdentifier(request, response);
+            result = (Identifier) mav.getModel().get("org.dataone.service.types.v1.Identifier");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
 
         assertNotNull(result);
-        assertEquals(pid.getValue(), result.getValue());
-        
+        assertEquals(pidValue, result.getValue());
+        this.cnLdapPopulation.deleteAllReservations();
     }
-    
 }

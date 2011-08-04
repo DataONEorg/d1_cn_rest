@@ -28,10 +28,25 @@ public class BufferedServletOutputStream extends ServletOutputStream {
     /**
      * This method must be defined for custom servlet output streams.
      */
-    public void write(int data) {
+    @Override
+    public void write(int data) throws IOException {
         this.bos.write(data);
     }
+    /**
+     * This method must be defined for custom servlet output streams.
+     */
+    @Override
+    public void write(byte[] b) throws IOException {
+        this.bos.write(b);
+    }
+    /**
+     * This method must be defined for custom servlet output streams.
+     */
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
 
+        this.bos.write(b,off,len);
+    }
     // BufferedHttpResponseWrapper calls this method
     public void reset( ) {
         this.bos.reset( );

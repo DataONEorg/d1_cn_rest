@@ -167,6 +167,7 @@ public abstract class AbstractWebController {
         handleBaseException((BaseException) serviceFailure, request, response);
     }
     public void handleBaseException(BaseException exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(exception.getCode());
         if (request.getHeader("Accept") != null && request.getHeader("Accept").equalsIgnoreCase("text/xml")) {
             try {
                 response.getOutputStream().write(exception.serialize(BaseException.FMT_XML).getBytes());

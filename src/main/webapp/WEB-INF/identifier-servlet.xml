@@ -20,7 +20,7 @@
     </context:component-scan>
     
     <!-- configure to match the LDAP server configuration -->
-    <bean name="reserveIdentifierService" class="org.dataone.service.cn.ReserveIdentifierService">
+    <bean name="reserveIdentifierService" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
         <property name="server" value="ldap://localhost:389"/>
         <property name="password" value="password"/>
     </bean>

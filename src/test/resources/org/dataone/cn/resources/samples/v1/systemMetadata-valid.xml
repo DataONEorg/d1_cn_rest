@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<d1:systemMetadata xmlns:d1="http://ns.dataone.org/service/types/0.6.2"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- 	xsi:schemaLocation="http://ns.dataone.org/service/types/0.6.2 https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_2/dataoneTypes.xsd">
+<d1:systemMetadata xmlns:d1="http://ns.dataone.org/service/types/v1"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <identifier>aAbBcC12345</identifier>
     <objectFormat>
         <fmtid>eml://ecoinformatics.org/eml-2.0.1</fmtid>
@@ -9,6 +8,7 @@
         <scienceMetadata>true</scienceMetadata>
     </objectFormat>
     <size>0</size>
+    <checksum algorithm="SHA-1">2e01e17467891f7c933dbaa00e1459d23db3fe4f</checksum>
     <submitter>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</submitter>
     <rightsHolder>uid=jones,o=NCEAS,dc=ecoinformatics,dc=org</rightsHolder>
     <accessPolicy>
@@ -18,29 +18,19 @@
         </allow>
     </accessPolicy>
     <obsoletes>Obsoletes0</obsoletes>
-    <obsoletes>Obsoletes1</obsoletes>
     <obsoletedBy>ObsoletedBy0</obsoletedBy>
-    <obsoletedBy>ObsoletedBy1</obsoletedBy>
-    <derivedFrom>DerivedFrom0</derivedFrom>
-    <derivedFrom>DerivedFrom1</derivedFrom>
-    <describes>Describes0</describes>
-    <describes>Describes1</describes>
-    <describedBy>DescribedBy0</describedBy>
-    <describedBy>DescribedBy1</describedBy>
-    <checksum algorithm="SHA-1">2e01e17467891f7c933dbaa00e1459d23db3fe4f</checksum>
-    <embargoExpires>2006-05-04T18:13:51.0Z</embargoExpires>
-    <dateUploaded>2006-05-04T18:13:51.0Z</dateUploaded>
-    <dateSysMetadataModified>2006-05-04T18:13:51.0Z</dateSysMetadataModified>
+    <dateUploaded>2006-05-04T18:13:51.000-00:00</dateUploaded>
+    <dateSysMetadataModified>2006-05-04T18:13:51.000-00:00</dateSysMetadataModified>
     <originMemberNode>OriginMemberNode0</originMemberNode>
     <authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
     <replica>
         <replicaMemberNode>sq1d</replicaMemberNode>
-        <replicationStatus>queued</replicationStatus>
-        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+        <replicationStatus>completed</replicationStatus>
+        <replicaVerified>2006-05-04T18:13:51.000-00:00</replicaVerified>
     </replica>
     <replica>
         <replicaMemberNode>sqR1</replicaMemberNode>
         <replicationStatus>queued</replicationStatus>
-        <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
+        <replicaVerified>2006-05-04T18:13:51.000-00:00</replicaVerified>
     </replica>
 </d1:systemMetadata>

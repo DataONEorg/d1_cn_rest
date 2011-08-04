@@ -2,29 +2,29 @@
 <!DOCTYPE urlrewrite SYSTEM "UrlRewrite.dtd" >
 <urlrewrite default-match-type="regex" use-query-string="true">
 	<rule match-type="regex">
-	    <from>^/object/?$</from>
-	    <to>/metacat/object/</to>
+	    <from>^/v1/object/?$</from>
+	    <to>/v1/metacat/object/</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/object/?\?(.*qt=path.*)$</from>
-	    <to>/metacat/object/?$1</to>
+	    <from>^/v1/object/?\?(.*qt=path.*)$</from>
+	    <to>/v1/metacat/object/?$1</to>
 	</rule>
 	<rule match-type="regex">
-	    <from>^/object/?\?(.*qt=solr.*)$</from>
-	    <to>/mercury/object/?$1</to>
+	    <from>^/v1/object/?\?(.*qt=solr.*)$</from>
+	    <to>/v1/mercury/object/?$1</to>
 	</rule>
 
 	<outbound-rule>
-	    <from>^/metacat/object/$</from>
-	    <to>/object/</to>
+	    <from>^/v1/metacat/object/$</from>
+	    <to>/v1/object/</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/metacat/object/(.+)$</from>
-	    <to>/object/$1</to>
+	    <from>^/v1/metacat/object/(.+)$</from>
+	    <to>/v1/object/$1</to>
 	</outbound-rule>
 	<outbound-rule>
-	    <from>^/mercury/object/(.+)$</from>
-	    <to>/object/$1</to>
+	    <from>^/v1/mercury/object/(.+)$</from>
+	    <to>/v1/object/$1</to>
 	</outbound-rule>
 
 </urlrewrite>

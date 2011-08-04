@@ -59,7 +59,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <filter>
-        <filter-name>ResolveFilter</filter-name>
+        <filter-name>ResolveFilterV1</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
         <init-param>
             <param-name>targetFilterLifecycle</param-name>
@@ -67,8 +67,8 @@
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>ResolveFilter</filter-name>
-        <url-pattern>/resolve/*</url-pattern>
+        <filter-name>ResolveFilterV1</filter-name>
+        <url-pattern>/v1/resolve/*</url-pattern>
     </filter-mapping>
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
@@ -161,31 +161,31 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/formats/*</url-pattern>
+        <url-pattern>/v1/formats/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/formats/</url-pattern>
+        <url-pattern>/v1/formats/</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/formats</url-pattern>
+        <url-pattern>/v1/formats</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/log</url-pattern>
+        <url-pattern>/v1/log</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/log/</url-pattern>
+        <url-pattern>/v1/log/</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/reserve</url-pattern>
+        <url-pattern>/v1/reserve</url-pattern>
     </servlet-mapping>
    <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/reserve/</url-pattern>
+        <url-pattern>/v1/reserve/</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>metacatSearch</servlet-name>
@@ -194,7 +194,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>metacatSearch</servlet-name>
-        <url-pattern>/metacat/*</url-pattern>
+        <url-pattern>/v1/metacat/*</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>mercurySearch</servlet-name>
@@ -203,7 +203,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>mercurySearch</servlet-name>
-        <url-pattern>/mercury/*</url-pattern>
+        <url-pattern>/v1/mercury/*</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>metacatCNRead</servlet-name>
@@ -212,19 +212,19 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
-        <url-pattern>/object/*</url-pattern>
+        <url-pattern>/v1/object/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
-        <url-pattern>/meta/*</url-pattern>
+        <url-pattern>/v1/meta/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
-        <url-pattern>/resolve/*</url-pattern>
+        <url-pattern>/v1/resolve/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
-        <url-pattern>/checksum/*</url-pattern>
+        <url-pattern>/v1/checksum/*</url-pattern>
     </servlet-mapping>
 
 <!--
@@ -252,15 +252,15 @@
 
     <servlet-mapping>
         <servlet-name>cnCoreNode</servlet-name>
-        <url-pattern>/node</url-pattern>
+        <url-pattern>/v1/node</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>cnCoreNode</servlet-name>
-        <url-pattern>/node/</url-pattern>
+        <url-pattern>/v1/node/</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>cnCoreNode</servlet-name>
-        <url-pattern>/node/*</url-pattern>
+        <url-pattern>/v1/node/*</url-pattern>
     </servlet-mapping>
     
     <servlet>
@@ -271,15 +271,15 @@
     
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
-        <url-pattern>/accounts</url-pattern>
+        <url-pattern>/v1/accounts</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
-        <url-pattern>/accounts/</url-pattern>
+        <url-pattern>/v1/accounts/</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
-        <url-pattern>/accounts/*</url-pattern>
+        <url-pattern>/v1/accounts/*</url-pattern>
     </servlet-mapping>
     
     <servlet>
@@ -290,7 +290,7 @@
     
 	<servlet-mapping>
         <servlet-name>identifier</servlet-name>
-        <url-pattern>/reserve/*</url-pattern>
+        <url-pattern>/v1/reserve/*</url-pattern>
     </servlet-mapping>
     
     <error-page>

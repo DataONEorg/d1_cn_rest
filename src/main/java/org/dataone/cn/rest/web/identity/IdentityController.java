@@ -11,10 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.batch.utils.TypeMarshaller;
+import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
-import org.dataone.service.Constants;
-import org.dataone.service.cn.CNIdentity;
+import org.dataone.service.util.Constants;
+import org.dataone.service.cn.v1.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -23,10 +23,10 @@ import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.Person;
-import org.dataone.service.types.Session;
-import org.dataone.service.types.Subject;
-import org.dataone.service.types.SubjectList;
+import org.dataone.service.types.v1.Person;
+import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.SubjectList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -72,7 +72,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
         SubjectList subjectList = cnIdentity.listSubjects(session, query, start, count);
 
-        return new ModelAndView("xmlSubjectListViewResolver", "org.dataone.service.types.SubjectList", subjectList);
+        return new ModelAndView("xmlSubjectListViewResolver", "org.dataone.service.types.v1.SubjectList", subjectList);
 
     }
     
@@ -89,7 +89,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
         SubjectList subjectList = cnIdentity.getSubjectInfo(session, subject);
 
-        return new ModelAndView("xmlSubjectListViewResolver", "org.dataone.service.types.SubjectList", subjectList);
+        return new ModelAndView("xmlSubjectListViewResolver", "org.dataone.service.types.v1.SubjectList", subjectList);
 
     }
     
@@ -110,7 +110,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		Subject subject = cnIdentity.registerAccount(session, person);
 
-        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.Subject", subject);
+        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.v1.Subject", subject);
 
     }
     
@@ -131,7 +131,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		Subject subject = cnIdentity.updateAccount(session, person);
 
-        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.Subject", subject);
+        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.v1.Subject", subject);
 
     }
     
@@ -205,7 +205,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     	
 		Subject retGroup = cnIdentity.createGroup(session, group);
 		
-        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.Subject", retGroup);
+        return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.v1.Subject", retGroup);
 
 
     }

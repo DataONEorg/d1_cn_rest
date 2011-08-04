@@ -16,34 +16,40 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
     <bean id="xmlIdentifierViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.Identifier"/>
+        <property name="modelKey" value="org.dataone.service.types.v1.Identifier"/>
         <property name="contentType" value="text/xml" />
         <property name="marshaller">
-            <oxm:jibx-marshaller id="jibxIdentifierMarshallerResponse" target-class="org.dataone.service.types.Identifier"/>
+            <oxm:jibx-marshaller id="jibxIdentifierMarshallerResponse" target-class="org.dataone.service.types.v1.Identifier"/>
         </property>
     </bean>
     
     <bean id="xmlMetaViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.SystemMetadata"/>
+        <property name="modelKey" value="org.dataone.service.types.v1.SystemMetadata"/>
         <property name="contentType" value="text/xml" />
         <property name="marshaller">
-            <oxm:jibx-marshaller id="jibxMarshallerSystemMetadataResponse" target-class="org.dataone.service.types.SystemMetadata"/>
+            <oxm:jibx-marshaller id="jibxMarshallerSystemMetadataResponse" target-class="org.dataone.service.types.v1.SystemMetadata"/>
         </property>
     </bean>
 
     <bean id="xmlObjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.ObjectList"/>
+        <property name="modelKey" value="org.dataone.service.types.v1.ObjectList"/>
         <property name="contentType" value="text/xml" />
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxObjectListMarshallerResponse" target-class="org.dataone.service.types.ObjectList"/>
         </property>
     </bean>
     <bean id="xmlNodeListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.NodeList"/>
+        <property name="modelKey" value="org.dataone.service.types.v1.NodeList"/>
         <property name="contentType" value="text/xml" />
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxNodeListMarshallerResponse" target-class="org.dataone.service.types.NodeList"/>
         </property>
     </bean>
-
+    <bean id="xmlNodeReferenceViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
+        <property name="contentType" value="text/xml" />
+        <property name="marshaller">
+            <oxm:jibx-marshaller id="jibxNodeListMarshallerResponse" target-class="org.dataone.service.types.v1.NodeReference"/>
+        </property>
+    </bean>
 </beans>

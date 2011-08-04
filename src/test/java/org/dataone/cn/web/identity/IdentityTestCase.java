@@ -14,14 +14,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.batch.utils.TypeMarshaller;
-import org.dataone.cn.ldap.LdapPopulation;
+import org.dataone.cn.auth.X509CertificateGenerator;
+import org.dataone.service.util.TypeMarshaller;
+import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
 import org.dataone.cn.rest.web.identity.IdentityController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.Person;
-import org.dataone.service.types.Subject;
-import org.dataone.service.types.SubjectList;
+import org.dataone.service.types.v1.Person;
+import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.SubjectList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -44,22 +45,28 @@ public class IdentityTestCase {
     public static Log log = LogFactory.getLog( IdentityTestCase.class);
     /** the servlet */
     private IdentityController testController;
-    private LdapPopulation cnLdapPopulation;
+    private SubjectLdapPopulation subjectLdapPopulation;
+    private X509CertificateGenerator x509CertificateGenerator;
     @Resource
-    public void setCNLdapPopulation(LdapPopulation ldapPopulation) {
-        this.cnLdapPopulation = ldapPopulation;
+    public void setCNLdapPopulation(SubjectLdapPopulation subjectLdapPopulation) {
+        this.subjectLdapPopulation = subjectLdapPopulation;
     }
     @Resource
     public void setTestController(IdentityController testController) {
         this.testController = testController;
     }
+    @Resource
+    public void setX509CertificateGenerator(X509CertificateGenerator x509CertificateGenerator) {
+        this.x509CertificateGenerator = x509CertificateGenerator;
+    }
     @Before
     public void before() throws Exception {
-        cnLdapPopulation.populateTestIdentities();
+        subjectLdapPopulation.populateTestIdentities();
     }
     @After
     public void after() throws Exception {
-        cnLdapPopulation.deletePopulatedSubjects();
+        //subjectLdapPopulation.deleteAllSubjects();
+        subjectLdapPopulation.deletePopulatedSubjects();
     }
     @Test
     public void listSubjects() throws Exception {
@@ -72,7 +79,7 @@ public class IdentityTestCase {
         SubjectList subjectList = null;
         try {
             ModelAndView mav = testController.listSubjects(request, response);
-            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.SubjectList");
+            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.v1.SubjectList");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
@@ -85,12 +92,12 @@ public class IdentityTestCase {
     @Test
     public void getSubjectInfo() throws Exception {
         log.info("Test getSubjectInfo");
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/accounts/cn=Dracula,dc=dataone,dc=org");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/accounts/CN=Dracula,DC=dataone,DC=org");
         MockHttpServletResponse response = new MockHttpServletResponse();
         SubjectList subjectList = null;
         try {
             ModelAndView mav = testController.listSubjects(request, response);
-            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.SubjectList");
+            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.v1.SubjectList");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
@@ -103,7 +110,7 @@ public class IdentityTestCase {
     @Test
     public void registerAccount() throws Exception {
         log.info("Test registerAccount");
-    	String subjectValue = "cn=test1,dc=dataone,dc=org";
+    	String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         Person person = new Person();
@@ -122,7 +129,7 @@ public class IdentityTestCase {
         Subject retSubject = null;
         try {
             ModelAndView mav = testController.registerAccount(request, response);
-            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.Subject");
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.v1.Subject");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
@@ -130,23 +137,23 @@ public class IdentityTestCase {
         assertNotNull(retSubject);
         assertTrue(retSubject.getValue().equals(subjectValue));
 
-        // I have the spring ldap configured to assume the dn and only account for the rdn
-    	String subjectValuePop = "test1";
-        Subject subjectPop = new Subject();
-        subjectPop.setValue(subjectValuePop);
-        cnLdapPopulation.testSubjectList.add(subjectPop);
+        subjectLdapPopulation.testSubjectList.add(subjectValue);
         
     }
     
     @Test
     public void registerAccountFromCertificate() throws Exception {
         log.info("Test registerAccountFromCertificate");
+        x509CertificateGenerator.storeSelfSignedCertificate();
         String subjectValue = CertificateManager.getInstance().loadCertificate().getSubjectDN().toString();
         
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         Person person = new Person();
         person.setSubject(subject);
+        person.addGivenName("test");
+        person.setFamilyName("test");
+        person.addEmail("test@dataone.org");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(person, baos);
         String personValue = baos.toString("UTF-8");
@@ -158,14 +165,15 @@ public class IdentityTestCase {
         Subject retSubject = null;
         try {
             ModelAndView mav = testController.registerAccount(request, response);
-            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.Subject");
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.v1.Subject");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
 
         assertNotNull(retSubject);
         assertTrue(retSubject.getValue().equals(subjectValue));
-        
+        subjectLdapPopulation.testSubjectList.add(subjectValue);
+        x509CertificateGenerator.cleanUpFiles();
     }
 
     @Test
@@ -175,7 +183,7 @@ public class IdentityTestCase {
     	registerAccount();
     	
     	// now update
-    	String subjectValue = "cn=test1,dc=dataone,dc=org";
+    	String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         Person person = new Person();
@@ -194,14 +202,14 @@ public class IdentityTestCase {
         Subject retSubject = null;
         try {
             ModelAndView mav = testController.updateAccount(request, response);
-            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.Subject");
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.v1.Subject");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
 
         assertNotNull(retSubject);
         assertTrue(retSubject.getValue().equals(subjectValue));        
-        
+
     }
 
     @Test
@@ -210,7 +218,7 @@ public class IdentityTestCase {
     	// create the account first
     	registerAccount();
     	
-    	String subjectValue = "cn=test1,dc=dataone,dc=org";
+    	String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         
@@ -237,7 +245,7 @@ public class IdentityTestCase {
     @Test
     public void mapIdentity() throws Exception {
 
-    	String value = "cn=test1,dc=dataone,dc=org";
+    	String value = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(value);
         
@@ -272,7 +280,7 @@ public class IdentityTestCase {
     	// make the mapping request before trying to confirm
     	this.mapIdentity();
     	
-    	String value = "cn=test2,dc=dataone,dc=org";
+    	String value = "CN=Test2,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(value);
         
@@ -299,7 +307,7 @@ public class IdentityTestCase {
     @Test
     public void createGroup() throws Exception {
 
-    	String value = "cn=testGroup,dc=dataone,dc=org";
+    	String value = "cn=testGroup,dc=cilogon,dc=org";
         Subject group = new Subject();
         group.setValue(value);
         
@@ -326,11 +334,11 @@ public class IdentityTestCase {
     @Test
     public void addGroupMembers() throws Exception {
 
-    	String value = "cn=testGroup,dc=dataone,dc=org";
+    	String value = "cn=testGroup,dc=cilogon,dc=org";
         Subject group = new Subject();
         group.setValue(value);
         
-        String subjectValue = "cn=test1,dc=dataone,dc=org";
+        String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         Person person = new Person();
@@ -369,11 +377,11 @@ public class IdentityTestCase {
     @Test
     public void removeGroupMembers() throws Exception {
 
-    	String value = "cn=testGroup,dc=dataone,dc=org";
+    	String value = "cn=testGroup,dc=cilogon,dc=org";
         Subject group = new Subject();
         group.setValue(value);
         
-        String subjectValue = "cn=test1,dc=dataone,dc=org";
+        String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         Person person = new Person();

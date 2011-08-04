@@ -1,5 +1,6 @@
-package org.dataone.cn.web;
+package org.dataone.cn.web.v1;
 
+import org.dataone.cn.rest.filter.v1.ResolveFilter;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 import static org.hamcrest.core.IsNot.not;
@@ -9,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -20,7 +20,6 @@ import javax.annotation.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.dataone.cn.rest.filter.*;
 import org.dataone.service.exceptions.ServiceFailure;
 
 import javax.servlet.*;
@@ -31,10 +30,12 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import org.dataone.cn.ldap.LdapPopulation;
-import org.dataone.cn.service.ldap.impl.CNCoreLDAPImpl;
+import org.dataone.cn.ldap.v1.NodeLdapPopulation;
+import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
+import org.dataone.cn.service.ldap.impl.v1.CNCoreLDAPImpl;
+import org.dataone.cn.web.ResolveServlet;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
-import org.dataone.service.cn.CNCore;
+import org.dataone.service.cn.v1.CNCore;
 import org.junit.After;
 import org.junit.runner.RunWith;
 
@@ -44,8 +45,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -54,12 +53,13 @@ import org.xml.sax.helpers.DefaultHandler;
 @ContextConfiguration(locations = {"classpath:/org/dataone/cn/resources/web/mockObject-dispatcher.xml", "classpath:/org/dataone/cn/resources/web/mockObject-beans.xml"}, loader = ProxyWebApplicationContextLoader.class)
 public class TestingMyResolve {
 
-    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_2/dataoneTypes.xsd";
+    private static String resourcePath = "/org/dataone/cn/resources/samples/v1/";
+    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_0_6_3/dataoneTypes.xsd";
     private static boolean debuggingOutput = true;
     private static boolean useSchemas = true;
     private static Integer nodelistRefreshIntervalSeconds = 120;
     private CNCore cnLdapCore;
-    private LdapPopulation cnLdapPopulation;
+    private NodeLdapPopulation cnLdapPopulation;
     // need to test that resolveFilter behaves properly under various conditions:
     // (general)
     // 1. All's well
@@ -84,23 +84,26 @@ public class TestingMyResolve {
     // system deployments through a separate service)
     // 1. mangled urls (unfollowable)
     // 2. connection timeout from metacat (/meta service)
-
     @Resource
     public void setTestController(CNCoreLDAPImpl cnLdapCore) {
         this.cnLdapCore = cnLdapCore;
     }
+
     @Resource
-    public void setCNLdapPopulation(LdapPopulation ldapPopulation) {
+    public void setCNLdapPopulation(NodeLdapPopulation ldapPopulation) {
         this.cnLdapPopulation = ldapPopulation;
     }
+
     @Before
     public void before() throws Exception {
         cnLdapPopulation.populateTestMNs();
     }
+
     @After
     public void after() throws Exception {
         cnLdapPopulation.deletePopulatedMns();
     }
+
     @Test
     public void testInit() {
 
@@ -126,7 +129,7 @@ public class TestingMyResolve {
     public void testDoFilter() throws FileNotFoundException {
 
 
-        this.nodelistRefreshIntervalSeconds =  13579;
+        this.nodelistRefreshIntervalSeconds = 13579;
         BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid.xml");
 
         // examine contents of the response
@@ -136,13 +139,13 @@ public class TestingMyResolve {
         String content = new String(responseWrapper.getBuffer());
 
         assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
-        this.nodelistRefreshIntervalSeconds =  120;
+        this.nodelistRefreshIntervalSeconds = 120;
     }
 
     @Test
     public void testUrlEncodingAscii() throws FileNotFoundException {
 
-        this.nodelistRefreshIntervalSeconds =  13579;
+        this.nodelistRefreshIntervalSeconds = 13579;
         BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-disallowed-ascii.xml");
 
         // examine contents of the response
@@ -153,13 +156,13 @@ public class TestingMyResolve {
 
         assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
         assertThat("wonky identifier is escaped in url", content, containsString("aAbBcC__%2F%3Fparam=5%23__12345</url>"));
-        this.nodelistRefreshIntervalSeconds =  120;
+        this.nodelistRefreshIntervalSeconds = 120;
     }
 
     @Test
     public void testUrlEncodingNonAscii() throws FileNotFoundException {
 
-        this.nodelistRefreshIntervalSeconds =  13579;
+        this.nodelistRefreshIntervalSeconds = 13579;
         BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-valid-nonAscii-id.utf8.xml");
 
         // examine contents of the response
@@ -170,7 +173,7 @@ public class TestingMyResolve {
 
         //assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
         assertThat("non-Ascii identifier is escaped in url", content, containsString("%E0%B8%89%E0%B8%B1%E0%B8%99%E0%B8%81%E0%B8%B4%E0%B8%99%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%88%E0%B8%81%E0%B9%84%E0%B8%94%E0%B9%89</url>"));
-        this.nodelistRefreshIntervalSeconds =  120;
+        this.nodelistRefreshIntervalSeconds = 120;
     }
 
     @Test
@@ -271,8 +274,8 @@ public class TestingMyResolve {
         assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
         assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
-        assertThat("metacat error code forwards", content, containsString("errorCode=\"123456\""));
-        assertThat("metacat error code forwards", content, containsString("detailCode=\"987654\""));
+        assertThat("metacat error code forwards", content, containsString("errorCode=\"500\""));
+        assertThat("metacat error code forwards", content, containsString("detailCode=\"4150\""));
         assertThat("metacat error code forwards", content, containsString("generic error from the /meta service to test forwarding capabilities of resolve."));
 
     }
@@ -297,7 +300,7 @@ public class TestingMyResolve {
         assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
 
         assertThat("metacat error code forwards", content, containsString("errorCode=\"404\""));
-        assertThat("metacat error code forwards", content, containsString("detailCode=\"1000\""));
+        assertThat("metacat error code forwards", content, containsString("detailCode=\"4140\""));
         assertThat("metacat error code forwards", content, containsString("Document not found"));
 
     }
@@ -421,16 +424,14 @@ public class TestingMyResolve {
 
         MockHttpServletRequest request = new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
         request.addHeader("accept", (Object) "text/xml");
-        request.setMethod("POST");
+        request.setMethod("GET");
 
         ResolveServlet testResolve = new ResolveServlet();
 
         try {
-            testResolve.setOutput("systemMetadata-valid.xml");
-        } catch (FileNotFoundException e) {
-            fail("Test misconfiguration - output file not found" + e);
-        } catch (UnsupportedEncodingException e) {
-            fail("Test misconfiguration - unsupported file encoding error" + e);
+            testResolve.setOutput(resourcePath + "systemMetadata-valid.xml");
+        } catch (IOException e) {
+            fail("Test misconfiguration - IOException" + e);
         }
 
         FilterChain chain = new PassThroughFilterChain(testResolve);
@@ -462,7 +463,6 @@ public class TestingMyResolve {
 
     }
 
-
 //	@Test
     public void testDestroy() {
         fail("Not yet implemented"); // TODO
@@ -488,16 +488,15 @@ public class TestingMyResolve {
 
         MockHttpServletRequest request = new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
         request.addHeader("accept", (Object) "text/xml");
-        request.setMethod("POST");
+        request.setMethod("GET");
 
         ResolveServlet testResolve = new ResolveServlet();
 
         try {
-            testResolve.setOutput(outputFilename);
-        } catch (FileNotFoundException e) {
-            fail("Test misconfiguration - output file not found" + e);
-        } catch (UnsupportedEncodingException e) {
-            fail("Test misconfiguration - unsupported file encoding error" + e);
+
+            testResolve.setOutput(resourcePath + outputFilename);
+        } catch (IOException ex) {
+            fail("Test misconfiguration - IOException " + ex);
         }
 
         FilterChain chain = new PassThroughFilterChain(testResolve);

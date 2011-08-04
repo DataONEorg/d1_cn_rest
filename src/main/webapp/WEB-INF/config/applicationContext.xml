@@ -21,11 +21,8 @@
         <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxySearchServiceImpl)"/>
     </context:component-scan>
 
-    <bean id="ResolveFilter" class="org.dataone.cn.rest.filter.ResolveFilter">
+    <bean id="ResolveFilterV1" class="org.dataone.cn.rest.filter.v1.ResolveFilter">
         <property name="nodelistRefreshIntervalSeconds" value="180" />
-        <!-- the properties below are by not stable when testing in various environments... -->
-<!--    <property name="systemmetadataSchemaLocation" value="/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5_1/dataoneTypes.xsd" />
-        <property name="nodelistSchemaLocation" value="/var/lib/tomcat6/webapps/knb/schema/D1_SCHEMA_0_5_1/dataoneTypes.xsd" /> -->
     </bean>
 
 <!--  
@@ -40,6 +37,6 @@
         <constructor-arg ref="contextSource" />
         <qualifier value="ldapTemplate"/>
     </bean>
-    <context:component-scan base-package="org.dataone.cn.service.ldap.impl"  />
+    <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
 
 </beans>

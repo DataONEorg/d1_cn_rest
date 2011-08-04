@@ -16,10 +16,10 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     
     <bean id="xmlSubjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.Identifier"/>
+        <property name="modelKey" value="org.dataone.service.types.v1.Identifier"/>
         <property name="contentType" value="text/xml" />
         <property name="marshaller">
-            <oxm:jibx-marshaller id="jibxIdentifierMarshallerResponse" target-class="org.dataone.service.types.Identifier"/>
+            <oxm:jibx-marshaller id="jibxIdentifierMarshallerResponse" target-class="org.dataone.service.types.v1.Identifier"/>
         </property>
     </bean>
 

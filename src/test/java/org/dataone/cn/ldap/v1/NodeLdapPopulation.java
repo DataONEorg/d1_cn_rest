@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.dataone.cn.ldap;
+package org.dataone.cn.ldap.v1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +26,12 @@ import org.springframework.stereotype.Component;
  * @author waltz
  */
 @Component
-@Qualifier("ldapPopulation")
-public class LdapPopulation {
+@Qualifier("nodeLdapPopulation")
+public class NodeLdapPopulation {
 
     public static List<Node> testNodeList = new ArrayList<Node>();
     public static List<Subject> testSubjectList = new ArrayList<Subject>();
-    public static Log log = LogFactory.getLog(LdapPopulation.class);
+    public static Log log = LogFactory.getLog(NodeLdapPopulation.class);
 
     static {
         // Need this or context will lowercase all the rdn s
@@ -56,6 +56,7 @@ public class LdapPopulation {
 
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn = new DistinguishedName();
+        dn.add("dc","dataone");
         dn.add("d1NodeId", sq1dId);
 
         DirContextAdapter context = new DirContextAdapter(dn);
@@ -77,6 +78,7 @@ public class LdapPopulation {
 
         // because we use a base DN, only need to supply the RDN
         dn = new DistinguishedName();
+        dn.add("dc","dataone");
         dn.add("d1NodeId", sqR1Id);
 
         context = new DirContextAdapter(dn);
@@ -94,7 +96,7 @@ public class LdapPopulation {
         context.setAttributeValue("d1NodeBaseURL", node.getBaseURL());
         context.setAttributeValue("d1NodeReplicate", Boolean.toString(node.isReplicate()).toUpperCase());
         context.setAttributeValue("d1NodeSynchronize", Boolean.toString(node.isSynchronize()).toUpperCase());
-        context.setAttributeValue("d1NodeType", node.getType().toString());
+        context.setAttributeValue("d1NodeType", node.getType().xmlValue());
     }
 
     public void deletePopulatedMns() {
@@ -106,68 +108,10 @@ public class LdapPopulation {
 
     private void deleteNode(Node node) {
         DistinguishedName dn = new DistinguishedName();
+        dn.add("dc","dataone");
         dn.add("d1NodeId", node.getIdentifier().getValue());
         log.info("deleting : " + dn.toString());
         ldapTemplate.unbind(dn);
     }
 
-    public void populateTestIdentities() {
-        String testSubject1Value = "Frankenstein";
-        Subject testSubject1 = new Subject();
-        testSubject1.setValue(testSubject1Value);
-        Person testPerson1 = new Person();
-        testPerson1.setSubject(testSubject1);
-        testPerson1.addGivenName("TheMonster");
-        testPerson1.setFamilyName(testSubject1Value);
-        testPerson1.addEmail("frankenstien@monster.info");
-        // because we use a base DN, only need to supply the RDN
-        DistinguishedName dn1 = new DistinguishedName();
-        dn1.add("cn", testSubject1.getValue());
-
-        DirContextAdapter context1 = new DirContextAdapter(dn1);
-        mapPersonToContext(testPerson1, context1);
-        ldapTemplate.bind(dn1, context1, null);
-        testSubjectList.add(testSubject1);
-
-        String testSubject2Value = "Dracula";
-        Subject testSubject2 = new Subject();
-        testSubject2.setValue(testSubject2Value);
-        Person testPerson2 = new Person();
-        testPerson2.setSubject(testSubject2);
-        testPerson2.addGivenName("Vlad");
-        testPerson2.setFamilyName(testSubject2Value);
-        testPerson2.addEmail("dracula@monsters.info");
-
-        DistinguishedName dn2 = new DistinguishedName();
-        dn2.add("cn", testSubject2.getValue());
-
-        DirContextAdapter context2 = new DirContextAdapter(dn2);
-        mapPersonToContext(testPerson2, context2);
-        ldapTemplate.bind(dn2, context2, null);
-        testSubjectList.add(testSubject2);
-    }
-
-    protected void mapPersonToContext(Person person, DirContextOperations context) {
-        context.setAttributeValues("objectclass", new String[]{"top", "person", "organizationalPerson", "inetOrgPerson", "d1Principal"});
-        context.setAttributeValue("cn", person.getFamilyName());
-        context.setAttributeValue("sn", person.getFamilyName());
-        context.setAttributeValues("givenName", person.getGivenNameList().toArray());
-        context.setAttributeValues("mail", person.getEmailList().toArray());
-        context.setAttributeValue("isVerified", "FALSE");
-
-    }
-
-    public void deletePopulatedSubjects() {
-        for (Subject subject : testSubjectList) {
-            deleteSubject(subject);
-        }
-        testSubjectList.clear();
-    }
-
-    private void deleteSubject(Subject subject) {
-        DistinguishedName dn = new DistinguishedName();
-        dn.add("cn", subject.getValue());
-        log.info("deleting : " + dn.toString());
-        ldapTemplate.unbind(dn);
-    }
 }
