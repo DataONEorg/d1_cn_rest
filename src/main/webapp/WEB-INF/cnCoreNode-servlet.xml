@@ -60,7 +60,7 @@
 	-->
     <bean id="xmlViewResolverObject" class="org.springframework.web.servlet.view.XmlViewResolver">
         <property name="order" value="1"/>
-        <property name="location" value="/WEB-INF/config/objectViews.xml"/>
+        <property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
     </bean>
 
 </beans>
