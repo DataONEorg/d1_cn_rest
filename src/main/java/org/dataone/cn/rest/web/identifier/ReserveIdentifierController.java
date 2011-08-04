@@ -52,6 +52,9 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller("reserveIdentifierController")
 public class ReserveIdentifierController extends AbstractProxyController implements ServletContextAware {
     public static Log log = LogFactory.getLog(ReserveIdentifierController.class);
+
+    private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
+
     private ServletContext servletContext;
     @Autowired
     @Qualifier("reserveIdentifierService")
@@ -62,8 +65,25 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
 
     public ReserveIdentifierController() {
     }
-
-    @RequestMapping(value = "/" + Constants.RESOURCE_RESERVE, method = RequestMethod.POST)
+   /*
+     * Given an optional scope and format, reserves and
+     * returns an identifier within that scope and format
+     * that is unique and will not be used by any other sessions.
+     * Future calls to MN_storage.create() and MN_storage.update() that
+     * reference this ID must originate from the session in which the
+     * identifier was reserved, otherwise an error is raised on those methods.
+     *
+     * return the identifier that was reserved
+     * default serialized as XML because there was not an accept header
+     *
+     * @author leinfelder
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @param String acceptType
+     * @return void
+     * @exception
+     */
+    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1, method = RequestMethod.POST)
     public ModelAndView reserveIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
         // get the Session object from certificate in request
@@ -110,8 +130,20 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
         return new ModelAndView("xmlIdentifierViewResolver", "org.dataone.service.types.v1.Identifier", pid);
 
     }
-
-    @RequestMapping(value = "/" + Constants.RESOURCE_RESERVE, method = RequestMethod.GET)
+   /*
+     * Checks to determine if the caller (as determined by session)
+     * has the reservation (i.e. is the owner) of the specified PID.
+     *
+     * return 200 if so, otherwise raise an exception
+     *
+     * @author leinfelder
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @param String acceptType
+     * @return void
+     * @exception
+     */
+    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1, method = RequestMethod.GET)
     public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request

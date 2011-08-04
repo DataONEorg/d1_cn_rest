@@ -42,9 +42,12 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller("identityController")
 public class IdentityController extends AbstractProxyController implements ServletContextAware {
-
-    private static final String ACCOUNTS_PATH = "/" + Constants.RESOURCE_ACCOUNTS;
-    private static final String GROUPS_PATH = "/" + Constants.RESOURCE_GROUPS;
+    /*
+     * hard coded paths that this controller will proxy out.
+     * easier to modify in future releases to keep them all at the top
+     */
+    private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
+    private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
 
     private ServletContext servletContext;
 
@@ -54,7 +57,7 @@ public class IdentityController extends AbstractProxyController implements Servl
     CNIdentity  cnIdentity;
     public IdentityController() {}
     
-    @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.GET)
+    @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.GET)
     public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented {
 
     	// get the Session object from certificate in request
@@ -76,7 +79,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.GET)
+    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.GET)
     public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -93,7 +96,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.POST)
     public ModelAndView registerAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -114,7 +117,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH, method = RequestMethod.PUT)
+    @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.PUT)
     public ModelAndView updateAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -135,7 +138,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH + "/*", method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.POST)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -150,7 +153,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH + "/map", method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/map", method = RequestMethod.POST)
     public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -169,7 +172,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH + "/confirm", method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/confirm", method = RequestMethod.POST)
     public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -188,7 +191,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = GROUPS_PATH, method = RequestMethod.POST)
+    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.POST)
     public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -210,7 +213,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = GROUPS_PATH, method = RequestMethod.PUT)
+    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.PUT)
     public void addGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -238,7 +241,7 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = GROUPS_PATH, method = RequestMethod.DELETE)
+    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.DELETE)
     public void removeGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request

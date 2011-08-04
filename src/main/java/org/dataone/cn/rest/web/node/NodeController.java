@@ -46,8 +46,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller("nodeController")
 public class NodeController extends AbstractProxyController implements ServletContextAware {
 
-    private static final String GET_NODE_PATH = "/" + Constants.RESOURCE_NODE + "/";
-    private static final String GET_NODELIST_PATH = "/" + Constants.RESOURCE_NODE;
+    private static final String NODE_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE + "/";
+    private static final String NODELIST_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE;
     private ServletContext servletContext;
 
     CertificateManager certificateManager = CertificateManager.getInstance();
@@ -62,7 +62,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
     @Qualifier("cnRegisterLDAP")
     CNRegister  nodeRegistry;
     
-    @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.GET)
+    @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented{
 
         //NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
@@ -75,13 +75,13 @@ public class NodeController extends AbstractProxyController implements ServletCo
     }
 
 
-    @RequestMapping(value = GET_NODE_PATH + "**", method = RequestMethod.GET)
+    @RequestMapping(value = NODE_PATH_V1 + "**", method = RequestMethod.GET)
     public void getNode(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         throw new Exception("search Not implemented Yet!");
 
     }
-    @RequestMapping(value = {GET_NODELIST_PATH, GET_NODE_PATH}, method = RequestMethod.POST)
+    @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
     public ModelAndView register(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidRequest, NotAuthorized, IdentifierNotUnique{
         Node node = null;
         MultipartFile nodeDataMultipart = null;

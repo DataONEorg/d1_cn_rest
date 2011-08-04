@@ -39,9 +39,6 @@
         <property name="alwaysUseFullPath" value="true"/>
     <!-- other properties -->
     </bean>
-    <bean id="xmlViewResolverIdentity" class="org.springframework.web.servlet.view.XmlViewResolver">
-        <property name="order" value="1"/>
-        <property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
-    </bean>
+
 
 </beans>
