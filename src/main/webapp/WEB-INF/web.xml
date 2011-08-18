@@ -251,15 +251,15 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>cnCoreNode</servlet-name>
+        <servlet-name>cnNode</servlet-name>
         <url-pattern>/v1/node</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>cnCoreNode</servlet-name>
+        <servlet-name>cnNode</servlet-name>
         <url-pattern>/v1/node/</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>cnCoreNode</servlet-name>
+        <servlet-name>cnNode</servlet-name>
         <url-pattern>/v1/node/*</url-pattern>
     </servlet-mapping>
     
