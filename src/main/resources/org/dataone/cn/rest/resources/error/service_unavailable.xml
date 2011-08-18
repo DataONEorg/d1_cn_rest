@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='ServiceFailure'
+       errorCode='500'
+       detailCode='503'>
+  <description>Service Unavailable: The server is currently unable to handle the request due to a temporary overloading or maintenance of the server.</description>
+</error>
+

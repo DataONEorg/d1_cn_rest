@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='417'>
+  <description>Expectation Failed: The expectation given in an Expect request-header field could not be met by this server.</description>
+</error>

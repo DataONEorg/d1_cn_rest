@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InsufficientResources'
+       errorCode='413'
+       detailCode='413'>
+  <description>Request Entity Too Large: The server is refusing to process a request because the request entity is larger than the server is willing or able to process.</description>
+</error>
+

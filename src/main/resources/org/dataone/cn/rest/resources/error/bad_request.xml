@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='400'>
+  <description>Bad Request: The request could not be understood by the server due to malformed syntax.</description>
+</error>

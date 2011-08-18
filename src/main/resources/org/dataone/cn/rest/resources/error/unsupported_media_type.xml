@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='415'>
+  <description>Unsupported Media Type: The server is refusing to service the request because the entity of the request is in a format not supported by the requested resource for the requested method.</description>
+</error>

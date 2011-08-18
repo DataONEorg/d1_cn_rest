@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='414'>
+  <description>Request-URI Too Long: The server is refusing to service the request because the Request-URI is longer than the server is willing to interpret.</description>
+</error>
+

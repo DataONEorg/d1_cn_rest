@@ -8,29 +8,13 @@
 	    http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-<!--        <context:property-placeholder location="classpath:/org/dataone/cn/rest/resources/proxyMetacat.properties"/> -->
-    <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-        <spring:property name="alwaysUseFullPath" value="true"/>
-        <spring:property name="urlDecode" value="false"/>
-    </spring:bean>
-    <spring:bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-        <spring:property name="alwaysUseFullPath" value="true"/>
-        <spring:property name="urlDecode" value="false"/>
-        <spring:property name="useDefaultSuffixPattern" value="false" />
-    </spring:bean>
-
-    <spring:bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <spring:property name="alwaysUseFullPath" value="true"/>
-    <!-- other properties -->
-    </spring:bean>
-        <context:component-scan base-package="org.dataone.cn.rest.proxy.controller" >
-            <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.SearchController"/>
-            <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?:CNReadController|AbstractProxyController)"/>
-          <!--  <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?!ObjectCollectionController)"/> -->
-        </context:component-scan>
-<!--        <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" /> -->
+    <context:component-scan base-package="org.dataone.cn.rest.proxy.controller" >
+        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.SearchController"/>
+        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?:CNReadController|AbstractProxyController)"/>
+    </context:component-scan>
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
         <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.MetacatProxySearchServiceImpl"/>
         <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxyObjectServiceImpl)"/>
     </context:component-scan>
+
 </spring:beans>

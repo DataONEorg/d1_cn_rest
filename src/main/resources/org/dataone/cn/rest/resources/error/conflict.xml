@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='409'>
+  <description>Conflict: The request could not be completed due to a conflict with the current state of the resource.</description>
+</error>

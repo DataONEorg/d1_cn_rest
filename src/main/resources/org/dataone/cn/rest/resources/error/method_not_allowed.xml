@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='405'>
+  <description>Method Not Allowed: The method specified in the Request-Line is not allowed for the resource identified by the Request-URI.</description>
+</error>
+

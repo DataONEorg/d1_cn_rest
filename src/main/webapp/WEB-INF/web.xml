@@ -12,7 +12,7 @@
     </context-param>
     <context-param>
         <param-name>webAppRootKey</param-name>
-        <param-value>cn.root</param-value>
+        <param-value>cn.rest.root</param-value>
     </context-param>
     <listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
@@ -292,21 +292,116 @@
         <servlet-name>identifier</servlet-name>
         <url-pattern>/v1/reserve/*</url-pattern>
     </servlet-mapping>
-    
+    <servlet>
+        <servlet-name>cnError</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+         <load-on-startup>7</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>cnError</servlet-name>
+        <url-pattern>/error/*</url-pattern>
+    </servlet-mapping>
+     <servlet>
+        <servlet-name>cnBase</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+         <load-on-startup>8</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
     <error-page>
         <error-code>500</error-code>
-        <location>/index.html</location>
+        <location>/error/server_error</location>
+    </error-page>
+    <error-page>
+        <error-code>501</error-code>
+        <location>/error/not_implemented</location>
+    </error-page>
+    <error-page>
+        <error-code>502</error-code>
+        <location>/error/bad_gateway</location>
+    </error-page>
+    <error-page>
+        <error-code>503</error-code>
+        <location>/error/service_unavailable</location>
+    </error-page>
+    <error-page>
+        <error-code>504</error-code>
+        <location>/error/gateway_timeout</location>
+    </error-page>
+    <error-page>
+        <error-code>505</error-code>
+        <location>/error/version_not_supported</location>
+    </error-page>
+    <error-page>
+        <error-code>400</error-code>
+        <location>/error/bad_request</location>
+    </error-page>
+    <error-page>
+        <error-code>401</error-code>
+        <location>/error/unauthorized</location>
+    </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error/forbidden</location>
     </error-page>
     <error-page>
         <error-code>404</error-code>
-        <location>/index.html</location>
+        <location>/error/not_found</location>
     </error-page>
-    <welcome-file-list>
-        <welcome-file>/index.html</welcome-file>
-    </welcome-file-list>
- 
-    <servlet-mapping>
-        <servlet-name>default</servlet-name>
-        <url-pattern>*.xml</url-pattern>
-    </servlet-mapping>
+    <error-page>
+        <error-code>405</error-code>
+        <location>/error/method_not_allowed</location>
+    </error-page>
+    <error-page>
+        <error-code>406</error-code>
+        <location>/error/not_acceptable</location>
+    </error-page>
+    <error-page>
+        <error-code>407</error-code>
+        <location>/error/proxy_authentication_required</location>
+    </error-page>
+    <error-page>
+        <error-code>408</error-code>
+        <location>/error/request_timeout</location>
+    </error-page>
+    <error-page>
+        <error-code>409</error-code>
+        <location>/error/conflict</location>
+    </error-page>
+    <error-page>
+        <error-code>410</error-code>
+        <location>/error/gone</location>
+    </error-page>
+    <error-page>
+        <error-code>411</error-code>
+        <location>/error/length_required</location>
+    </error-page>
+    <error-page>
+        <error-code>412</error-code>
+        <location>/error/precondition_failed</location>
+    </error-page>
+    <error-page>
+        <error-code>413</error-code>
+        <location>/error/entity_too_large</location>
+    </error-page>
+    <error-page>
+        <error-code>414</error-code>
+        <location>/error/uri_too_long</location>
+    </error-page>
+    <error-page>
+        <error-code>415</error-code>
+        <location>/error/unsupported_media_type</location>
+    </error-page>
+    <error-page>
+        <error-code>416</error-code>
+        <location>/error/range_not_satisfiable</location>
+    </error-page>
+    <error-page>
+        <error-code>417</error-code>
+        <location>/error/expectation_failed</location>
+    </error-page>
+
 </web-app>

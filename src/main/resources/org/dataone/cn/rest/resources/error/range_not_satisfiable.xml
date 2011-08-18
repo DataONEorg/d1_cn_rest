@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='416'>
+  <description>Requested Range Not Satisfiable: A server SHOULD return a response with this status code if a request included a Range request-header field.</description>
+</error>

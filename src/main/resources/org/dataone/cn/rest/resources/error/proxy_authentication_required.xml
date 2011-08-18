@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='NotAuthorized'
+       errorCode='401'
+       detailCode='407'>
+  <description>Proxy Authentication Required: The client must first authenticate itself with the proxy.</description>
+</error>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidCredentials'
+       errorCode='401'
+       detailCode='401'>
+  <description>Unauthorized: The request requires user authentication.</description>
+</error>
+

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='412'>
+  <description>Precondition Failed: The precondition given in one or more of the request-header fields evaluated to false when it was tested on the server.</description>
+</error>

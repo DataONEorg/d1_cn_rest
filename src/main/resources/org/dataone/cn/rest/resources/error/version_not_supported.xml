@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='ServiceFailure'
+       errorCode='500'
+       detailCode='505'>
+  <description>HTTP Version Not Supported: The server does not support, or refuses to support, the HTTP protocol version that was used in the request message.</description>
+</error>

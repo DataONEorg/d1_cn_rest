@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='ServiceFailure'
+       errorCode='500'
+       detailCode='502'>
+  <description>Bad Gateway: The server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request. </description>
+</error>
+

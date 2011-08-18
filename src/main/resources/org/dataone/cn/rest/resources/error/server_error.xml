@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='ServiceFailure'
+       errorCode='500'
+       detailCode='500'>
+  <description>Internal Server Error: The server encountered an unexpected condition which prevented it from fulfilling the request.</description>
+</error>

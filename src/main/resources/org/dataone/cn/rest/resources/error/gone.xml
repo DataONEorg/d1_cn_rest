@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='NotFound'
+       errorCode='404'
+       detailCode='410'>
+  <description>Gone: The requested resource is no longer available at the server and no forwarding address is known. </description>
+</error>

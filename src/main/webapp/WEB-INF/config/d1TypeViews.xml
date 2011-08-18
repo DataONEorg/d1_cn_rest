@@ -45,6 +45,13 @@
             <oxm:jibx-marshaller id="jibxNodeListMarshallerResponse" target-class="org.dataone.service.types.v1.NodeList"/>
         </property>
     </bean>
+    <bean id="xmlNodeViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="org.dataone.service.types.v1.Node"/>
+        <property name="contentType" value="text/xml" />
+        <property name="marshaller">
+            <oxm:jibx-marshaller id="jibxNodeMarshallerResponse" target-class="org.dataone.service.types.v1.Node"/>
+        </property>
+    </bean>
     <bean id="xmlNodeReferenceViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
         <property name="contentType" value="text/xml" />
@@ -67,4 +74,12 @@
             <oxm:jibx-marshaller id="jibxSubjectViewMarshallerResponse" target-class="org.dataone.service.types.v1.Subject"/>
         </property>
     </bean>
+<bean id="dataOneExceptionMarshaller" class="org.dataone.cn.rest.exceptions.DataOneExceptionMarshaller" />
+
+    <bean id="xmlBaseExceptionViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="org.dataone.service.exception.BaseException"/>
+        <property name="contentType" value="text/xml" />
+        <property name="marshaller" ref="dataOneExceptionMarshaller" />
+    </bean>
+
 </beans>

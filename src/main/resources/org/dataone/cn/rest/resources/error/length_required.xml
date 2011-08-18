@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='InvalidRequest'
+       errorCode='400'
+       detailCode='411'>
+  <description>Length Required: The server refuses to accept the request without a defined Content-Length.</description>
+</error>

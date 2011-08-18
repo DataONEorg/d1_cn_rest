@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error name='NotImplemented'
+       errorCode='501'
+       detailCode='501'>
+  <description>Not Implemented: The server does not support the functionality required to fulfill the request.</description>
+</error>
