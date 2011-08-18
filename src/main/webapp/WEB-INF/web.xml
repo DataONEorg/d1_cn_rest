@@ -245,7 +245,7 @@
 -->
 
     <servlet>
-        <servlet-name>cnCoreNode</servlet-name>
+        <servlet-name>cnNode</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
          <load-on-startup>5</load-on-startup>
     </servlet>
