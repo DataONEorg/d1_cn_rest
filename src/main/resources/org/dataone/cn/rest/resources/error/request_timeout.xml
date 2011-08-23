@@ -2,5 +2,5 @@
 <error name='AuthenticationTimeout'
        errorCode='408'
        detailCode='408'>
-  <descriptionRequest Timeout: The client did not produce a request within the time that the server was prepared to wait.</description>
+  <description>Request Timeout: The client did not produce a request within the time that the server was prepared to wait.</description>
 </error>
