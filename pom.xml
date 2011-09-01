@@ -258,6 +258,12 @@
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
+            <artifactId>d1_portal</artifactId>
+            <version>0.6.4-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.dataone</groupId>
             <artifactId>d1_cn_rest_proxy</artifactId>
             <version>0.6.4-SNAPSHOT</version>
             <type>jar</type>
