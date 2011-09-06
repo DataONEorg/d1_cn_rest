@@ -16,7 +16,6 @@
     </parent>
     <properties>
         <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
-        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
     </properties>
     <build>
         <finalName>cn</finalName>
@@ -194,31 +193,14 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-<!--        <dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
             <type>jar</type>
             <scope>provided</scope>
-        </dependency> -->
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>6.0.24</version>
-            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>catalina</artifactId>
-            <version>6.0.24</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>coyote</artifactId>
-            <version>6.0.24</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.jibx</groupId>
             <artifactId>jibx-run</artifactId>

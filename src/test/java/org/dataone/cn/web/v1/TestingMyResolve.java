@@ -451,7 +451,7 @@ public class TestingMyResolve {
         // read the baseURLmap to make sure it's working
         String url = null;
         try {
-            url = rf.lookupBaseURLbyNode("r2d2");
+            url = rf.lookupBaseURLbyNode("sq1d");
         } catch (ServiceFailure e) {
             fail("baseURLmap lookup error: " + e);
         }

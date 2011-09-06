@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeReference;
+import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.NodeType;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Subject;
@@ -52,6 +53,7 @@ public class NodeLdapPopulation {
         sq1dMNNode.setBaseURL("https://my.squid.test/mn");
         sq1dMNNode.setReplicate(false);
         sq1dMNNode.setSynchronize(false);
+        sq1dMNNode.setState(NodeState.UP);
         sq1dMNNode.setType(NodeType.MN);
 
         // because we use a base DN, only need to supply the RDN
@@ -63,6 +65,8 @@ public class NodeLdapPopulation {
         mapNodeToContext(sq1dMNNode, context);
         ldapTemplate.bind(dn, context, null);
         testNodeList.add(sq1dMNNode);
+
+
         Node sqR1MNNode = new Node();
         String sqR1Id = "sqR1";
         NodeReference sqR1NodeReference = new NodeReference();
@@ -73,6 +77,7 @@ public class NodeLdapPopulation {
         sqR1MNNode.setBaseURL("https://my.squirrel.test/mn");
         sqR1MNNode.setReplicate(false);
         sqR1MNNode.setSynchronize(false);
+        sqR1MNNode.setState(NodeState.UP);
         sqR1MNNode.setType(NodeType.MN);
 
 
@@ -97,6 +102,7 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeReplicate", Boolean.toString(node.isReplicate()).toUpperCase());
         context.setAttributeValue("d1NodeSynchronize", Boolean.toString(node.isSynchronize()).toUpperCase());
         context.setAttributeValue("d1NodeType", node.getType().xmlValue());
+        context.setAttributeValue("d1NodeState", node.getState().xmlValue());
     }
 
     public void deletePopulatedMns() {
