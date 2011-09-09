@@ -167,22 +167,20 @@ public abstract class AbstractWebController {
         handleBaseException((BaseException) serviceFailure, request, response);
     }
     public void handleBaseException(BaseException exception, HttpServletRequest request, HttpServletResponse response) {
-        response.setStatus(exception.getCode());
-        if (request.getHeader("Accept") != null && request.getHeader("Accept").equalsIgnoreCase("text/xml")) {
+
+        if (request.getHeader("Accept") != null && request.getHeader("Accept").equalsIgnoreCase("application/json")) {
             try {
-                response.getOutputStream().write(exception.serialize(BaseException.FMT_XML).getBytes());
-            } catch (IOException ex) {
-                logger.error(ex.getMessage());
-            }
-        } else if (request.getHeader("Accept") != null  && request.getHeader("Accept").equalsIgnoreCase("application/json")) {
-            try {
+                response.setContentType("application/json");
                 response.getOutputStream().write(exception.serialize(BaseException.FMT_JSON).getBytes());
+                response.getOutputStream().close();
             } catch (IOException ex) {
                 logger.error(ex.getMessage());
             }
         } else {
             try {
-                response.getOutputStream().write(exception.serialize(BaseException.FMT_HTML).getBytes());
+                response.setContentType("text/xml");
+                response.getOutputStream().write(exception.serialize(BaseException.FMT_XML).getBytes());
+                response.getOutputStream().close();
             } catch (IOException ex) {
                 logger.error(ex.getMessage());
             }

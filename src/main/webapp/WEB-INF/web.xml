@@ -320,96 +320,96 @@
     </servlet-mapping>
 
     <error-page>
-        <error-code>500</error-code>
-        <location>/error/server_error</location>
-    </error-page>
-    <error-page>
-        <error-code>501</error-code>
-        <location>/error/not_implemented</location>
-    </error-page>
-    <error-page>
-        <error-code>502</error-code>
-        <location>/error/bad_gateway</location>
-    </error-page>
-    <error-page>
-        <error-code>503</error-code>
-        <location>/error/service_unavailable</location>
-    </error-page>
-    <error-page>
-        <error-code>504</error-code>
-        <location>/error/gateway_timeout</location>
-    </error-page>
-    <error-page>
-        <error-code>505</error-code>
-        <location>/error/version_not_supported</location>
-    </error-page>
-    <error-page>
         <error-code>400</error-code>
-        <location>/error/bad_request</location>
+        <location>/exception/400</location>
     </error-page>
     <error-page>
         <error-code>401</error-code>
-        <location>/error/unauthorized</location>
+        <location>/exception/401</location>
     </error-page>
     <error-page>
         <error-code>403</error-code>
-        <location>/error/forbidden</location>
+        <location>/exception/403</location>
     </error-page>
     <error-page>
         <error-code>404</error-code>
-        <location>/error/not_found</location>
+        <location>/exception/404</location>
     </error-page>
     <error-page>
         <error-code>405</error-code>
-        <location>/error/method_not_allowed</location>
+        <location>/exception/405</location>
     </error-page>
     <error-page>
         <error-code>406</error-code>
-        <location>/error/not_acceptable</location>
+        <location>/exception/406</location>
     </error-page>
     <error-page>
         <error-code>407</error-code>
-        <location>/error/proxy_authentication_required</location>
+        <location>/exception/407</location>
     </error-page>
     <error-page>
         <error-code>408</error-code>
-        <location>/error/request_timeout</location>
+        <location>/exception/408</location>
     </error-page>
     <error-page>
         <error-code>409</error-code>
-        <location>/error/conflict</location>
+        <location>/exception/409</location>
     </error-page>
     <error-page>
         <error-code>410</error-code>
-        <location>/error/gone</location>
+        <location>/exception/410</location>
     </error-page>
     <error-page>
         <error-code>411</error-code>
-        <location>/error/length_required</location>
+        <location>/exception/411</location>
     </error-page>
     <error-page>
         <error-code>412</error-code>
-        <location>/error/precondition_failed</location>
+        <location>/exception/412</location>
     </error-page>
     <error-page>
         <error-code>413</error-code>
-        <location>/error/entity_too_large</location>
+        <location>/exception/413</location>
     </error-page>
     <error-page>
         <error-code>414</error-code>
-        <location>/error/uri_too_long</location>
+        <location>/exception/414</location>
     </error-page>
     <error-page>
         <error-code>415</error-code>
-        <location>/error/unsupported_media_type</location>
+        <location>/exception/415</location>
     </error-page>
     <error-page>
         <error-code>416</error-code>
-        <location>/error/range_not_satisfiable</location>
+        <location>/exception/416</location>
     </error-page>
     <error-page>
         <error-code>417</error-code>
-        <location>/error/expectation_failed</location>
+        <location>/exception/417</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/exception/500</location>
+    </error-page>
+    <error-page>
+        <error-code>501</error-code>
+        <location>/exception/501</location>
+    </error-page>
+    <error-page>
+        <error-code>502</error-code>
+        <location>/exception/502</location>
+    </error-page>
+    <error-page>
+        <error-code>503</error-code>
+        <location>/exception/503</location>
+    </error-page>
+    <error-page>
+        <error-code>504</error-code>
+        <location>/exception/504</location>
+    </error-page>
+    <error-page>
+        <error-code>505</error-code>
+        <location>/exception/505</location>
     </error-page>
 
 </web-app>
