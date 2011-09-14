@@ -22,7 +22,15 @@
         <property name="logName" value="log"/>
     </bean>
     
+    <bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
+    <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
+        factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
+    <bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+        <constructor-arg ref="contextSource" />
+        <qualifier value="ldapTemplate"/>
+    </bean>
     <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
+    
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
         <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxyCNReadServiceImpl|MetacatProxyCNCoreServiceImpl)"/>
         <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxySearchServiceImpl)"/>
@@ -32,19 +40,9 @@
         <property name="nodelistRefreshIntervalSeconds" value="180" />
     </bean>
 
-    <bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
-    <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
-        factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
-    <bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
-        <constructor-arg ref="contextSource" />
-        <qualifier value="ldapTemplate"/>
-    </bean>
-    
-
     <bean id="xmlViewResolverIdentity" class="org.springframework.web.servlet.view.XmlViewResolver">
         <property name="order" value="1"/>
         <property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
     </bean>
 
-    <bean id="handlerExceptionResolver" class="org.dataone.cn.rest.exceptions.DataOneExceptionViewResolver" />
 </beans>

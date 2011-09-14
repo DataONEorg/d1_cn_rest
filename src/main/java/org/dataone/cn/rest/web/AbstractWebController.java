@@ -59,6 +59,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.REQUEST_TIMEOUT)
     @ExceptionHandler(AuthenticationTimeout.class)
     public void handleException(AuthenticationTimeout exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_REQUEST_TIMEOUT);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -66,6 +67,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.CONFLICT)
     @ExceptionHandler(IdentifierNotUnique.class)
     public void handleException(IdentifierNotUnique exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_CONFLICT);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -73,6 +75,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.REQUEST_ENTITY_TOO_LARGE)
     @ExceptionHandler(InsufficientResources.class)
     public void handleException(InsufficientResources exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_REQUEST_ENTITY_TOO_LARGE);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -80,6 +83,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(InvalidCredentials.class)
     public void handleException(InvalidCredentials exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_UNAUTHORIZED);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -87,6 +91,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidRequest.class)
     public void handleException(InvalidRequest exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_BAD_REQUEST);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -94,6 +99,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidSystemMetadata.class)
     public void handleException(InvalidSystemMetadata exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_BAD_REQUEST);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -101,6 +107,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(InvalidToken.class)
     public void handleException(InvalidToken exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_UNAUTHORIZED);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -108,6 +115,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(NotAuthorized.class)
     public void handleException(NotAuthorized exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_UNAUTHORIZED);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -115,6 +123,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFound.class)
     public void handleException(NotFound exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_NOT_FOUND);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -122,6 +131,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
     @ExceptionHandler(NotImplemented.class)
     public void handleException(NotImplemented exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_NOT_IMPLEMENTED);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -129,6 +139,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(ServiceFailure.class)
     public void handleException(ServiceFailure exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_INTERNAL_SERVER_ERROR);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -136,6 +147,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UnsupportedMetadataType.class)
     public void handleException(UnsupportedMetadataType exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_BAD_REQUEST);
         handleBaseException((BaseException) exception, request, response);
     }
     /* Exceptions.UnsupportedType 	400 	The information presented appears to be unsupported. This error might be encountered when attempting to register unrecognized science metadata for e */
@@ -143,6 +155,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UnsupportedType.class)
     public void handleException(UnsupportedType exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_BAD_REQUEST);
         handleBaseException((BaseException) exception, request, response);
     }
 
@@ -150,6 +163,7 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
     @ExceptionHandler(UnsupportedOperationException.class)
     public void handleException(UnsupportedOperationException exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_NOT_IMPLEMENTED);
         NotImplemented notImplemented = new NotImplemented("000", exception.getMessage());
         handleBaseException((BaseException) notImplemented, request, response);
     }
@@ -157,12 +171,14 @@ public abstract class AbstractWebController {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(IOException.class)
     public void handleException(IOException exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_INTERNAL_SERVER_ERROR);
         ServiceFailure serviceFailure = new ServiceFailure("000", exception.getMessage());
         handleBaseException((BaseException) serviceFailure, request, response);
     }
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(JiBXException.class)
     public void handleException(JiBXException exception, HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(response.SC_INTERNAL_SERVER_ERROR);
         ServiceFailure serviceFailure = new ServiceFailure("000", exception.getMessage());
         handleBaseException((BaseException) serviceFailure, request, response);
     }
@@ -172,6 +188,7 @@ public abstract class AbstractWebController {
             try {
                 response.setContentType("application/json");
                 response.getOutputStream().write(exception.serialize(BaseException.FMT_JSON).getBytes());
+                response.getOutputStream().flush();
                 response.getOutputStream().close();
             } catch (IOException ex) {
                 logger.error(ex.getMessage());
@@ -180,6 +197,7 @@ public abstract class AbstractWebController {
             try {
                 response.setContentType("text/xml");
                 response.getOutputStream().write(exception.serialize(BaseException.FMT_XML).getBytes());
+                response.getOutputStream().flush();
                 response.getOutputStream().close();
             } catch (IOException ex) {
                 logger.error(ex.getMessage());
