@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
 import org.dataone.service.util.ExceptionHandler;
 import org.dataone.service.util.EncodingUtilities;
-import org.dataone.service.cn.v1.CNCore;
 import org.dataone.service.exceptions.*;
 import org.dataone.service.types.v1.ObjectLocationList;
 import org.dataone.service.types.v1.Identifier;
@@ -38,7 +37,7 @@ import org.dataone.service.types.v1.Replica;
 import org.dataone.service.types.v1.ReplicationStatus;
 import org.dataone.service.types.v1.SystemMetadata;
 import org.dataone.service.types.v1.util.NodelistUtil;
-import org.dataone.service.util.ExceptionalInputStream;
+import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,8 +82,8 @@ public class ResolveFilter implements Filter {
     // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
     @Autowired
-    @Qualifier("cnCoreLDAP")
-    CNCore nodeListRetrieval;
+    @Qualifier("cnNodeRegistry")
+    NodeRegistryService nodeListRetrieval;
 
     /**
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
@@ -393,11 +392,11 @@ public class ResolveFilter implements Filter {
     }
 
     //  ------   Getters and Setters --------------//
-    public CNCore getNodeListRetrieval() {
+    public NodeRegistryService getNodeListRetrieval() {
         return nodeListRetrieval;
     }
 
-    public void setNodeListRetrieval(CNCore nodeListRetrieval) {
+    public void setNodeListRetrieval(NodeRegistryService nodeListRetrieval) {
         this.nodeListRetrieval = nodeListRetrieval;
     }
 

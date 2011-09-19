@@ -32,9 +32,9 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import org.dataone.cn.ldap.v1.NodeLdapPopulation;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
-import org.dataone.cn.service.ldap.impl.v1.CNCoreLDAPImpl;
 import org.dataone.cn.web.ResolveServlet;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
+import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.cn.v1.CNCore;
 import org.junit.After;
 import org.junit.runner.RunWith;
@@ -58,7 +58,7 @@ public class TestingMyResolve {
     private static boolean debuggingOutput = true;
     private static boolean useSchemas = true;
     private static Integer nodelistRefreshIntervalSeconds = 120;
-    private CNCore cnLdapCore;
+    private NodeRegistryService cnLdapCore;
     private NodeLdapPopulation cnLdapPopulation;
     // need to test that resolveFilter behaves properly under various conditions:
     // (general)
@@ -85,7 +85,7 @@ public class TestingMyResolve {
     // 1. mangled urls (unfollowable)
     // 2. connection timeout from metacat (/meta service)
     @Resource
-    public void setTestController(CNCoreLDAPImpl cnLdapCore) {
+    public void setTestController(NodeRegistryService cnLdapCore) {
         this.cnLdapCore = cnLdapCore;
     }
 

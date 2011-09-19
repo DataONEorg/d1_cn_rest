@@ -21,14 +21,11 @@
     class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
         <property name="logName" value="log"/>
     </bean>
-    
-    <bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
-    <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
-        factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
-    <bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
-        <constructor-arg ref="contextSource" />
-        <qualifier value="ldapTemplate"/>
+
+    <bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
+        <qualifier value="cnNodeRegistry"/>
     </bean>
+
     <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
     
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >

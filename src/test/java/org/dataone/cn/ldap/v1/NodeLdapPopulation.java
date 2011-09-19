@@ -55,11 +55,13 @@ public class NodeLdapPopulation {
         sq1dMNNode.setSynchronize(false);
         sq1dMNNode.setState(NodeState.UP);
         sq1dMNNode.setType(NodeType.MN);
-
+        Subject sq1dSubject = new Subject();
+        sq1dSubject.setValue("cn="+sq1dId+",dc=dataone,dc=org");
+        sq1dMNNode.addSubject(sq1dSubject);
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn = new DistinguishedName();
         dn.add("dc","dataone");
-        dn.add("d1NodeId", sq1dId);
+        dn.add("cn", sq1dId);
 
         DirContextAdapter context = new DirContextAdapter(dn);
         mapNodeToContext(sq1dMNNode, context);
@@ -79,12 +81,14 @@ public class NodeLdapPopulation {
         sqR1MNNode.setSynchronize(false);
         sqR1MNNode.setState(NodeState.UP);
         sqR1MNNode.setType(NodeType.MN);
-
+        Subject sqR1Subject = new Subject();
+        sqR1Subject.setValue("cn="+sqR1Id+",dc=dataone,dc=org");
+        sqR1MNNode.addSubject(sqR1Subject);
 
         // because we use a base DN, only need to supply the RDN
         dn = new DistinguishedName();
         dn.add("dc","dataone");
-        dn.add("d1NodeId", sqR1Id);
+        dn.add("cn", sqR1Id);
 
         context = new DirContextAdapter(dn);
         mapNodeToContext(sqR1MNNode, context);
@@ -94,7 +98,9 @@ public class NodeLdapPopulation {
 
     protected void mapNodeToContext(Node node, DirContextOperations context) {
 
+        context.setAttributeValue("objectclass", "device");
         context.setAttributeValue("objectclass", "d1Node");
+        context.setAttributeValue("cn", node.getIdentifier().getValue());
         context.setAttributeValue("d1NodeId", node.getIdentifier().getValue());
         context.setAttributeValue("d1NodeName", node.getName());
         context.setAttributeValue("d1NodeDescription", node.getDescription());
@@ -103,6 +109,7 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeSynchronize", Boolean.toString(node.isSynchronize()).toUpperCase());
         context.setAttributeValue("d1NodeType", node.getType().xmlValue());
         context.setAttributeValue("d1NodeState", node.getState().xmlValue());
+        context.setAttributeValue("subject", node.getSubject(0).getValue());
     }
 
     public void deletePopulatedMns() {
@@ -115,7 +122,7 @@ public class NodeLdapPopulation {
     private void deleteNode(Node node) {
         DistinguishedName dn = new DistinguishedName();
         dn.add("dc","dataone");
-        dn.add("d1NodeId", node.getIdentifier().getValue());
+        dn.add("cn", node.getIdentifier().getValue());
         log.info("deleting : " + dn.toString());
         ldapTemplate.unbind(dn);
     }

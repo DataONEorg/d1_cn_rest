@@ -12,11 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.mimemultipart.MultipartRequestResolver;
+import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.util.Constants;
-import org.dataone.service.cn.v1.CNCore;
-import org.dataone.service.cn.v1.CNRegister;
 import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
@@ -55,12 +54,10 @@ public class NodeController extends AbstractProxyController implements ServletCo
     static final int SMALL_BUFF_SIZE = 25000;
     static final int MED_BUFF_SIZE = 50000;
     static final int LARGE_BUFF_SIZE = 100000;
+
     @Autowired
-    @Qualifier("cnCoreLDAP")
-    CNCore  nodeListRetrieval;
-    @Autowired
-    @Qualifier("cnRegisterLDAP")
-    CNRegister  nodeRegistry;
+    @Qualifier("cnNodeRegistry")
+    NodeRegistryService  nodeRegistry;
     
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented{
@@ -68,7 +65,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
         //NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
         NodeList nodeList;
  
-        nodeList = nodeListRetrieval.listNodes();
+        nodeList = nodeRegistry.listNodes();
 
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.v1.NodeList", nodeList);
 
@@ -108,7 +105,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
         } else {
             throw new InvalidRequest("4843", "New Node Xml not found in MultiPart request");
         }
-        NodeReference nodeReference = nodeRegistry.register(session, node);
+        NodeReference nodeReference = nodeRegistry.register(node);
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
     @Override

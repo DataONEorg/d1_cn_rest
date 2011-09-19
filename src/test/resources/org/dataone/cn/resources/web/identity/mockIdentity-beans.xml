@@ -26,7 +26,7 @@
 		</spring:property>
 	</spring:bean>
         
-       <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
+       <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
         <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
             factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />

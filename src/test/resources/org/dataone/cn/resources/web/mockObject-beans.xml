@@ -29,7 +29,7 @@
         </spring:property>
     </spring:bean>
 
-    <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.service.ldap.ContextSourceConfiguration" />
+    <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
     <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
         factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
@@ -43,7 +43,9 @@
     </spring:bean>
     -->
     <context:annotation-config/>
-    <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
+    <spring:bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
+        <spring:qualifier value="cnNodeRegistry"/>
+    </spring:bean>
     <context:component-scan base-package="org.dataone.cn.web.proxy.service" />
     <context:component-scan base-package="org.dataone.cn.rest.web.node" />
     <context:component-scan base-package="org.dataone.cn.ldap.v1" />

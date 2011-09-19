@@ -8,7 +8,8 @@ package org.dataone.cn.rest.web.base;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.dataone.cn.service.ldap.impl.v1.CNCoreLDAPImpl;
+import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Node;
@@ -34,15 +35,15 @@ import org.springframework.web.servlet.ModelAndView;
 public class BaseController implements ServletContextAware{
 
     @Autowired
-    @Qualifier("cnCoreLDAP")
-    CNCoreLDAPImpl  nodeRetrieval;
+    @Qualifier("cnNodeRegistry")
+    NodeRegistryService  nodeRetrieval;
     private ServletContext servletContext;
 
     @Value("${cn.nodeId}")
     String nodeIdentifier;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented{
+    public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
 
         Node node;
 
