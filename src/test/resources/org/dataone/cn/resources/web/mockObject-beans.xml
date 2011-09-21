@@ -28,7 +28,9 @@
             </spring:list>
         </spring:property>
     </spring:bean>
-
+        <spring:bean id="mnNodeResource" class="org.springframework.core.io.ClassPathResource" >
+            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnNode.xml"/>
+        </spring:bean>
     <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
     <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"

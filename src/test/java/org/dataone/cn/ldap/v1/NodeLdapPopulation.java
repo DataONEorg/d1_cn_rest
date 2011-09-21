@@ -13,6 +13,7 @@ import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.NodeType;
 import org.dataone.service.types.v1.Person;
+import org.dataone.service.types.v1.Service;
 import org.dataone.service.types.v1.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -114,6 +115,11 @@ public class NodeLdapPopulation {
 
     public void deletePopulatedMns() {
         for (Node node : testNodeList) {
+            if ((node.getServices() != null) && (!node.getServices().getServiceList().isEmpty())) {
+                for (Service service : node.getServices().getServiceList()) {
+                    deleteNodeService(node, service);
+                }
+            }
             deleteNode(node);
         }
         testNodeList.clear();
@@ -126,5 +132,13 @@ public class NodeLdapPopulation {
         log.info("deleting : " + dn.toString());
         ldapTemplate.unbind(dn);
     }
-
+    private void deleteNodeService(Node node, Service service) {
+        String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+        DistinguishedName dn = new DistinguishedName();
+        dn.add("dc","dataone");
+        dn.add("cn", node.getIdentifier().getValue());
+        dn.add("d1NodeServiceId",d1NodeServiceId);
+        log.info("deleting : " + dn.toString());
+        ldapTemplate.unbind(dn);
+    }
 }

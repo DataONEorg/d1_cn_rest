@@ -178,7 +178,8 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.0.1</version>
-            <scope>test</scope>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -201,12 +202,6 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.jibx</groupId>
-            <artifactId>jibx-run</artifactId>
-            <version>1.2.3</version>
-        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
@@ -221,12 +216,6 @@
         </dependency>
         <!--  and we have dependencies on re-usable projects that we maintain -->
 
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_common_java</artifactId>
-            <version>0.6.4-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_libclient_java</artifactId>

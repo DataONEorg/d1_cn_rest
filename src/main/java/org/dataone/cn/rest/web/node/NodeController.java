@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.mimemultipart.MultipartRequestResolver;
@@ -44,6 +45,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller("nodeController")
 public class NodeController extends AbstractProxyController implements ServletContextAware {
+
+     Logger logger = Logger.getLogger(NodeController.class.getName());
 
     private static final String NODE_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE + "/";
     private static final String NODELIST_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE;
@@ -85,6 +88,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
         Session session = certificateManager.getSession(fileRequest);
         Set<String> keys = fileRequest.getFileMap().keySet();
         for (String key : keys) {
+            logger.info("Found filepart " + key);
             if (key.equalsIgnoreCase("node")) {
                 nodeDataMultipart = fileRequest.getFileMap().get(key);
             }
@@ -106,7 +110,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
             throw new InvalidRequest("4843", "New Node Xml not found in MultiPart request");
         }
         NodeReference nodeReference = nodeRegistry.register(node);
-        return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
+        return new ModelAndView("xmlNodeReferenceViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
     @Override
     public void setServletContext(ServletContext sc) {
