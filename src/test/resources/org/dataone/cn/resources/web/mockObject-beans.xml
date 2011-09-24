@@ -11,7 +11,7 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
-
+    <spring:bean id="hzInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" />
     <spring:bean id="mylog"
     class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
         <spring:property name="logName" value="log"/>
@@ -31,10 +31,14 @@
         <spring:bean id="mnNodeResource" class="org.springframework.core.io.ClassPathResource" >
             <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnNode.xml"/>
         </spring:bean>
+        <spring:bean id="mnInvalidNodeResource" class="org.springframework.core.io.ClassPathResource" >
+            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnBadNodeBad.xml"/>
+        </spring:bean>
     <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
     <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
         factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
+        
     <spring:bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
         <spring:constructor-arg ref="contextSource" />
     </spring:bean>
@@ -44,6 +48,18 @@
         <spring:qualifier value="cnCoreLDAP" />
     </spring:bean>
     -->
+    <spring:bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
+        <spring:constructor-arg value="org/dataone/cn/resources/web/hazelcastClientConf.xml" />
+        <spring:qualifier value="hzClientClasspathConfig" />
+    </spring:bean>
+
+    <spring:bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
+        <spring:constructor-arg ref="hzConfig" />
+        <spring:qualifier value="hzClientConfiguration" />
+    </spring:bean>
+
+
+
     <context:annotation-config/>
     <spring:bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
         <spring:qualifier value="cnNodeRegistry"/>

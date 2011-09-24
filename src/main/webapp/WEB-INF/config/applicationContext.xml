@@ -22,16 +22,23 @@
         <property name="logName" value="log"/>
     </bean>
 
+    <bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
+        <constructor-arg ref="hzConfig" />
+        <qualifier value="hzClientConfiguration" />
+    </bean>
+    <bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
+        <constructor-arg value="org/dataone/cn/rest/resources/hazelcastClientConf.xml" />
+        <qualifier value="hzConfig" />
+    </bean>
+
+
     <bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
         <qualifier value="cnNodeRegistry"/>
     </bean>
 
     <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
     
-    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" >
-        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxyCNReadServiceImpl|MetacatProxyCNCoreServiceImpl)"/>
-        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.service.impl.metacat.(?:MetacatProxySearchServiceImpl)"/>
-    </context:component-scan>
+    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" />
 
     <bean id="ResolveFilterV1" class="org.dataone.cn.rest.filter.v1.ResolveFilter">
         <property name="nodelistRefreshIntervalSeconds" value="180" />

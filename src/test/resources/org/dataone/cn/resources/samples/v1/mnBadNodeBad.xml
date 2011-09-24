@@ -12,8 +12,8 @@
         replicate="true" synchronize="true" type="mn" state="up">
     <identifier>test</identifier>
     <name>localhost-test-1</name>
-    <description>Nowhere Test Member node</description>
-    <baseURL>https://nowhere.com/mn</baseURL>
+    <description>Nasty Localhost Test Member node</description>
+    <baseURL>https://localhost:8080/mn</baseURL>
     <services>
         <service name="MNCore" version="v1" available="true"/>
         <service name="MNRead" version="v1" available="true"/>

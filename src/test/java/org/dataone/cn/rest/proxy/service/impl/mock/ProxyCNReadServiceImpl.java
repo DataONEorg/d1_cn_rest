@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
+import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,10 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     public void assertRelation(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+    @Override
+    public void listObjects(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType) throws ServiceFailure, InvalidRequest {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     public Resource getNodeScienceMetadataResource() {
         return readScienceMetadataResource;
     }
@@ -116,6 +120,8 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     public void setNodeSystemMetadataResource(Resource readSystemMetadataResource) {
         this.readSystemMetadataResource = readSystemMetadataResource;
     }
+
+
 
 
 }

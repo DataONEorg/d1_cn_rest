@@ -5,6 +5,7 @@
 
 package org.dataone.cn.rest.web.base;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Node;
+import org.dataone.service.types.v1.NodeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,13 +43,20 @@ public class BaseController implements ServletContextAware{
 
     @Value("${cn.nodeId}")
     String nodeIdentifier;
+    NodeReference nodeReference;
+    
+    @PostConstruct
+    public void init() {
+        nodeReference = new NodeReference();
+        nodeReference.setValue(nodeIdentifier);
+    }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
 
         Node node;
 
-        node = nodeRetrieval.getNode(nodeIdentifier);
+        node = nodeRetrieval.getNode(nodeReference);
 
         return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
 
