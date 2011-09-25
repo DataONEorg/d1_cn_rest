@@ -77,7 +77,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
     @Autowired
     @Qualifier("hzClientConfiguration")
     ClientConfiguration clientConfiguration;
-    HazelcastInstance hzclient;
+    HazelcastInstance hzclient = null;
 
 
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
@@ -104,13 +104,14 @@ public class NodeController extends AbstractProxyController implements ServletCo
         // don't think lazy init will not work in this case since this is the controller for a servlet
         // so lazy init the client here. the hzStore instance (or whereever hzNodes is housed should
         // already be initialized or BOOM goes register
+        logger.info("group " + clientConfiguration.getGroup() + " pwd " + clientConfiguration.getPassword() + " addresses " + clientConfiguration.getLocalhost());
         if (hzclient == null) {
             hzclient = HazelcastClient.newHazelcastClient(clientConfiguration.getGroup(), clientConfiguration.getPassword(),
-                clientConfiguration.getLocalhost());
+                    clientConfiguration.getLocalhost());
         }
+
         Node node = null;
         MultipartFile nodeDataMultipart = null;
-        Session session = certificateManager.getSession(fileRequest);
         Set<String> keys = fileRequest.getFileMap().keySet();
         for (String key : keys) {
             logger.info("Found filepart " + key);
@@ -138,8 +139,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
         if (httpPatternMatcher.find()) {
             throw new InvalidRequest("4823", "BaseURL may not point to localhost! " + node.getBaseURL());
         }
-//        NodeReference nodeReference = nodeRegistry.register(node);
-        // XXX need to generate new Node Reference before putting it in the map
+
         IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
         for (NodeReference noderef : hzNodes.keySet()) {
             logger.info(noderef.getValue());
@@ -148,6 +148,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
         if (hzNodes.containsKey(nodeReference)) {
             throw new IdentifierNotUnique("4844", "Sorry! Node Identifier " + nodeReference.getValue() + " already exists ");
         }
+        // XXX need to generate new Node Reference before putting it in the map
         //       NodeReference nodeReference = nodeRegistry.generateNodeIdentifier();
         //       node.setIdentifier(nodeReference);
 
