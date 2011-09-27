@@ -23,7 +23,7 @@ basic.xsd"
         <interface>127.0.0.1</interface>
       </tcp-ip>
     </join>
-
+  </network>
   <executor-service>
     <core-pool-size>16</core-pool-size>
     <max-pool-size>64</max-pool-size>
