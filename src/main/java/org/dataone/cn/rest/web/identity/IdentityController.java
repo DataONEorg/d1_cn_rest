@@ -4,8 +4,6 @@
  */
 package org.dataone.cn.rest.web.identity;
 
-import java.io.ByteArrayInputStream;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +31,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -46,6 +46,8 @@ public class IdentityController extends AbstractProxyController implements Servl
      * hard coded paths that this controller will proxy out.
      * easier to modify in future releases to keep them all at the top
      */
+    private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
+    private static final String ACCOUNT_MAPPING_CONFIRM_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_CONFIRM;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
 
@@ -86,7 +88,8 @@ public class IdentityController extends AbstractProxyController implements Servl
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf("/") + 1);
+    	String path = ACCOUNTS_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
     	Subject subject = new Subject();
     	subject.setValue(subjectString);
     	
@@ -97,15 +100,15 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.POST)
-    public ModelAndView registerAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    public ModelAndView registerAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Person person = null;
-    	String personString = request.getParameter("person");
+    	MultipartFile personPart = fileRequest.getFile("person");
     	try {
-			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, new ByteArrayInputStream(personString.getBytes("UTF-8")));
+			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, personPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Person from input");
@@ -118,15 +121,15 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.PUT)
-    public ModelAndView updateAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Person person = null;
-    	String personString = request.getParameter("person");
+    	MultipartFile personPart = fileRequest.getFile("person");
     	try {
-			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, new ByteArrayInputStream(personString.getBytes("UTF-8")));
+			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, personPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Person from input");
@@ -141,11 +144,13 @@ public class IdentityController extends AbstractProxyController implements Servl
     @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.POST)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
+    	
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf("/") + 1);
+    	String path = ACCOUNTS_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
     	Subject subject = new Subject();
     	subject.setValue(subjectString);
     	
@@ -153,16 +158,16 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/map", method = RequestMethod.POST)
-    public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1, method = RequestMethod.POST)
+    public void mapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Subject subject = null;
-    	String subjectString = request.getParameter("subject");
+        MultipartFile subjectPart = fileRequest.getFile("subject");
     	try {
-			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(subjectString.getBytes("UTF-8")));
+			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, subjectPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Subject from input");
@@ -172,16 +177,16 @@ public class IdentityController extends AbstractProxyController implements Servl
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/confirm", method = RequestMethod.POST)
-    public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = ACCOUNT_MAPPING_CONFIRM_PATH_V1, method = RequestMethod.POST)
+    public void confirmMapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Subject subject = null;
-    	String subjectString = request.getParameter("subject");
+    	MultipartFile subjectPart = fileRequest.getFile("subject");
     	try {
-			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(subjectString.getBytes("UTF-8")));
+			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, subjectPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Subject from input");
@@ -197,10 +202,13 @@ public class IdentityController extends AbstractProxyController implements Servl
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-        Subject group = null;
-    	String groupString = request.getParameter("group");
+    	Subject group = null;
+        String requesUri = request.getRequestURI();
+    	String path = GROUPS_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
     	try {
-			group = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(groupString.getBytes("UTF-8")));
+			group = new Subject();
+			group.setValue(subjectString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Group from input");
@@ -214,23 +222,26 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.PUT)
-    public void addGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void addGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Subject group = null;
-    	String groupString = request.getParameter("groupName");
+        String requesUri = fileRequest.getRequestURI();
+    	String path = GROUPS_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
     	try {
-			group = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(groupString.getBytes("UTF-8")));
+			group = new Subject();
+			group.setValue(subjectString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Group from input");
 		}
 		SubjectList members = null;
-    	String memberString = request.getParameter("members");
+    	MultipartFile memberPart = fileRequest.getFile("members");
     	try {
-			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, new ByteArrayInputStream(memberString.getBytes("UTF-8")));
+			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, memberPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create SubjectList from members input");
@@ -242,23 +253,26 @@ public class IdentityController extends AbstractProxyController implements Servl
     }
     
     @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.DELETE)
-    public void removeGroupMembers(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void removeGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
-        Subject group = null;
-    	String groupString = request.getParameter("groupName");
+    	Subject group = null;
+        String requesUri = fileRequest.getRequestURI();
+    	String path = GROUPS_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
     	try {
-			group = TypeMarshaller.unmarshalTypeFromStream(Subject.class, new ByteArrayInputStream(groupString.getBytes("UTF-8")));
+			group = new Subject();
+			group.setValue(subjectString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Group from input");
 		}
 		SubjectList members = null;
-    	String memberString = request.getParameter("members");
+    	MultipartFile memberPart = fileRequest.getFile("members");
     	try {
-			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, new ByteArrayInputStream(memberString.getBytes("UTF-8")));
+			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, memberPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create SubjectList from members input");
