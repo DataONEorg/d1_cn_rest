@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
@@ -84,6 +86,9 @@ public class IdentityTestCase {
             fail("Test misconfiguration" + ex);
         }
 
+        for (Person person : subjectList.getPersonList()) {
+            log.info("ListSubject: " + person.getSubject().getValue());
+        }
         assertNotNull(subjectList);
         assertTrue(subjectList.getPersonList().size() > 0);
 
@@ -120,10 +125,15 @@ public class IdentityTestCase {
         person.addEmail("test@dataone.org");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(person, baos);
-        String personValue = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts");
-        request.addParameter("person", personValue);
+
+
+        MockMultipartFile mockPersonFile = new MockMultipartFile("person",baos.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock/accounts");
+        request.addFile(mockPersonFile);
+
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         Subject retSubject = null;
@@ -156,10 +166,12 @@ public class IdentityTestCase {
         person.addEmail("test@dataone.org");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(person, baos);
-        String personValue = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts");
-        request.addParameter("person", personValue);
+        MockMultipartFile mockPersonFile = new MockMultipartFile("person",baos.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock/accounts");
+        request.addFile(mockPersonFile);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         Subject retSubject = null;
@@ -193,10 +205,12 @@ public class IdentityTestCase {
         person.addEmail("update@dataone.org");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(person, baos);
-        String personValue = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/Mock/accounts");
-        request.addParameter("person", personValue);
+        MockMultipartFile mockPersonFile = new MockMultipartFile("person",baos.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("PUT");
+        request.setContextPath("/Mock/accounts");
+        request.addFile(mockPersonFile);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         Subject retSubject = null;
@@ -212,13 +226,14 @@ public class IdentityTestCase {
 
     }
 
+    @Ignore
     @Test
     public void verifyAccount() throws Exception {
          log.info("Test verifyAccount");
     	// create the account first
     	registerAccount();
     	
-    	String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
+    	String subjectValue = "cn=Dracula,dc=cilogon,dc=org";
         Subject subject = new Subject();
         subject.setValue(subjectValue);
         
@@ -251,10 +266,14 @@ public class IdentityTestCase {
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(subject, baos);
-        String subjectString = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts/map");
-        request.addParameter("subject", subjectString);
+
+        MockMultipartFile mockSubjectFile = new MockMultipartFile("subject",baos.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock/accounts/map");
+        request.addFile(mockSubjectFile);
+
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         boolean result = false;
@@ -286,10 +305,14 @@ public class IdentityTestCase {
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(subject, baos);
-        String subjectString = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts/confirm");
-        request.addParameter("subject", subjectString);
+        MockMultipartFile mockSubjectFile = new MockMultipartFile("subject",baos.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock/accounts/confirm");
+        request.addFile(mockSubjectFile);
+
+
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         boolean result = false;
@@ -315,7 +338,7 @@ public class IdentityTestCase {
         TypeMarshaller.marshalTypeToOutputStream(group, baos);
         String groupString = baos.toString("UTF-8");
         
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/groups");
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/groups/");
         request.addParameter("group", groupString);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
@@ -349,17 +372,21 @@ public class IdentityTestCase {
         SubjectList members = new SubjectList();
         members.addPerson(person);
         
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(group, baos);
-        String groupString = baos.toString("UTF-8");
+        ByteArrayOutputStream groupBaos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, groupBaos);
+        MockMultipartFile mockGroupFile = new MockMultipartFile("groupName",groupBaos.toByteArray());
         
-        baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(members, baos);
-        String membersString = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/Mock/groups");
-        request.addParameter("groupName", groupString);
-        request.addParameter("members", membersString);
+        ByteArrayOutputStream membersBaos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(members, membersBaos);
+        MockMultipartFile mockMembersFile = new MockMultipartFile("members",groupBaos.toByteArray());
+
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("PUT");
+        request.setContextPath("/Mock/groups");
+        request.addFile(mockGroupFile);
+        request.addFile(mockMembersFile);
+
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean result = false;
         try {
@@ -392,17 +419,20 @@ public class IdentityTestCase {
         SubjectList members = new SubjectList();
         members.addPerson(person);
         
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(group, baos);
-        String groupString = baos.toString("UTF-8");
-        
-        baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(members, baos);
-        String membersString = baos.toString("UTF-8");
-        
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/Mock/groups");
-        request.addParameter("groupName", groupString);
-        request.addParameter("members", membersString);
+        ByteArrayOutputStream groupBaos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, groupBaos);
+        MockMultipartFile mockGroupFile = new MockMultipartFile("groupName",groupBaos.toByteArray());
+
+        ByteArrayOutputStream membersBaos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(members, membersBaos);
+        MockMultipartFile mockMembersFile = new MockMultipartFile("members",groupBaos.toByteArray());
+
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("DELETE");
+        request.setContextPath("/Mock/groups");
+        request.addFile(mockGroupFile);
+        request.addFile(mockMembersFile);
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean result = false;
         try {
