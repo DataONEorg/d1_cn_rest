@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.net.URLCodec;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.rest.web.AbstractWebController;
@@ -53,7 +54,8 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     private ServletContext servletContext;
 
-    
+	private URLCodec urlDecoder = new URLCodec();
+
     @Autowired
     @Qualifier("cnIdentity")
     CNIdentity  cnIdentity;
@@ -89,7 +91,12 @@ public class IdentityController extends AbstractWebController implements Servlet
     	// get params from request
     	String requesUri = request.getRequestURI();
     	String path = ACCOUNTS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
     	Subject subject = new Subject();
     	subject.setValue(subjectString);
     	
@@ -150,7 +157,12 @@ public class IdentityController extends AbstractWebController implements Servlet
     	// get params from request
     	String requesUri = request.getRequestURI();
     	String path = ACCOUNTS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
     	Subject subject = new Subject();
     	subject.setValue(subjectString);
     	
@@ -205,7 +217,12 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Subject group = null;
         String requesUri = request.getRequestURI();
     	String path = GROUPS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
     	try {
 			group = new Subject();
 			group.setValue(subjectString);
@@ -230,7 +247,12 @@ public class IdentityController extends AbstractWebController implements Servlet
         Subject group = null;
         String requesUri = fileRequest.getRequestURI();
     	String path = GROUPS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
     	try {
 			group = new Subject();
 			group.setValue(subjectString);
@@ -261,7 +283,12 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Subject group = null;
         String requesUri = fileRequest.getRequestURI();
     	String path = GROUPS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length() + 1);
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
     	try {
 			group = new Subject();
 			group.setValue(subjectString);
