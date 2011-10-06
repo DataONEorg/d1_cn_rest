@@ -42,7 +42,7 @@ public class ExceptionController extends AbstractWebController {
     public static Log log = LogFactory.getLog(ExceptionController.class);
     static final int SIZE = 8192;
     
-    @RequestMapping(value = "/{errorId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{errorId}")
     public void get(HttpServletRequest request, HttpServletResponse response, @PathVariable String errorId) throws NotFound, ServiceFailure, NotImplemented, InvalidRequest, InvalidCredentials, NotAuthorized, AuthenticationTimeout, InsufficientResources {
 
             int status = 500;

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.service.util.TypeMarshaller;
-import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
+import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.service.util.Constants;
 import org.dataone.service.cn.v1.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author leinfelder
  */
 @Controller("identityController")
-public class IdentityController extends AbstractProxyController implements ServletContextAware {
+public class IdentityController extends AbstractWebController implements ServletContextAware {
     /*
      * hard coded paths that this controller will proxy out.
      * easier to modify in future releases to keep them all at the top
