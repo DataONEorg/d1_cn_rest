@@ -208,7 +208,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.POST)
+    @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.POST)
     public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
