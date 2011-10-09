@@ -14,6 +14,7 @@ import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.NodeType;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Service;
+import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v1.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,6 +60,19 @@ public class NodeLdapPopulation {
         Subject sq1dSubject = new Subject();
         sq1dSubject.setValue("cn="+sq1dId+",dc=dataone,dc=org");
         sq1dMNNode.addSubject(sq1dSubject);
+        Services sq1dservices = new Services();
+        Service sq1dcoreService = new Service();
+        sq1dcoreService.setName("MNCore");
+        sq1dcoreService.setVersion("v1");
+        sq1dcoreService.setAvailable(Boolean.TRUE);
+
+        Service sq1dreadService = new Service();
+        sq1dreadService.setName("MNRead");
+        sq1dreadService.setVersion("v1");
+        sq1dreadService.setAvailable(Boolean.TRUE);
+        sq1dservices.addService(sq1dcoreService);
+        sq1dservices.addService(sq1dreadService);
+        sq1dMNNode.setServices(sq1dservices);
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn = new DistinguishedName();
         dn.add("dc","dataone");
@@ -67,6 +81,20 @@ public class NodeLdapPopulation {
         DirContextAdapter context = new DirContextAdapter(dn);
         mapNodeToContext(sq1dMNNode, context);
         ldapTemplate.bind(dn, context, null);
+
+        for (Service service : sq1dMNNode.getServices().getServiceList()) {
+            String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+            DistinguishedName dnService = new DistinguishedName();
+            dnService.add("dc","dataone");
+            dnService.add("cn", sq1dId);
+            dnService.add("d1NodeServiceId", d1NodeServiceId);
+            context = new DirContextAdapter(dnService);
+            mapServiceToContext(service, sq1dId, d1NodeServiceId, context);
+            ldapTemplate.bind(dnService, context, null);
+        }
+
+
+
         testNodeList.add(sq1dMNNode);
 
 
@@ -85,6 +113,20 @@ public class NodeLdapPopulation {
         Subject sqR1Subject = new Subject();
         sqR1Subject.setValue("cn="+sqR1Id+",dc=dataone,dc=org");
         sqR1MNNode.addSubject(sqR1Subject);
+        sq1dMNNode.addSubject(sq1dSubject);
+        Services sqR1services = new Services();
+        Service sqR1coreService = new Service();
+        sqR1coreService.setName("MNCore");
+        sqR1coreService.setVersion("v1");
+        sqR1coreService.setAvailable(Boolean.TRUE);
+
+        Service sqR1readService = new Service();
+        sqR1readService.setName("MNRead");
+        sqR1readService.setVersion("v1");
+        sqR1readService.setAvailable(Boolean.TRUE);
+        sqR1services.addService(sqR1coreService);
+        sqR1services.addService(sqR1readService);
+        sqR1MNNode.setServices(sqR1services);
 
         // because we use a base DN, only need to supply the RDN
         dn = new DistinguishedName();
@@ -94,6 +136,16 @@ public class NodeLdapPopulation {
         context = new DirContextAdapter(dn);
         mapNodeToContext(sqR1MNNode, context);
         ldapTemplate.bind(dn, context, null);
+        for (Service service : sqR1MNNode.getServices().getServiceList()) {
+            String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+            DistinguishedName dnService = new DistinguishedName();
+            dnService.add("dc","dataone");
+            dnService.add("cn", sqR1Id);
+            dnService.add("d1NodeServiceId", d1NodeServiceId);
+            context = new DirContextAdapter(dnService);
+            mapServiceToContext(service, sqR1Id, d1NodeServiceId, context);
+            ldapTemplate.bind(dnService, context, null);
+        }
         testNodeList.add(sqR1MNNode);
     }
 
@@ -112,7 +164,15 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeState", node.getState().xmlValue());
         context.setAttributeValue("subject", node.getSubject(0).getValue());
     }
+    protected void mapServiceToContext(org.dataone.service.types.v1.Service service, String nodeId, String nodeServiceId, DirContextOperations context) {
+        context.setAttributeValue("objectclass", "d1NodeService");
+        context.setAttributeValue("d1NodeServiceId", nodeServiceId);
+        context.setAttributeValue("d1NodeId", nodeId);
 
+        context.setAttributeValue("d1NodeServiceName", service.getName());
+        context.setAttributeValue("d1NodeServiceVersion", service.getVersion());
+        context.setAttributeValue("d1NodeServiceAvailable", Boolean.toString(service.getAvailable()).toUpperCase());
+    }
     public void deletePopulatedMns() {
         for (Node node : testNodeList) {
             if ((node.getServices() != null) && (!node.getServices().getServiceList().isEmpty())) {

@@ -149,16 +149,21 @@ public class ResolveFilter implements Filter {
 
             for (Node node : nodeList.getNodeList()) {
                 ArrayList<String> versionedBaseUrls = new ArrayList<String>();
-                cacheUrlMap.put(node.getIdentifier().getValue(), versionedBaseUrls);
+
                 Services services = node.getServices();
-                for (Service service : services.getServiceList()) {
-                    if (service.getName().equalsIgnoreCase("MNRead") && service.getAvailable()) {
-                        if (node.getBaseURL().endsWith("/")) {
-                            versionedBaseUrls.add(node.getBaseURL() + service.getVersion() + "/");
-                        } else {
-                            versionedBaseUrls.add(node.getBaseURL() + "/" + service.getVersion() + "/");
+                if (services != null) {
+                    for (Service service : services.getServiceList()) {
+                        if (service.getName().contains("Read") && service.getAvailable()) {
+                            if (node.getBaseURL().endsWith("/")) {
+                                versionedBaseUrls.add(node.getBaseURL() + service.getVersion() + "/");
+                            } else {
+                                versionedBaseUrls.add(node.getBaseURL() + "/" + service.getVersion() + "/");
+                            }
                         }
                     }
+                    cacheUrlMap.put(node.getIdentifier().getValue(), versionedBaseUrls);
+                } else {
+                    logger.info("NO SERVICES FOR " + node.getIdentifier().getValue());
                 }
             }
             versionedBaseUrlMap = cacheUrlMap;
