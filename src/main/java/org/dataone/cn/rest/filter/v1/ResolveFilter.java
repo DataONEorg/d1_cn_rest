@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,11 @@ import org.dataone.service.types.v1.ObjectLocation;
 import org.dataone.service.types.v1.Replica;
 import org.dataone.service.types.v1.ReplicationStatus;
 import org.dataone.service.types.v1.SystemMetadata;
-import org.dataone.service.types.v1.util.NodelistUtil;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.types.v1.Node;
+import org.dataone.service.types.v1.Services;
+import org.dataone.service.types.v1.Service;
+import org.dataone.service.types.v1.util.NodelistUtil;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +75,7 @@ public class ResolveFilter implements Filter {
 
     Logger logger = Logger.getLogger(ResolveFilter.class);
     private FilterConfig filterConfig = null;
+    private Map<String, ArrayList<String>> versionedBaseUrlMap = null;
     private Map<String, String> baseUrlMap = null;
     private XPathFactory xFactory = null;
     private long lastRefreshTimeMS = 0;
@@ -91,7 +96,7 @@ public class ResolveFilter implements Filter {
     @Override
     public void destroy() {
         this.filterConfig = null;
-        this.baseUrlMap = null;
+        this.versionedBaseUrlMap = null;
         this.xFactory = null;
     }
 
@@ -123,7 +128,6 @@ public class ResolveFilter implements Filter {
         }
 
         if (this.baseUrlMap == null) {
-            HashMap<String, String> cacheUrlMap = new HashMap<String, String>();
 
             try {
 
@@ -139,10 +143,26 @@ public class ResolveFilter implements Filter {
                 throw new ServiceFailure("4150", "Error parsing Nodelist: nodeList is Empty!");
             }
 
-            this.baseUrlMap = NodelistUtil.mapNodeList(nodeList);
+            baseUrlMap = NodelistUtil.mapNodeList(nodeList);
+
+            HashMap<String, ArrayList<String>> cacheUrlMap = new HashMap<String, ArrayList<String>>();
+
+            for (Node node : nodeList.getNodeList()) {
+                ArrayList<String> versionedBaseUrls = new ArrayList<String>();
+                cacheUrlMap.put(node.getIdentifier().getValue(), versionedBaseUrls);
+                Services services = node.getServices();
+                for (Service service : services.getServiceList()) {
+                    if (service.getName().equalsIgnoreCase("MNRead") && service.getAvailable()) {
+                        if (node.getBaseURL().endsWith("/")) {
+                            versionedBaseUrls.add(node.getBaseURL() + service.getVersion() + "/");
+                        } else {
+                            versionedBaseUrls.add(node.getBaseURL() + "/" + service.getVersion() + "/");
+                        }
+                    }
+                }
+            }
+            versionedBaseUrlMap = cacheUrlMap;
         }
-
-
     }
 
     /**
@@ -177,6 +197,11 @@ public class ResolveFilter implements Filter {
      *  @exception org.dataone.service.exceptions.ServiceFailure
      * 
      **/
+    public List<String> lookupVersionedBaseURLbyNode(String nodeID) throws ServiceFailure {
+
+        return versionedBaseUrlMap.get(nodeID);
+    }
+
     public String lookupBaseURLbyNode(String nodeID) throws ServiceFailure {
 
         return baseUrlMap.get(nodeID);
@@ -258,52 +283,52 @@ public class ResolveFilter implements Filter {
         ByteArrayInputStream origXMLIn = new ByteArrayInputStream(origXML);
         // Examine byte to make certain there is not an error
 
-            String errorCheck = new String(Arrays.copyOfRange(origXML, 0, 100));
-            if (errorCheck.contains("<error")) {
-                try {
-                    TreeMap<String, String> trace_information = new TreeMap<String, String>();
-                    // get the exception from getSystemMetadata in order to re-cast it as a resolve error
-                    String statusInt = String.valueOf(responseWrapper.getStatus());
-                    BaseException d1Exception = (BaseException) ExceptionHandler.deserializeXml(origXMLIn, statusInt + ": ");
-                    /*
-                     * Check for these exceptions from getSystemMetadata and re-raise them as resolve exceptions
-                     * Exceptions.InvalidToken – (errorCode=401, detailCode=1050)
-                     * Exceptions.NotImplemented – (errorCode=501, detailCode=1041)
-                     * Exceptions.ServiceFailure – (errorCode=500, detailCode=1090)
-                     * Exceptions.NotAuthorized – (errorCode=401, detailCode=1040)
-                     * Exceptions.NotFound – (errorCode=404, detailCode=1060)
-                     * Exceptions.InvalidRequest – (errorCode=400, detailCode=1080)
-                     */
+        String errorCheck = new String(Arrays.copyOfRange(origXML, 0, 100));
+        if (errorCheck.contains("<error")) {
+            try {
+                TreeMap<String, String> trace_information = new TreeMap<String, String>();
+                // get the exception from getSystemMetadata in order to re-cast it as a resolve error
+                String statusInt = String.valueOf(responseWrapper.getStatus());
+                BaseException d1Exception = (BaseException) ExceptionHandler.deserializeXml(origXMLIn, statusInt + ": ");
+                /*
+                 * Check for these exceptions from getSystemMetadata and re-raise them as resolve exceptions
+                 * Exceptions.InvalidToken – (errorCode=401, detailCode=1050)
+                 * Exceptions.NotImplemented – (errorCode=501, detailCode=1041)
+                 * Exceptions.ServiceFailure – (errorCode=500, detailCode=1090)
+                 * Exceptions.NotAuthorized – (errorCode=401, detailCode=1040)
+                 * Exceptions.NotFound – (errorCode=404, detailCode=1060)
+                 * Exceptions.InvalidRequest – (errorCode=400, detailCode=1080)
+                 */
 
-                    for (String key : d1Exception.getTraceKeySet()) {
-                        trace_information.put(key, d1Exception.getTraceDetail(key));
-                    }
-
-                    if (d1Exception.getDetail_code().equalsIgnoreCase("1050")) {
-                        throw new InvalidToken("4130", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    } else if (d1Exception.getDetail_code().equalsIgnoreCase("1041")) {
-                        throw new NotImplemented("4131", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    } else if (d1Exception.getDetail_code().equalsIgnoreCase("1090")) {
-                        throw new ServiceFailure("4150", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    } else if (d1Exception.getDetail_code().equalsIgnoreCase("1040")) {
-                        throw new NotAuthorized("4120", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
-                        throw new NotFound("4140", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
-                        throw new InvalidRequest("4132", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    } else {
-                        throw new ServiceFailure("4150", "Unrecognized getSystemMetadata failure: " + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                    }
-                } catch (IllegalStateException ex) {
-                    throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
-                } catch (ParserConfigurationException ex) {
-                    throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
-                } catch (SAXException ex) {
-                    throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+                for (String key : d1Exception.getTraceKeySet()) {
+                    trace_information.put(key, d1Exception.getTraceDetail(key));
                 }
 
+                if (d1Exception.getDetail_code().equalsIgnoreCase("1050")) {
+                    throw new InvalidToken("4130", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1041")) {
+                    throw new NotImplemented("4131", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1090")) {
+                    throw new ServiceFailure("4150", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1040")) {
+                    throw new NotAuthorized("4120", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
+                    throw new NotFound("4140", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
+                    throw new InvalidRequest("4132", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else {
+                    throw new ServiceFailure("4150", "Unrecognized getSystemMetadata failure: " + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                }
+            } catch (IllegalStateException ex) {
+                throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+            } catch (ParserConfigurationException ex) {
+                throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+            } catch (SAXException ex) {
+                throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
             }
-        
+
+        }
+
 
         //  ****** Handle response from the servlet  *********
         //  response will be either a systemMD object, or a D1 error object
@@ -358,29 +383,29 @@ public class ResolveFilter implements Filter {
             if (replica.getReplicationStatus() == ReplicationStatus.COMPLETED) {
                 isReplicaNotCompleted = false;
                 NodeReference nodeReference = replica.getReplicaMemberNode();
-
-                String baseURLstring = lookupBaseURLbyNode(nodeReference.getValue());
-                if (baseURLstring == null) {
+                String baseURLString = lookupBaseURLbyNode(nodeReference.getValue());
+                List<String> baseURLS = lookupVersionedBaseURLbyNode(nodeReference.getValue());
+                if ((baseURLString == null) || (baseURLS == null) || baseURLS.isEmpty()) {
                     throw new ServiceFailure("4150", "unregistered Node identifier ("
                             + nodeReference.getValue() + ") in systemmetadata document for object: " + idString);
                 }
                 // the id is put into the path portion of the url, so encoding thusly ;)
                 String encodedIdString = EncodingUtilities.encodeUrlPathSegment(idString);
-                String urlString;
-                if (baseURLstring.endsWith("/")) {
-                    urlString = baseURLstring + "object/" + encodedIdString;
-                } else {
-                    urlString = baseURLstring + "/object/" + encodedIdString;
+                for (String versionedBaseURLString : baseURLS) {
+
+                    String urlString = versionedBaseURLString + "object/" + encodedIdString;
+
+                    ObjectLocation objectLocation = new ObjectLocation();
+                    objectLocation.setNodeIdentifier(nodeReference);
+                    objectLocation.setBaseURL(baseURLString);
+                    objectLocation.setUrl(urlString);
+                    objectLocationList.addObjectLocation(objectLocation);
+                    // A weighting parameter that provides a hint to the caller
+                    // for the relative preference for nodes from which the content should be retrieved.
+                    // XXX How to set the preference???
+                    // objectLocation.setPreference(filterConfig)
                 }
-                ObjectLocation objectLocation = new ObjectLocation();
-                objectLocation.setNodeIdentifier(nodeReference);
-                objectLocation.setBaseURL(baseURLstring);
-                objectLocation.setUrl(urlString);
-                objectLocationList.addObjectLocation(objectLocation);
-                // A weighting parameter that provides a hint to the caller
-                // for the relative preference for nodes from which the content should be retrieved.
-                // XXX How to set the preference???
-                // objectLocation.setPreference(filterConfig)
+
             }
 
         }
