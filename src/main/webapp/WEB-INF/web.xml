@@ -137,6 +137,11 @@
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
     <!-- Test Including this -->
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
@@ -164,6 +169,26 @@
         <url-pattern>/v1/checksum/*</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v1/notify</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v1/notify/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v1/meta/replication/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v1/meta/policy/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v1/replicationAuthorized/*</url-pattern>
+    </servlet-mapping>
 <!--
     <servlet>
         <servlet-name>notify</servlet-name>
