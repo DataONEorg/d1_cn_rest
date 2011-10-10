@@ -285,7 +285,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     	// get params from request
     	Subject group = null;
         String requesUri = fileRequest.getRequestURI();
-    	String path = GROUPS_PATH_V1 + "/";
+    	String path = GROUPS_REMOVE_PATH_V1 + "/";
     	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
