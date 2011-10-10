@@ -66,6 +66,13 @@
             <oxm:jibx-marshaller id="jibxSubjectListMarshallerResponse" target-class="org.dataone.service.types.v1.SubjectList"/>
         </property>
     </bean>
+    <bean id="xmlSubjectInfoViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="org.dataone.service.types.v1.SubjectInfo"/>
+        <property name="contentType" value="text/xml" />
+        <property name="marshaller">
+            <oxm:jibx-marshaller id="jibxSubjectInfoMarshallerResponse" target-class="org.dataone.service.types.v1.SubjectInfo"/>
+        </property>
+    </bean>
 
     <bean id="xmlSubjectViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <property name="modelKey" value="org.dataone.service.types.v1.Subject"/>

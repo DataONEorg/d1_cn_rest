@@ -25,6 +25,7 @@ import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.types.v1.SubjectList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,6 +52,8 @@ public class IdentityController extends AbstractWebController implements Servlet
     private static final String ACCOUNT_MAPPING_CONFIRM_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_CONFIRM;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
+    private static final String GROUPS_REMOVE_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS_REMOVE;
+
 
     private ServletContext servletContext;
 
@@ -77,9 +80,9 @@ public class IdentityController extends AbstractWebController implements Servlet
     		count = Integer.parseInt(request.getParameter("count"));
     	} catch (Exception e) {}
     	
-        SubjectList subjectList = cnIdentity.listSubjects(session, query, start, count);
+    	SubjectInfo subjectInfo = cnIdentity.listSubjects(session, query, start, count);
 
-        return new ModelAndView("xmlSubjectListViewResolver", "org.dataone.service.types.v1.SubjectList", subjectList);
+        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
 
     }
     
@@ -100,9 +103,9 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Subject subject = new Subject();
     	subject.setValue(subjectString);
     	
-        SubjectList subjectList = cnIdentity.getSubjectInfo(session, subject);
+    	SubjectInfo subjectInfo = cnIdentity.getSubjectInfo(session, subject);
 
-        return new ModelAndView("xmlSubjectListViewResolver", "org.dataone.service.types.v1.SubjectList", subjectList);
+        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
 
     }
     
@@ -274,7 +277,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    @RequestMapping(value = GROUPS_REMOVE_PATH_V1 + "/*", method = RequestMethod.POST)
     public void removeGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
