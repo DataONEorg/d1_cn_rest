@@ -238,7 +238,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.PUT)
+    @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.PUT)
     public void addGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -274,7 +274,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.DELETE)
+    @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.DELETE)
     public void removeGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
