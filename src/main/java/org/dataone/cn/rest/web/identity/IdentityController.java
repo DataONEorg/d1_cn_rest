@@ -71,6 +71,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String query = request.getParameter("query");
+    	String status = request.getParameter("status");
     	int start = 0;
     	int count = -1;
     	try {
@@ -80,7 +81,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     		count = Integer.parseInt(request.getParameter("count"));
     	} catch (Exception e) {}
     	
-    	SubjectInfo subjectInfo = cnIdentity.listSubjects(session, query, start, count);
+    	SubjectInfo subjectInfo = cnIdentity.listSubjects(session, query, status, start, count);
 
         return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
 
