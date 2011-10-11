@@ -50,6 +50,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      */
     private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
     private static final String ACCOUNT_MAPPING_CONFIRM_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_CONFIRM;
+    private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
     private static final String GROUPS_REMOVE_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS_REMOVE;
@@ -110,6 +111,30 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.GET)
+    public ModelAndView getPendingMapIdentity(HttpServletRequest request, HttpServletResponse response) 
+    	throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requesUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+    	
+    	SubjectInfo subjectInfo = cnIdentity.getPendingMapIdentity(session, subject);
+
+        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+
+    }
+    
     @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.POST)
     public ModelAndView registerAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
@@ -159,9 +184,9 @@ public class IdentityController extends AbstractWebController implements Servlet
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-    	String requesUri = request.getRequestURI();
+    	String requestUri = request.getRequestURI();
     	String path = ACCOUNTS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
 		} catch (Exception e) {
@@ -209,6 +234,48 @@ public class IdentityController extends AbstractWebController implements Servlet
 		}
     	
 		boolean success = cnIdentity.confirmMapIdentity(session, subject);
+
+    }
+    
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    public void denyMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+    	
+		boolean success = cnIdentity.denyMapIdentity(session, subject);
+
+    }
+    
+    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    public void removeMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+    	
+		boolean success = cnIdentity.removeMapIdentity(session, subject);
 
     }
     
