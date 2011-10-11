@@ -24,8 +24,8 @@
     <!-- other properties -->
     </spring:bean>
     <context:component-scan base-package="org.dataone.cn.rest.proxy.controller" >
-        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.CNReadController"/>
-        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?:CNCoreController|CNReplicationController|AbstractProxyController)"/>
+        <context:include-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.CNReplicationController"/>
+        <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?:CNReadController|CNCoreController|AbstractProxyController)"/>
           <!--  <context:exclude-filter type="regex" expression="org.dataone.cn.rest.proxy.controller.(?!SearchController)"/> -->
     </context:component-scan>
 <!--    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" /> -->
