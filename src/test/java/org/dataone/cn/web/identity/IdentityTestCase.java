@@ -22,6 +22,7 @@ import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.types.v1.SubjectList;
 import org.junit.After;
 import org.junit.Before;
@@ -78,19 +79,19 @@ public class IdentityTestCase {
         request.setParameter("start", "0");
         request.setParameter("count", "10");
         MockHttpServletResponse response = new MockHttpServletResponse();
-        SubjectList subjectList = null;
+        SubjectInfo subjectInfo = null;
         try {
             ModelAndView mav = testController.listSubjects(request, response);
-            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.v1.SubjectList");
+            subjectInfo = (SubjectInfo) mav.getModel().get("org.dataone.service.types.v1.SubjectInfo");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
 
-        for (Person person : subjectList.getPersonList()) {
+        for (Person person : subjectInfo.getPersonList()) {
             log.info("ListSubject: " + person.getSubject().getValue());
         }
-        assertNotNull(subjectList);
-        assertTrue(subjectList.getPersonList().size() > 0);
+        assertNotNull(subjectInfo);
+        assertTrue(subjectInfo.getPersonList().size() > 0);
 
     }
 
@@ -99,16 +100,16 @@ public class IdentityTestCase {
         log.info("Test getSubjectInfo");
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/accounts/CN=Dracula,DC=dataone,DC=org");
         MockHttpServletResponse response = new MockHttpServletResponse();
-        SubjectList subjectList = null;
+        SubjectInfo subjectInfo = null;
         try {
             ModelAndView mav = testController.listSubjects(request, response);
-            subjectList = (SubjectList) mav.getModel().get("org.dataone.service.types.v1.SubjectList");
+            subjectInfo = (SubjectInfo) mav.getModel().get("org.dataone.service.types.v1.SubjectInfo");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
 
-        assertNotNull(subjectList);
-        assertTrue(subjectList.getPersonList().size() > 0);
+        assertNotNull(subjectInfo);
+        assertTrue(subjectInfo.getPersonList().size() > 0);
         
     }
 
@@ -370,7 +371,7 @@ public class IdentityTestCase {
         person.setFamilyName("test");
         person.addEmail("test@dataone.org");
         SubjectList members = new SubjectList();
-        members.addPerson(person);
+        members.addSubject(person.getSubject());
         
         ByteArrayOutputStream groupBaos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(group, groupBaos);
@@ -417,7 +418,7 @@ public class IdentityTestCase {
         person.setFamilyName("test");
         person.addEmail("test@dataone.org");
         SubjectList members = new SubjectList();
-        members.addPerson(person);
+        members.addSubject(person.getSubject());
         
         ByteArrayOutputStream groupBaos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(group, groupBaos);
