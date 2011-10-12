@@ -319,6 +319,8 @@ public class ResolveFilter implements Filter {
                     throw new NotAuthorized("4120", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
                 } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
                     throw new NotFound("4140", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1800")) {
+                    throw new NotFound("4140", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
                 } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
                     throw new InvalidRequest("4132", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
                 } else {
