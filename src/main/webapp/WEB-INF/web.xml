@@ -137,11 +137,7 @@
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
-    <servlet>
-        <servlet-name>metacatCNReplication</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
-    </servlet>
+
     <!-- Test Including this -->
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
@@ -168,26 +164,26 @@
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v1/checksum/*</url-pattern>
     </servlet-mapping>
-
+    <servlet>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
     <servlet-mapping>
         <servlet-name>metacatCNReplication</servlet-name>
-        <url-pattern>/v1/notify</url-pattern>
+        <url-pattern>/v1/replicaNotifications/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNReplication</servlet-name>
-        <url-pattern>/v1/notify/</url-pattern>
+        <url-pattern>/v1/replicaMetadata/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNReplication</servlet-name>
-        <url-pattern>/v1/meta/replication/*</url-pattern>
+        <url-pattern>/v1/replicaPolicies/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNReplication</servlet-name>
-        <url-pattern>/v1/meta/policy/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNReplication</servlet-name>
-        <url-pattern>/v1/replicationAuthorized/*</url-pattern>
+        <url-pattern>/v1/replicaAuthorizations/*</url-pattern>
     </servlet-mapping>
 <!--
     <servlet>
@@ -209,7 +205,7 @@
     <servlet>
         <servlet-name>cnNode</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>3</load-on-startup>
+         <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet-mapping>
@@ -228,7 +224,7 @@
     <servlet>
         <servlet-name>identity</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>4</load-on-startup>
+         <load-on-startup>5</load-on-startup>
     </servlet>
     
     <servlet-mapping>
@@ -264,7 +260,7 @@
     <servlet>
         <servlet-name>identifier</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>5</load-on-startup>
+         <load-on-startup>6</load-on-startup>
     </servlet>
     
 	<servlet-mapping>
@@ -274,7 +270,7 @@
     <servlet>
         <servlet-name>exception</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>6</load-on-startup>
+         <load-on-startup>7</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>exception</servlet-name>
@@ -283,7 +279,7 @@
      <servlet>
         <servlet-name>cnBase</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>7</load-on-startup>
+         <load-on-startup>8</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
