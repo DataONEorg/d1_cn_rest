@@ -49,6 +49,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * easier to modify in future releases to keep them all at the top
      */
     private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
+    private static final String ACCOUNT_MAPPING_REQUEST_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_REQUEST;
     private static final String ACCOUNT_MAPPING_CONFIRM_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_CONFIRM;
     private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
@@ -204,6 +205,35 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	
+    	// get params from request
+        Subject primarySubject = null;
+        MultipartFile primarySubjectPart = fileRequest.getFile("primarySubject");
+    	try {
+    		primarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, primarySubjectPart.getInputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create primary Subject from input");
+		}
+		Subject secondarySubject = null;
+        MultipartFile secondarySubjectPart = fileRequest.getFile("secondarySubject");
+    	try {
+    		secondarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, secondarySubjectPart.getInputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create secondary Subject from input");
+		}
+    	
+		boolean success = cnIdentity.mapIdentity(session, primarySubject, secondarySubject);
+
+    }
+    
+    
+    @RequestMapping(value = ACCOUNT_MAPPING_REQUEST_PATH_V1, method = RequestMethod.POST)
+    public void requestMapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Subject subject = null;
         MultipartFile subjectPart = fileRequest.getFile("subject");
@@ -214,7 +244,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 			throw new ServiceFailure(null, "Could not create Subject from input");
 		}
     	
-		boolean success = cnIdentity.mapIdentity(session, subject);
+		boolean success = cnIdentity.requestMapIdentity(session, subject);
 
     }
     
