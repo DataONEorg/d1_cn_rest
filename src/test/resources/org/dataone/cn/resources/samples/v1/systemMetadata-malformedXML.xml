@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <d1:systemMetadata xmlns:d1="http://ns.dataone.org/service/types/v1"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <serialVersion>1</serialVersion>
     <identifier>aAbBcC12345</identifier>
 
-    <fmtid>eml://ecoinformatics.org/eml-2.0.1</fmtid>
+    <formatId>eml://ecoinformatics.org/eml-2.0.1</formatId>
 
 	<!-- 
 		introducing an error to simulate malformed systemmetadata returned (not closing size element)

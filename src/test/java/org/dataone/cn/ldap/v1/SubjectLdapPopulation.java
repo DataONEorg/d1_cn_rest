@@ -59,6 +59,7 @@ public class SubjectLdapPopulation {
         testPerson1.addGivenName("TheMonster");
         testPerson1.setFamilyName(testSubject1Value);
         testPerson1.addEmail("frankenstien@monster.info");
+        testPerson1.setVerified(Boolean.TRUE);
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn1 = new DistinguishedName();
         dn1.add("DC", "cilogon");
@@ -77,7 +78,7 @@ public class SubjectLdapPopulation {
         testPerson2.addGivenName("Vlad");
         testPerson2.setFamilyName(testSubject2Value);
         testPerson2.addEmail("dracula@monsters.info");
-
+        testPerson2.setVerified(Boolean.TRUE);
         DistinguishedName dn2 = new DistinguishedName();
         dn2.add("DC", "cilogon");
         dn2.add("CN", testSubject2.getValue());

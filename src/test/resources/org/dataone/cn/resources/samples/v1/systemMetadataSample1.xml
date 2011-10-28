@@ -22,11 +22,11 @@
 -->
 
 <d1:systemMetadata xmlns:d1="http://ns.dataone.org/service/types/v1"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://ns.dataone.org/service/types/v1 file:/home/rwaltz/Projects/AllSoftware/d1_schemas/dataoneTypes.xsd">
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <serialVersion>1</serialVersion>
     <identifier>ABC123</identifier>
 
-    <fmtid>http://www.loc.gov/METS/</fmtid>
+    <formatId>http://www.loc.gov/METS/</formatId>
 
     <size>922337203</size>
     <checksum algorithm="SHA-1">SGVsbG8gV29ybGQh</checksum>

@@ -60,6 +60,11 @@ public class NodeLdapPopulation {
         Subject sq1dSubject = new Subject();
         sq1dSubject.setValue("cn="+sq1dId+",dc=dataone,dc=org");
         sq1dMNNode.addSubject(sq1dSubject);
+
+        Subject sq1dContactSubject = new Subject();
+        sq1dContactSubject.setValue("CN=Dracula,DC=cilogon,DC=org");
+        sq1dMNNode.addContactSubject(sq1dContactSubject);
+        
         Services sq1dservices = new Services();
         Service sq1dcoreService = new Service();
         sq1dcoreService.setName("MNCore");
@@ -113,7 +118,11 @@ public class NodeLdapPopulation {
         Subject sqR1Subject = new Subject();
         sqR1Subject.setValue("cn="+sqR1Id+",dc=dataone,dc=org");
         sqR1MNNode.addSubject(sqR1Subject);
-        sq1dMNNode.addSubject(sq1dSubject);
+
+        Subject sqR1ContactSubject = new Subject();
+        sqR1ContactSubject.setValue("CN=Frankenstein,DC=cilogon,DC=org");
+        sqR1MNNode.addContactSubject(sqR1ContactSubject);
+        
         Services sqR1services = new Services();
         Service sqR1coreService = new Service();
         sqR1coreService.setName("MNCore");
@@ -162,7 +171,9 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeSynchronize", Boolean.toString(node.isSynchronize()).toUpperCase());
         context.setAttributeValue("d1NodeType", node.getType().xmlValue());
         context.setAttributeValue("d1NodeState", node.getState().xmlValue());
+        context.setAttributeValue("d1NodeApproved", Boolean.toString(Boolean.TRUE).toUpperCase());
         context.setAttributeValue("subject", node.getSubject(0).getValue());
+        context.setAttributeValue("d1NodeContactSubject", node.getContactSubject(0).getValue());
     }
     protected void mapServiceToContext(org.dataone.service.types.v1.Service service, String nodeId, String nodeServiceId, DirContextOperations context) {
         context.setAttributeValue("objectclass", "d1NodeService");
