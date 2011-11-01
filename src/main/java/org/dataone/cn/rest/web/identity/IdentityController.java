@@ -49,8 +49,6 @@ public class IdentityController extends AbstractWebController implements Servlet
      * easier to modify in future releases to keep them all at the top
      */
     private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
-    private static final String ACCOUNT_MAPPING_REQUEST_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_REQUEST;
-    private static final String ACCOUNT_MAPPING_CONFIRM_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_CONFIRM;
     private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
@@ -229,39 +227,43 @@ public class IdentityController extends AbstractWebController implements Servlet
     }
     
     
-    @RequestMapping(value = ACCOUNT_MAPPING_REQUEST_PATH_V1, method = RequestMethod.POST)
-    public void requestMapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.POST)
+    public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-        Subject subject = null;
-        MultipartFile subjectPart = fileRequest.getFile("subject");
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
-			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, subjectPart.getInputStream());
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create Subject from input");
+			// ignore
 		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
     	
 		boolean success = cnIdentity.requestMapIdentity(session, subject);
 
     }
     
-    @RequestMapping(value = ACCOUNT_MAPPING_CONFIRM_PATH_V1, method = RequestMethod.POST)
-    public void confirmMapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.PUT)
+    public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-        Subject subject = null;
-    	MultipartFile subjectPart = fileRequest.getFile("subject");
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
-			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, subjectPart.getInputStream());
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create Subject from input");
+			// ignore
 		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
     	
 		boolean success = cnIdentity.confirmMapIdentity(session, subject);
 
