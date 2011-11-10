@@ -8,8 +8,9 @@
 	<xsl:import href="nodeList.v1.xsl"/>
 	<!--
 	<xsl:import href="objectList.v1.xsl"/>
-	<xsl:import href="objectFormatList.v1.xsl"/>
 	-->
+	<xsl:import href="objectFormatList.v1.xsl"/>
+	
 
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 	
@@ -39,13 +40,14 @@
                             	<xsl:call-template name="objectList"/>
                             </div>	
                         </xsl:if>
+                        -->
                         
                         <xsl:if test="*[local-name()='objectFormatList']">
                         	<div id="objectFormatList"> 	
                             	<xsl:call-template name="objectFormatList"/>
                            	</div>
                         </xsl:if>
-                        -->
+                        
 					</div>
                         
 				<xsl:call-template name="bodyfooter"/>
