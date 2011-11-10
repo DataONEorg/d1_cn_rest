@@ -14,6 +14,17 @@ import org.springframework.oxm.XmlMappingException;
 
 public class StylesheetTypeMarshaller implements Marshaller {
 
+	// configure in the bean
+	private String stylesheet;
+
+	public String getStylesheet() {
+		return stylesheet;
+	}
+
+	public void setStylesheet(String stylesheet) {
+		this.stylesheet = stylesheet;
+	}
+
 	@Override
 	public void marshal(Object typeObject, Result result) throws IOException,
 			XmlMappingException {
@@ -21,7 +32,7 @@ public class StylesheetTypeMarshaller implements Marshaller {
 		// marshal to byte stream
 		OutputStream os = new ByteArrayOutputStream();
 		try {
-			TypeMarshaller.marshalTypeToOutputStream(typeObject, os);
+			TypeMarshaller.marshalTypeToOutputStream(typeObject, os, stylesheet);
 		} catch (JiBXException e) {
 			// throw it up the stack
 			e.printStackTrace();
