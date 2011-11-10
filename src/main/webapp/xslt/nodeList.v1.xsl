@@ -36,7 +36,13 @@
 				</tr>
 				<tr>
 					<td>Base URL: </td>
-					<td><xsl:value-of select="baseURL"/></td>
+					<td>
+						<a>
+							<xsl:attribute name="href"><xsl:value-of select="baseURL"/></xsl:attribute>
+							<xsl:attribute name="target">_blank</xsl:attribute>
+							<xsl:value-of select="baseURL"/>
+						</a>	
+					</td>
 				</tr>
 				<tr>
 					<td>Subject[s]: </td>
