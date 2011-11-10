@@ -7,7 +7,7 @@
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 		
 	<xsl:template name="nodeList">
-		<p>Registered DataONE nodes. Inludes Coordinating Nodes (CN) and Member Nodes (MN).</p>
+		<p>Registered DataONE nodes. Includes Coordinating Nodes (CN) and Member Nodes (MN).</p>
 		<hr/>
 		<xsl:for-each select="*[local-name()='nodeList']/node">
 			<xsl:call-template name="node" />
@@ -61,6 +61,26 @@
 						</xsl:for-each>	
 					</td>
 				</tr>
+				<tr>
+					<td>Synchronization schedule: </td>
+					<td>
+						<xsl:for-each select="synchronization/schedule">
+							<xsl:call-template name="schedule" />
+						</xsl:for-each>	
+					</td>
+				</tr>
+				<tr>
+					<td>Last Harvested: </td>
+					<td>
+						<xsl:value-of select="synchronization/lastHarvested"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Last Complete Harvest: </td>
+					<td>
+						<xsl:value-of select="synchronization/lastCompleteHarvest"/>
+					</td>
+				</tr>
 			</table>		
 		</xsl:for-each>
 	</xsl:template>
@@ -77,6 +97,39 @@
 					<td><xsl:value-of select="@name"/></td>
 					<td><xsl:value-of select="@version"/></td>
 					<td><xsl:value-of select="@available"/></td>
+				</tr>
+			</xsl:for-each>	
+		</table>
+	</xsl:template>
+	
+	<!-- 
+	<schedule hour="*" mday="*" min="0,5,10,15,20,25,30,35,40,45,50,55"
+				mon="*" sec="0" wday="?" year="*" />
+			<lastHarvested>1900-01-01T00:00:00.000+00:00
+			</lastHarvested>
+			<lastCompleteHarvest>1900-01-01T00:00:00.000+00:00
+			</lastCompleteHarvest>
+	 -->
+	<xsl:template name="schedule">
+		<table>
+			<tr>
+				<td>Year</td>
+				<td>Month</td>
+				<td>Day of Month</td>
+				<td>Day of Week</td>
+				<td>Hour</td>
+				<td>Minute</td>
+				<td>Second</td>
+			</tr>
+			<xsl:for-each select=".">		
+				<tr>
+					<td><xsl:value-of select="@year"/></td>
+					<td><xsl:value-of select="@mon"/></td>
+					<td><xsl:value-of select="@mday"/></td>
+					<td><xsl:value-of select="@wday"/></td>
+					<td><xsl:value-of select="@hour"/></td>
+					<td><xsl:value-of select="@min"/></td>
+					<td><xsl:value-of select="@sec"/></td>
 				</tr>
 			</xsl:for-each>	
 		</table>
