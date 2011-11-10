@@ -65,7 +65,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public IdentityController() {}
     
     @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.GET)
-    public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented {
+    public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -88,7 +88,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     }
     
     @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.GET)
-    public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+    public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
@@ -156,7 +156,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     }
     
     @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.PUT)
-    public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(fileRequest);
@@ -177,7 +177,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     }
     
     @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.POST)
-    public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	
     	// get the Session object from certificate in request
