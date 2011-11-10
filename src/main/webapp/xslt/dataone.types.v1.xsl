@@ -6,9 +6,7 @@
 	
 	<!-- these are the types we want to render -->
 	<xsl:import href="nodeList.v1.xsl"/>
-	<!--
 	<xsl:import href="objectList.v1.xsl"/>
-	-->
 	<xsl:import href="objectFormatList.v1.xsl"/>
 	
 
@@ -34,14 +32,11 @@
                             	<xsl:call-template name="nodeList"/>
                             </div>	
                         </xsl:if>
-                        <!-- 
                         <xsl:if test="*[local-name()='objectList']">
                         	<div id="objectList">  	
                             	<xsl:call-template name="objectList"/>
                             </div>	
-                        </xsl:if>
-                        -->
-                        
+                        </xsl:if>                        
                         <xsl:if test="*[local-name()='objectFormatList']">
                         	<div id="objectFormatList"> 	
                             	<xsl:call-template name="objectFormatList"/>
