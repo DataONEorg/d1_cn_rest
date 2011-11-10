@@ -20,22 +20,30 @@
 		
 			<xsl:call-template name="documenthead"/>
 			
-			<body>
+			<body onload="initTabs()">
 		
 				<xsl:call-template name="bodyheader"/>
 				    
 					<div id="content">
+						<!-- place holder for tabs-->
+						<ul></ul>
 					                        
                    		<xsl:if test="*[local-name()='nodeList']">
-                            <xsl:call-template name="nodeList"/>
+                   			<div id="nodeList">
+                            	<xsl:call-template name="nodeList"/>
+                            </div>	
                         </xsl:if>
                         <!-- 
-                        <xsl:if test="*[local-name()='objectList']">     	
-                            <xsl:call-template name="objectList"/>
+                        <xsl:if test="*[local-name()='objectList']">
+                        	<div id="objectList">  	
+                            	<xsl:call-template name="objectList"/>
+                            </div>	
                         </xsl:if>
                         
-                        <xsl:if test="*[local-name()='objectFormatList']">     	
-                            <xsl:call-template name="objectFormatList"/>
+                        <xsl:if test="*[local-name()='objectFormatList']">
+                        	<div id="objectFormatList"> 	
+                            	<xsl:call-template name="objectFormatList"/>
+                           	</div>
                         </xsl:if>
                         -->
 					</div>
@@ -48,17 +56,38 @@
 		
 	</xsl:template>
 	
-	
 	<xsl:template name="documenthead">
 		<head>
-			<!-- 
-			<link rel="stylesheet" type="text/css" href="dataone.css" />
-			-->
+			
+			<link type="text/css" href="jquery/jqueryui/css/smoothness/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+			<link type="text/css" href="dataone.css" rel="Stylesheet" />	
+			<script src="jquery/jquery-1.6.4.min.js"></script>
+			<script src="jquery/jqueryui/jquery-ui-1.8.16.custom.min.js"></script>
+			<script type="text/javascript">
+			function initTabs() {
+				$(function() {
+					$("#content").tabs();
+					if ($("#nodeList").is("div")) {
+						$("#content").tabs("add", "#nodeList", "Node List");
+					}
+					if ($("#objectList").is("div")) {
+						$("#content").tabs("add", "#objectList", "Object List");
+					}
+					if ($("#objectFormatList").is("div")) {
+						$("#content").tabs("add", "#objectFormatList", "Object Format List");
+					}
+				});
+			}
+			</script>
+			
 		</head>
 	</xsl:template>
 	
 	<xsl:template name="bodyheader">
-		<!-- header -->
+		<!-- dataone logo header -->
+		<div class="logoheader">
+			<h1></h1>
+		</div>
 	</xsl:template>
 	
 	<xsl:template name="bodyfooter">

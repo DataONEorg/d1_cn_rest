@@ -7,7 +7,8 @@
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 		
 	<xsl:template name="nodeList">
-		<h1>Node List</h1>
+		<p>Registered DataONE nodes. Inludes Coordinating Nodes (CN) and Member Nodes (MN).</p>
+		<hr/>
 		<xsl:for-each select="*[local-name()='nodeList']/node">
 			<xsl:call-template name="node" />
 			<hr/>
