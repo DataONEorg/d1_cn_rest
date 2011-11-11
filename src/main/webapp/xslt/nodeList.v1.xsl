@@ -62,6 +62,18 @@
 					</td>
 				</tr>
 				<tr>
+					<td>Status: </td>
+					<td><xsl:value-of select="@state"/></td>
+				</tr>
+				<tr>
+					<td>Replicate: </td>
+					<td><xsl:value-of select="@replicate"/></td>
+				</tr>
+				<tr>
+					<td>Synchronize: </td>
+					<td><xsl:value-of select="@synchronize"/></td>
+				</tr>
+				<tr>
 					<td>Synchronization schedule: </td>
 					<td>
 						<xsl:for-each select="synchronization/schedule">
