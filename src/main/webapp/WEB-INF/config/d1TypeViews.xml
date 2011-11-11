@@ -40,9 +40,12 @@
     <bean id="xmlObjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <property name="modelKey" value="org.dataone.service.types.v1.ObjectList"/>
         <property name="contentType" value="text/xml" />
+        <property name="marshaller" ref="stylesheetTypeMarshaller"/>
+        <!-- 
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxObjectListMarshallerResponse" target-class="org.dataone.service.types.v1.ObjectList"/>
         </property>
+        -->
     </bean>
     <bean id="xmlNodeListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <property name="modelKey" value="org.dataone.service.types.v1.NodeList"/>
