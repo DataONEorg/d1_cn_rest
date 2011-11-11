@@ -32,7 +32,7 @@
 					<td><xsl:value-of select="formatType"/></td>
 				</tr>
 				<tr>
-					<td>ID: </td>
+					<td>Id: </td>
 					<td><xsl:value-of select="formatId"/></td>
 				</tr>
 				<tr>

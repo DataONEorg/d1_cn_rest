@@ -19,7 +19,7 @@
 		<xsl:for-each select=".">
 			<table>
 				<tr>
-					<td>ID: </td>
+					<td>Node Id: </td>
 					<td><xsl:value-of select="identifier"/></td>
 				</tr>
 				<tr>
