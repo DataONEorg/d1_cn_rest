@@ -18,7 +18,7 @@
 
 	<!-- for marshalling jibx objects including a stylesheet processing directive -->
     <bean id="stylesheetTypeMarshaller" class="org.dataone.cn.rest.util.StylesheetTypeMarshaller">
-        <property name="stylesheet" value="xslt/dataone.types.v1.xsl" />
+        <property name="stylesheet" value="/cn/xslt/dataone.types.v1.xsl" />
     </bean>
 
     <bean id="xmlIdentifierViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
