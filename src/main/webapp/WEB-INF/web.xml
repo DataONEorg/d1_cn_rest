@@ -277,9 +277,22 @@
         <url-pattern>/exception/*</url-pattern>
     </servlet-mapping>
      <servlet>
-        <servlet-name>cnBase</servlet-name>
+        <servlet-name>xslt</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
          <load-on-startup>8</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>xslt</servlet-name>
+        <url-pattern>/xslt/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>xslt</servlet-name>
+        <url-pattern>/xslt/</url-pattern>
+    </servlet-mapping>
+     <servlet>
+        <servlet-name>cnBase</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+         <load-on-startup>9</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
