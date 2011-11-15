@@ -8,11 +8,11 @@
 	<xsl:import href="nodeList.v1.xsl"/>
 	<xsl:import href="objectList.v1.xsl"/>
 	<xsl:import href="objectFormatList.v1.xsl"/>
-	
 
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 	
-	<xsl:param name="something">something</xsl:param>
+	<!-- depending on the deployment, this allows us to locate the resources -->
+	<xsl:param name="pathPrefix">/cn/xslt/</xsl:param>
 		
 	<xsl:template match="/">
 		<html>
@@ -56,10 +56,26 @@
 	<xsl:template name="documenthead">
 		<head>
 			
-			<link type="text/css" href="jquery/jqueryui/css/smoothness/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
-			<link type="text/css" href="dataone.css" rel="Stylesheet" />	
-			<script src="jquery/jquery-1.6.4.min.js"></script>
-			<script src="jquery/jqueryui/jquery-ui-1.8.16.custom.min.js"></script>
+			<link type="text/css" rel="Stylesheet" >
+				<xsl:attribute name="href">
+					<xsl:value-of select="$pathPrefix"/>jquery/jqueryui/css/smoothness/jquery-ui-1.8.16.custom.css
+				</xsl:attribute>
+			</link>
+			<link type="text/css" rel="Stylesheet" >
+				<xsl:attribute name="href">
+					<xsl:value-of select="$pathPrefix"/>dataone.css
+				</xsl:attribute>
+			</link>	
+			<script>
+				<xsl:attribute name="src">
+					<xsl:value-of select="$pathPrefix"/>jquery/jquery-1.6.4.min.js
+				</xsl:attribute>
+			</script>
+			<script>
+				<xsl:attribute name="src">
+					<xsl:value-of select="$pathPrefix"/>jquery/jqueryui/jquery-ui-1.8.16.custom.min.js
+				</xsl:attribute>
+			</script>
 			<script type="text/javascript">
 			function initTabs() {
 				$(function() {
