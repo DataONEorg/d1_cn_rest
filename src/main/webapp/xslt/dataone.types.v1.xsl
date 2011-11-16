@@ -32,6 +32,11 @@
                             	<xsl:call-template name="nodeList"/>
                             </div>	
                         </xsl:if>
+                        <xsl:if test="*[local-name()='node']">
+                   			<div id="node">
+                            	<xsl:call-template name="node"/>
+                            </div>	
+                        </xsl:if>
                         <xsl:if test="*[local-name()='objectList']">
                         	<div id="objectList">  	
                             	<xsl:call-template name="objectList"/>
@@ -82,6 +87,9 @@
 					$("#content").tabs();
 					if ($("#nodeList").is("div")) {
 						$("#content").tabs("add", "#nodeList", "Node List");
+					}
+					if ($("#node").is("div")) {
+						$("#content").tabs("add", "#node", "Node Details");
 					}
 					if ($("#objectList").is("div")) {
 						$("#content").tabs("add", "#objectList", "Object List");
