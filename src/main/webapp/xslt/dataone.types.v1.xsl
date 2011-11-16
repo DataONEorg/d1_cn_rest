@@ -34,7 +34,9 @@
                         </xsl:if>
                         <xsl:if test="*[local-name()='node']">
                    			<div id="node">
-                            	<xsl:call-template name="node"/>
+                   				<xsl:for-each select="*[local-name()='node']">
+									<xsl:call-template name="node" />
+								</xsl:for-each>
                             </div>	
                         </xsl:if>
                         <xsl:if test="*[local-name()='objectList']">
