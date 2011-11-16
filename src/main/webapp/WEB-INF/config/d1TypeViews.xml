@@ -60,9 +60,12 @@
     <bean id="xmlNodeViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <property name="modelKey" value="org.dataone.service.types.v1.Node"/>
         <property name="contentType" value="text/xml" />
+        <property name="marshaller" ref="stylesheetTypeMarshaller"/>
+        <!--
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxNodeMarshallerResponse" target-class="org.dataone.service.types.v1.Node"/>
         </property>
+        -->
     </bean>
     <bean id="xmlNodeReferenceViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
