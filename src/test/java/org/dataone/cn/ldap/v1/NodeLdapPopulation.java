@@ -98,10 +98,7 @@ public class NodeLdapPopulation {
             ldapTemplate.bind(dnService, context, null);
         }
 
-
-
         testNodeList.add(sq1dMNNode);
-
 
         Node sqR1MNNode = new Node();
         String sqR1Id = "sqR1";

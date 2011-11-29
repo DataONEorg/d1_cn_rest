@@ -6,8 +6,14 @@ package org.dataone.cn.rest.web.identifier;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.codec.DecoderException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -18,11 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
-import org.dataone.cn.rest.proxy.http.ProxyServletResponseWrapper;
 import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.service.util.Constants;
 import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
+import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -63,6 +69,8 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
     @Qualifier("proxyCNReadService")
     ProxyCNReadService proxyCNReadService;
 
+    private URLCodec urlCodec = new URLCodec();
+    
     public ReserveIdentifierController() {
     }
    /*
@@ -104,6 +112,30 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
         BufferedHttpResponseWrapper metaResponse = new BufferedHttpResponseWrapper(response);
         try {
             proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, pid.getValue(), AcceptType.XML);
+            if (metaResponse.isException()) {
+                BaseException d1Exception = metaResponse.getD1Exception();
+                TreeMap<String, String> trace_information = new TreeMap<String, String>();
+                for (String key : d1Exception.getTraceKeySet()) {
+                    trace_information.put(key, d1Exception.getTraceDetail(key));
+                }
+                if (d1Exception.getDetail_code().equalsIgnoreCase("1050")) {
+                    throw new InvalidToken("4190", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1041")) {
+                    throw new NotImplemented("4191", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1090")) {
+                    throw new ServiceFailure("4210", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1040")) {
+                    throw new NotAuthorized("4180", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
+                    throw new NotFound("0", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1800")) {
+                    throw new NotFound("0", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
+                    throw new InvalidRequest("4200", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else {
+                    throw new ServiceFailure("4210", "Unrecognized getSystemMetadata failure: " + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                }
+            }
             String bufferedData = new String(metaResponse.getBuffer());
             log.info(bufferedData);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(bufferedData.getBytes());
@@ -143,20 +175,20 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
      * @return void
      * @exception
      */
-    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1, method = RequestMethod.GET)
+    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/**", method = RequestMethod.GET)
     public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
         Session session = CertificateManager.getInstance().getSession(request);
         // get params from request
-        Identifier pid = null;
-        String pidString = request.getParameter("pid");
+        Identifier pid = new Identifier();
         try {
-            pid = TypeMarshaller.unmarshalTypeFromStream(Identifier.class, new ByteArrayInputStream(pidString.getBytes("UTF-8")));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ServiceFailure(null, "Could not create pid from input");
+            String pidString = getRequestPID(request, RESOURCE_RESERVE_PATH_V1);
+            pid.setValue(pidString);
+        } catch (DecoderException ex) {
+            throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
         }
+
 
         // check the reservation
         boolean hasReservation = reserveIdentifierService.hasReservation(session, pid);
@@ -164,26 +196,74 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
         // look for existing use of the ID if there is no reservation
         if (!hasReservation) {
             // look for existing use of the Identifier
-            ProxyServletResponseWrapper metaResponse = new ProxyServletResponseWrapper(response);
+            BufferedHttpResponseWrapper metaResponse = new BufferedHttpResponseWrapper(response);
             proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, pid.getValue(), AcceptType.XML);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(metaResponse.getData());
+            if (metaResponse.isException()) {
+                BaseException d1Exception = metaResponse.getD1Exception();
+                TreeMap<String, String> trace_information = new TreeMap<String, String>();
+                for (String key : d1Exception.getTraceKeySet()) {
+                    trace_information.put(key, d1Exception.getTraceDetail(key));
+                }
+                if (d1Exception.getDetail_code().equalsIgnoreCase("1050")) {
+                    throw new InvalidToken("4875", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1041")) {
+                    throw new NotImplemented("4870", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1090")) {
+                    throw new ServiceFailure("4872", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1040")) {
+                    throw new NotAuthorized("4871", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
+                    throw new NotFound("4874", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1800")) {
+                    throw new NotFound("4874", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
+                    throw new InvalidRequest("4873", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                } else {
+                    throw new ServiceFailure("4872", "Unrecognized getSystemMetadata failure: " + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                }
+            }
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(metaResponse.getBuffer());
+
             SystemMetadata systemMetadata = null;
             try {
                 systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new ServiceFailure("1090", "Problem deserializing system metadata, " + e.getMessage());
+                throw new ServiceFailure("4872", "Problem deserializing system metadata, " + e.getMessage());
             }
             // is there system meta data for the Identifier?
             if (systemMetadata != null) {
-                throw new IdentifierNotUnique("4210", "The given pid is already in use: " + pid.getValue());
+                throw new IdentifierNotUnique("4876", "The given pid is already in use: " + pid.getValue());
             }
         }
 
         // if we got here, we have the reservation
 
     }
-
+    /**
+     * pull the pid from an url
+     *  it maybe that the PID is url encoded or it may appear as a path
+     *  use the path as a way to delimit the pid
+     *
+     * @author rwaltz
+     * @param HttpServletRequest request
+     * @param String delimiter
+     * @return PID
+     * @exception DecoderException
+     */
+    private String getRequestPID(HttpServletRequest request, String delimiter) throws DecoderException {
+        StringBuffer urlBuffer = request.getRequestURL();
+        int objectStart = urlBuffer.indexOf(delimiter);
+        String pid = urlBuffer.substring(objectStart + delimiter.length(), urlBuffer.length());
+        String decodedPID = null;
+        try {
+            decodedPID = EncodingUtilities.decodeString(pid);
+        } catch (UnsupportedEncodingException e) {
+            decodedPID = urlCodec.decode(pid);
+        }
+        log.info("decoding PID/PID: " + pid + " to " + decodedPID);
+        return decodedPID;
+    }
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;

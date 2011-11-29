@@ -12,7 +12,13 @@ package org.dataone.cn.rest.filter;
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
+import org.dataone.service.exceptions.*;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import org.dataone.service.util.ExceptionHandler;
 /**
  * A custom response wrapper that captures all output in a buffer.
  */
@@ -24,6 +30,7 @@ public class BufferedHttpResponseWrapper extends HttpServletResponseWrapper {
     private ServletOutputStream outputStream = null;
     private int status = -1;
 
+    private BaseException d1Exception = null;
     public BufferedHttpResponseWrapper(HttpServletResponse origResponse) {
         super(origResponse);
     }
@@ -92,5 +99,41 @@ public class BufferedHttpResponseWrapper extends HttpServletResponseWrapper {
     
     public int getStatus() {
     	return this.status;
+    }
+    public Boolean isException()  {
+        String errorCheck = new String(Arrays.copyOfRange(getBuffer(), 0, 100));
+        BaseException d1Exception = null;
+        Boolean isException = null;
+        if (errorCheck.contains("<error")) {
+            isException = true;
+            try {
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(getBuffer());
+                
+                // get the exception from getSystemMetadata in order to re-cast it as a resolve error
+                String statusInt = String.valueOf(getStatus());
+                d1Exception = (BaseException) ExceptionHandler.deserializeXml(inputStream, statusInt + ": ");
+
+                setD1Exception(d1Exception);
+            } catch (IllegalStateException ex) {
+                d1Exception = new ServiceFailure("0", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+            } catch (ParserConfigurationException ex) {
+                d1Exception = new  ServiceFailure("0", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+            } catch (SAXException ex) {
+               d1Exception = new ServiceFailure("0", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+            } catch (IOException ex) {
+               d1Exception = new  ServiceFailure("0", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
+            }
+            setD1Exception(d1Exception);
+        } else {
+            isException = false;
+        }
+        return isException;
+    }
+
+    public BaseException getD1Exception() {
+        return this.d1Exception;
+    }
+    public void setD1Exception(BaseException d1Exception) {
+        this.d1Exception = d1Exception;
     }
 } 

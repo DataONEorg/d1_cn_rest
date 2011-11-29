@@ -5,14 +5,16 @@
 package org.dataone.cn.web.node;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.core.IMap;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.client.auth.CertificateManager;
+import org.dataone.cn.auth.X509CertificateGenerator;
 import org.dataone.cn.ldap.v1.NodeLdapPopulation;
+import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
 import org.dataone.cn.rest.web.node.NodeController;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
@@ -34,6 +36,9 @@ import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
+import java.security.cert.X509Certificate;
+import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.types.v1.Subject;
 
 /**
  *
@@ -48,8 +53,9 @@ public class NodeRegistryTestCase {
     public static Log log = LogFactory.getLog(NodeRegistryTestCase.class);
     private NodeController testController;
     private NodeLdapPopulation cnLdapPopulation;
-
-    
+    private SubjectLdapPopulation subjectLdapPopulation;
+    private X509CertificateGenerator x509CertificateGenerator;
+    private NodeRegistryService nodeRegistryService = new NodeRegistryService();
     private Config hzConfig;
     final static int SIZE = 16384;
     @Resource
@@ -60,13 +66,23 @@ public class NodeRegistryTestCase {
     public void setTestController(NodeController testController) {
         this.testController = testController;
     }
+    @Resource
+    public void setCNLdapPopulation(SubjectLdapPopulation subjectLdapPopulation) {
+        this.subjectLdapPopulation = subjectLdapPopulation;
+    }
+    @Resource
+    public void setX509CertificateGenerator(X509CertificateGenerator x509CertificateGenerator) {
+        this.x509CertificateGenerator = x509CertificateGenerator;
+    }
     @Before
     public void before() throws Exception {
         cnLdapPopulation.populateTestMNs();
+        subjectLdapPopulation.populateTestIdentities();
     }
     @After
     public void after() throws Exception {
         cnLdapPopulation.deletePopulatedMns();
+        subjectLdapPopulation.deletePopulatedSubjects();
     }
     @Autowired
     @Qualifier("mnNodeResource")
@@ -108,6 +124,9 @@ public class NodeRegistryTestCase {
     @Test
     public void testRegisterNode() throws Exception {
 
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
         ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
 
         BufferedInputStream bInputStream = new BufferedInputStream(mnNodeResource.getInputStream());
@@ -126,6 +145,7 @@ public class NodeRegistryTestCase {
         MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
         
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         request.setMethod("POST");
         request.setContextPath("/Mock/node/");
         request.addFile(mockNodeFile);
@@ -136,22 +156,29 @@ public class NodeRegistryTestCase {
             ModelAndView mav = testController.register(request, response);
             nodeReference = (NodeReference) mav.getModel().get("org.dataone.service.types.v1.NodeReference");
 
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration " + ex);
+            //IMap<NodeReference, Node> hzNodes = testController.getHzclient().getMap("hzNodes");
+            //hzNodes.evict(nodeReference);
+            assertNotNull(nodeReference);
+            assertFalse(nodeReference.getValue().isEmpty());
+
+        } catch (Exception ex) {
+                ex.printStackTrace();
+                fail("Test misconfiguration " + ex);
+        } finally {
+            if (nodeReference != null) {
+                ByteArrayInputStream bArrayInputStream = new ByteArrayInputStream(mnNodeOutput.toByteArray());
+                Node mnNode = TypeMarshaller.unmarshalTypeFromStream(Node.class,  bArrayInputStream);
+                mnNode.getIdentifier().setValue(nodeReference.getValue());
+                cnLdapPopulation.testNodeList.add(mnNode);
+            }
+            x509CertificateGenerator.cleanUpFiles();
         }
-        ByteArrayInputStream bArrayInputStream = new ByteArrayInputStream(mnNodeOutput.toByteArray());
-        Node mnNode = TypeMarshaller.unmarshalTypeFromStream(Node.class,  bArrayInputStream);
-        mnNode.getIdentifier().setValue(nodeReference.getValue());
-        cnLdapPopulation.testNodeList.add(mnNode);
-        IMap<NodeReference, Node> hzNodes = testController.getHzclient().getMap("hzNodes");
-        hzNodes.evict(nodeReference);
-        assertNotNull(nodeReference);
-        assertFalse(nodeReference.getValue().isEmpty());
     }
     
     @Test
     public void testRegisterBadNode() throws Exception {
-
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
         ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
 
         BufferedInputStream bInputStream = new BufferedInputStream(mnInvalidNodeResource.getInputStream());
@@ -171,6 +198,7 @@ public class NodeRegistryTestCase {
         MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         request.setMethod("POST");
         request.setContextPath("/Mock/node/");
         request.addFile(mockNodeFile);
@@ -184,9 +212,56 @@ public class NodeRegistryTestCase {
 
         } catch (InvalidRequest ex) {
             assertTrue(ex.getDetail_code().equals("4823"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Test misconfiguration " + ex);
         }
 
         assertNull(nodeReference);
+        x509CertificateGenerator.cleanUpFiles();
+    }
+    
+    @Test
+    public void testUpdateNodeCapabilities() throws Exception {
 
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+        String sq1dId = "sq1d";
+        NodeReference sq1dNodeReference = new NodeReference();
+        sq1dNodeReference.setValue(sq1dId);
+        Node sq1dNode = nodeRegistryService.getNode(sq1dNodeReference);
+        Subject sqR1ContactSubject = new Subject();
+        sqR1ContactSubject.setValue("CN=Frankenstein,DC=cilogon,DC=org");
+        sq1dNode.addContactSubject(sqR1ContactSubject);
+        sq1dNode.addSubject(sqR1ContactSubject);
+
+        ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(sq1dNode, mnNodeOutput);
+
+        testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
+
+        MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.setMethod("PUT");
+        request.setContextPath("/Mock/node/" + sq1dId);
+        request.addFile(mockNodeFile);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        NodeReference nodeReference = null;
+        try {
+            testController.updateNodeCapabilities(request, response, sq1dId);
+            Node sq1dUpdatedNode = nodeRegistryService.getNode(sq1dNodeReference);
+            log.info("sizeContactSubjectList " + sq1dUpdatedNode.sizeContactSubjectList());
+            assertTrue(sq1dUpdatedNode.sizeContactSubjectList() == 2);
+        } catch (Exception ex) {
+                ex.printStackTrace();
+                fail("Test misconfiguration " + ex);
+        } finally {
+
+            x509CertificateGenerator.cleanUpFiles();
+        }
     }
 }

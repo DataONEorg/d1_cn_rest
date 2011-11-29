@@ -10,6 +10,8 @@ import com.hazelcast.core.IMap;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
@@ -21,27 +23,37 @@ import org.dataone.cn.hazelcast.ClientConfiguration;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.mimemultipart.MultipartRequestResolver;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.cn.v1.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.util.Constants;
 import org.dataone.service.exceptions.InvalidRequest;
+import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.v1.Group;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeList;
 import org.dataone.service.types.v1.NodeReference;
+import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import javax.annotation.PostConstruct;
 
 /**
  * Returns a list of nodes that have been registered with the DataONE infrastructure.
@@ -50,7 +62,6 @@ import org.springframework.web.servlet.ModelAndView;
  * This package will also edit and add to the registry
  * @author waltz
  */
-
 @Controller("nodeController")
 public class NodeController extends AbstractProxyController implements ServletContextAware {
 
@@ -74,8 +85,30 @@ public class NodeController extends AbstractProxyController implements ServletCo
     @Qualifier("hzClientConfiguration")
     ClientConfiguration clientConfiguration;
     HazelcastInstance hzclient = null;
+    @Autowired
+    @Qualifier("cnIdentity")
+    CNIdentity cnIdentity;
 
+    @Value("${cn.nodeId}")
+    String nodeIdentifier;
+    NodeReference nodeReference;
 
+    @Value("${cn.administrators}")
+    String nodeAdministrators;
+    List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
+
+    @PostConstruct
+    public void init() {
+        nodeReference = new NodeReference();
+        nodeReference.setValue(nodeIdentifier);
+
+        String[] administrators =nodeAdministrators.split(";");
+        for (int i = 0; i < administrators.length; i++) {
+            Subject adminSubject = new Subject();
+            adminSubject.setValue(administrators[0]);
+            nodeAdminSubjects.add(adminSubject);
+        }
+    }
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented {
 
@@ -88,22 +121,145 @@ public class NodeController extends AbstractProxyController implements ServletCo
 
     }
 
-    @RequestMapping(value = NODE_PATH_V1 + "**", method = RequestMethod.GET)
+    @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.GET)
     public void getNode(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        throw new Exception("search Not implemented Yet!");
+        throw new Exception("getNode Not implemented Yet!");
 
     }
 
-    @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
-    public ModelAndView register(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidRequest, NotAuthorized, IdentifierNotUnique {
+    @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
+    public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented {
+        Session session = CertificateManager.getInstance().getSession(fileRequest);
+        if (session == null) {
+            throw new NotAuthorized("4821", "Need a valid certificate before request can be processed");
+        }
+
+
+        NodeReference updateNodeReference = new NodeReference();
+        updateNodeReference.setValue(nodeId);
         // don't think lazy init will not work in this case since this is the controller for a servlet
         // so lazy init the client here. the hzStore instance (or whereever hzNodes is housed should
-        // already be initialized or BOOM goes register
+        // already be initialized or BOOM goes updateNodeCapabilities)
         logger.info("group " + clientConfiguration.getGroup() + " pwd " + clientConfiguration.getPassword() + " addresses " + clientConfiguration.getLocalhost());
         if (hzclient == null) {
             hzclient = HazelcastClient.newHazelcastClient(clientConfiguration.getGroup(), clientConfiguration.getPassword(),
                     clientConfiguration.getLocalhost());
+        }
+
+        // retrieve the node structure being updated
+        Node node = null;
+        MultipartFile nodeDataMultipart = null;
+        Set<String> keys = fileRequest.getFileMap().keySet();
+        for (String key : keys) {
+            logger.info("Found filepart " + key);
+            if (key.equalsIgnoreCase("node")) {
+                nodeDataMultipart = fileRequest.getFileMap().get(key);
+            }
+        }
+        if (nodeDataMultipart != null) {
+            try {
+                node = TypeMarshaller.unmarshalTypeFromStream(Node.class, nodeDataMultipart.getInputStream());
+            } catch (IOException ex) {
+                throw new ServiceFailure("4842", ex.getMessage());
+            } catch (InstantiationException ex) {
+                throw new ServiceFailure("4842", ex.getMessage());
+            } catch (IllegalAccessException ex) {
+                throw new ServiceFailure("4842", ex.getMessage());
+            } catch (JiBXException ex) {
+                throw new ServiceFailure("4842", ex.getMessage());
+            }
+
+        } else {
+            throw new InvalidRequest("4843", "Updated Node Xml not found in MultiPart request");
+        }
+        if (!updateNodeReference.equals(node.getIdentifier())) {
+            throw new InvalidRequest("4843", "Updated Node Xml Node Reference " + updateNodeReference.getValue()
+                    + " does not equal path node identifier " + node.getIdentifier().getValue());
+        }
+        // decide if the subject requesting an update has permission to update
+        Boolean approvedAdmin = false;
+        Subject clientCertSubject = session.getSubject();
+        logger.debug("Certificate has subject " + clientCertSubject.getValue());
+        // is the subject equal to the value found in the subject list of the node?
+        // XXX this would be easy to manipuate, in order to subvert a node
+        for (Subject subject : node.getSubjectList()) {
+            if (subject.equals(clientCertSubject)) {
+                approvedAdmin = true;
+            }
+        }
+        if (!approvedAdmin) {
+            for (Subject subject : nodeAdminSubjects) {
+                logger.debug("Administrative subject is " + subject.getValue());
+                if (subject.equals(clientCertSubject)) {
+                    approvedAdmin = true;
+                }
+            }
+        }
+        if (!approvedAdmin) {
+           throw new NotAuthorized("4821", "Certificate should be an administrative subject before request can be processed");
+        }
+        // the contactSubject must be a registered and verified user or group
+        List<Subject> contactSubjectList = node.getContactSubjectList();
+        Boolean unVerifiedRegistration = false;
+        StringBuilder errorMessage = new StringBuilder();
+        for (Subject contactSubject : contactSubjectList) {
+            if (!(isVerifiedSubject(session, contactSubject))) {
+                errorMessage.append("Subject: " + contactSubject.getValue() + " is not verified! \n");
+                unVerifiedRegistration = true;
+            }
+            // this is an even stricter check, if any one user in a group is unverified
+            // then throw an exception
+            SubjectInfo contactSubjectInfo;
+            try {
+                contactSubjectInfo = cnIdentity.getSubjectInfo(session, contactSubject);
+
+                List<Group> contactGroupList = contactSubjectInfo.getGroupList();
+                for (Group contactGroup : contactGroupList) {
+                    List<Subject> contactGroupSubjectList = contactGroup.getHasMemberList();
+                    for (Subject groupSubject : contactGroupSubjectList) {
+                        if (!(isVerifiedSubject(session, contactSubject))) {
+                            errorMessage.append("Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
+                            unVerifiedRegistration = true;
+                        }
+                    }
+                }
+            } catch (NotFound ex) {
+                throw new NotAuthorized("4821", contactSubject.getValue() + " is not a Registered Subject");
+            }
+        }
+        if (unVerifiedRegistration) {
+            throw new NotAuthorized("4821", errorMessage.toString());
+        }
+
+        // do not allow localhost to be baseURL of a node
+        Matcher httpPatternMatcher = excludeNodeBaseURLPattern.matcher(node.getBaseURL());
+        if (httpPatternMatcher.find()) {
+            throw new InvalidRequest("4823", "BaseURL may not point to localhost! " + node.getBaseURL());
+        }
+
+        IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
+        //for (NodeReference noderef : hzNodes.keySet()) {
+        //    logger.info(noderef.getValue());
+        //}
+        NodeReference nodeReference = node.getIdentifier();
+        //if (hzNodes.containsKey(nodeReference)) {
+        //    throw new IdentifierNotUnique("4844", "Sorry! Node Identifier " + nodeReference.getValue() + " already exists ");
+        //}
+        // XXX need to generate new Node Reference before putting it in the map
+        //       NodeReference nodeReference = nodeRegistry.generateNodeIdentifier();
+        //       node.setIdentifier(nodeReference);
+
+        hzNodes.put(nodeReference, node);
+        return;
+
+    }
+
+    @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
+    public ModelAndView register(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidRequest, NotAuthorized, IdentifierNotUnique, InvalidToken {
+        Session session = CertificateManager.getInstance().getSession(fileRequest);
+        if (session == null) {
+            throw new NotAuthorized("4841", "Need a valid certificate before request can be processed");
         }
 
         Node node = null;
@@ -131,27 +287,84 @@ public class NodeController extends AbstractProxyController implements ServletCo
         } else {
             throw new InvalidRequest("4843", "New Node Xml not found in MultiPart request");
         }
+
+
+        // Contact Subject must be registered and verified users
+        List<Subject> contactSubjectList = node.getContactSubjectList();
+        Boolean unVerifiedRegistration = false;
+        StringBuilder errorMessage = new StringBuilder();
+        for (Subject contactSubject : contactSubjectList) {
+            if (!(isVerifiedSubject(session, contactSubject))) {
+                errorMessage.append("Subject: " + contactSubject.getValue() + " is not verified! \n");
+                unVerifiedRegistration = true;
+            }
+            // this is an even stricter check, if any one user in a group is unverified
+            // then throw an exception
+            SubjectInfo contactSubjectInfo;
+            try {
+                contactSubjectInfo = cnIdentity.getSubjectInfo(session, contactSubject);
+
+                List<Group> contactGroupList = contactSubjectInfo.getGroupList();
+                for (Group contactGroup : contactGroupList) {
+                    List<Subject> contactGroupSubjectList = contactGroup.getHasMemberList();
+                    for (Subject groupSubject : contactGroupSubjectList) {
+                        if (!(isVerifiedSubject(session, contactSubject))) {
+                            errorMessage.append("Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
+                            unVerifiedRegistration = true;
+                        }
+                    }
+                }
+            } catch (NotFound ex) {
+                throw new NotAuthorized("4841", contactSubject.getValue() + " is not a Registered Subject");
+            }
+        }
+        if (unVerifiedRegistration) {
+            throw new NotAuthorized("4841", errorMessage.toString());
+        }
         Matcher httpPatternMatcher = excludeNodeBaseURLPattern.matcher(node.getBaseURL());
         if (httpPatternMatcher.find()) {
             throw new InvalidRequest("4823", "BaseURL may not point to localhost! " + node.getBaseURL());
         }
 
-        IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
-        for (NodeReference noderef : hzNodes.keySet()) {
-            logger.info(noderef.getValue());
-        }
-        NodeReference nodeReference = node.getIdentifier();
-        if (hzNodes.containsKey(nodeReference)) {
-            throw new IdentifierNotUnique("4844", "Sorry! Node Identifier " + nodeReference.getValue() + " already exists ");
-        }
+        //IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
+        //for (NodeReference noderef : hzNodes.keySet()) {
+        //    logger.info(noderef.getValue());
+        //}
+        //NodeReference nodeReference = node.getIdentifier();
+        //if (hzNodes.containsKey(nodeReference)) {
+        //    throw new IdentifierNotUnique("4844", "Sorry! Node Identifier " + nodeReference.getValue() + " already exists ");
+        //}
         // XXX need to generate new Node Reference before putting it in the map
         //       NodeReference nodeReference = nodeRegistry.generateNodeIdentifier();
         //       node.setIdentifier(nodeReference);
 
-        hzNodes.put(nodeReference, node);
+        NodeReference nodeReference = nodeRegistry.register(node);
         return new ModelAndView("xmlNodeReferenceViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
 
+    private Boolean isVerifiedSubject(Session session, Subject subject) throws ServiceFailure, InvalidRequest, NotAuthorized, NotImplemented {
+        Boolean verifiedRegistration = false;
+        SubjectInfo contactSubjectInfo;
+        try {
+            contactSubjectInfo = cnIdentity.getSubjectInfo(session, subject);
+        } catch (NotFound ex) {
+            throw new NotAuthorized("4841", subject.getValue() + " is not a Registered Subject");
+        }
+        if (contactSubjectInfo == null) {
+            return verifiedRegistration;
+        }
+        if (contactSubjectInfo.getPersonList() == null || contactSubjectInfo.getPersonList().isEmpty()) {
+            return verifiedRegistration;
+        }
+        List<Person> contactPersonList = contactSubjectInfo.getPersonList();
+        for (Person contactPerson : contactPersonList) {
+            if (contactPerson.getVerified()) {
+                verifiedRegistration = true;
+                break;
+            }
+        }
+        return verifiedRegistration;
+    }
 
     @Override
     public void setServletContext(ServletContext sc) {

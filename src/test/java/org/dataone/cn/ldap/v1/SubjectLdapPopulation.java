@@ -95,7 +95,7 @@ public class SubjectLdapPopulation {
         context.setAttributeValue("sn", person.getFamilyName());
         context.setAttributeValues("givenName", person.getGivenNameList().toArray());
         context.setAttributeValues("mail", person.getEmailList().toArray());
-        context.setAttributeValue("isVerified", "FALSE");
+        context.setAttributeValue("isVerified", Boolean.toString(person.getVerified()).toUpperCase());
 
     }
 

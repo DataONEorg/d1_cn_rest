@@ -285,16 +285,14 @@ public class ResolveFilter implements Filter {
             chain.doFilter(req, response);
             return;
         }
-        ByteArrayInputStream origXMLIn = new ByteArrayInputStream(origXML);
+        
         // Examine byte to make certain there is not an error
 
-        String errorCheck = new String(Arrays.copyOfRange(origXML, 0, 100));
-        if (errorCheck.contains("<error")) {
+        if (responseWrapper.isException()) {
             try {
                 TreeMap<String, String> trace_information = new TreeMap<String, String>();
-                // get the exception from getSystemMetadata in order to re-cast it as a resolve error
-                String statusInt = String.valueOf(responseWrapper.getStatus());
-                BaseException d1Exception = (BaseException) ExceptionHandler.deserializeXml(origXMLIn, statusInt + ": ");
+
+                BaseException d1Exception = responseWrapper.getD1Exception();
                 /*
                  * Check for these exceptions from getSystemMetadata and re-raise them as resolve exceptions
                  * Exceptions.InvalidToken – (errorCode=401, detailCode=1050)
@@ -328,10 +326,6 @@ public class ResolveFilter implements Filter {
                 }
             } catch (IllegalStateException ex) {
                 throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
-            } catch (ParserConfigurationException ex) {
-                throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
-            } catch (SAXException ex) {
-                throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
             }
 
         }
@@ -343,6 +337,7 @@ public class ResolveFilter implements Filter {
 
         // read the incoming sysMD stream
         // and convert from bytearray to xmlSource
+        ByteArrayInputStream origXMLIn = new ByteArrayInputStream(origXML);
         SystemMetadata systemMetadata = null;
         try {
             systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, origXMLIn);
