@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class ResolveFilter implements Filter {
 
     Logger logger = Logger.getLogger(ResolveFilter.class);
     private FilterConfig filterConfig = null;
-    private Map<String, ArrayList<String>> versionedBaseUrlMap = null;
+    private Map<String, ArrayList<String>> supportedVersionMap = null;
     private Map<String, String> baseUrlMap = null;
     private XPathFactory xFactory = null;
     private long lastRefreshTimeMS = 0;
@@ -96,7 +97,7 @@ public class ResolveFilter implements Filter {
     @Override
     public void destroy() {
         this.filterConfig = null;
-        this.versionedBaseUrlMap = null;
+        this.supportedVersionMap = null;
         this.xFactory = null;
     }
 
@@ -145,28 +146,31 @@ public class ResolveFilter implements Filter {
 
             baseUrlMap = NodelistUtil.mapNodeList(nodeList);
 
-            HashMap<String, ArrayList<String>> cacheUrlMap = new HashMap<String, ArrayList<String>>();
 
+            HashMap<String, ArrayList<String>> cacheVersionMap = new HashMap<String, ArrayList<String>>();
             for (Node node : nodeList.getNodeList()) {
-                ArrayList<String> versionedBaseUrls = new ArrayList<String>();
 
+                ArrayList<String> supportedVersions = new ArrayList<String>();
                 Services services = node.getServices();
                 if (services != null) {
                     for (Service service : services.getServiceList()) {
                         if (service.getName().contains("Read") && service.getAvailable()) {
-                            if (node.getBaseURL().endsWith("/")) {
-                                versionedBaseUrls.add(node.getBaseURL() + service.getVersion() + "/");
-                            } else {
-                                versionedBaseUrls.add(node.getBaseURL() + "/" + service.getVersion() + "/");
-                            }
+                            supportedVersions.add(service.getVersion());
                         }
                     }
-                    cacheUrlMap.put(node.getIdentifier().getValue(), versionedBaseUrls);
+                    // ??? since we haven't nailed down our version schema yet
+                    // like for instance [v1 v2 v3] or [v1.1 v1.2 v2] etc
+                    // gonna use default alpha sorting,
+                    // TODO when we make a decision, may have to make custom comparator
+                    //
+                    Collections.sort(supportedVersions);
+
+                    cacheVersionMap.put(node.getIdentifier().getValue(), supportedVersions);
                 } else {
                     logger.info("NO SERVICES FOR " + node.getIdentifier().getValue());
                 }
             }
-            versionedBaseUrlMap = cacheUrlMap;
+            supportedVersionMap = cacheVersionMap;
         }
     }
 
@@ -202,9 +206,20 @@ public class ResolveFilter implements Filter {
      *  @exception org.dataone.service.exceptions.ServiceFailure
      * 
      **/
-    public List<String> lookupVersionedBaseURLbyNode(String nodeID) throws ServiceFailure {
-
-        return versionedBaseUrlMap.get(nodeID);
+    public String lookupVersionedBaseURLbyNode(String nodeID) throws ServiceFailure {
+        String baseUrl = baseUrlMap.get(nodeID);
+        String versionedBaseUrl = null;
+        //determine the highest version for the node
+        List<String> versions = supportedVersionMap.get(nodeID);
+        if (versions != null && !versions.isEmpty()) {
+            String version = versions.get(versions.size() - 1);
+            if (baseUrl.endsWith("/")) {
+                versionedBaseUrl = baseUrl + version + "/";
+            } else {
+                versionedBaseUrl = baseUrl + "/" + version + "/";
+            }
+        }
+        return versionedBaseUrl;
     }
 
     public String lookupBaseURLbyNode(String nodeID) throws ServiceFailure {
@@ -285,7 +300,7 @@ public class ResolveFilter implements Filter {
             chain.doFilter(req, response);
             return;
         }
-        
+
         // Examine byte to make certain there is not an error
 
         if (responseWrapper.isException()) {
@@ -386,27 +401,27 @@ public class ResolveFilter implements Filter {
                 isReplicaNotCompleted = false;
                 NodeReference nodeReference = replica.getReplicaMemberNode();
                 String baseURLString = lookupBaseURLbyNode(nodeReference.getValue());
-                List<String> baseURLS = lookupVersionedBaseURLbyNode(nodeReference.getValue());
-                if ((baseURLString == null) || (baseURLS == null) || baseURLS.isEmpty()) {
+                String versionedbaseURL = lookupVersionedBaseURLbyNode(nodeReference.getValue());
+                if ((baseURLString == null) || (versionedbaseURL == null)) {
                     throw new ServiceFailure("4150", "unregistered Node identifier ("
                             + nodeReference.getValue() + ") in systemmetadata document for object: " + idString);
                 }
                 // the id is put into the path portion of the url, so encoding thusly ;)
                 String encodedIdString = EncodingUtilities.encodeUrlPathSegment(idString);
-                for (String versionedBaseURLString : baseURLS) {
 
-                    String urlString = versionedBaseURLString + "object/" + encodedIdString;
+                String urlString = versionedbaseURL + "object/" + encodedIdString;
 
-                    ObjectLocation objectLocation = new ObjectLocation();
-                    objectLocation.setNodeIdentifier(nodeReference);
-                    objectLocation.setBaseURL(baseURLString);
-                    objectLocation.setUrl(urlString);
-                    objectLocationList.addObjectLocation(objectLocation);
-                    // A weighting parameter that provides a hint to the caller
-                    // for the relative preference for nodes from which the content should be retrieved.
-                    // XXX How to set the preference???
-                    // objectLocation.setPreference(filterConfig)
-                }
+                ObjectLocation objectLocation = new ObjectLocation();
+                objectLocation.setNodeIdentifier(nodeReference);
+                objectLocation.setBaseURL(baseURLString);
+                objectLocation.setUrl(urlString);
+                objectLocation.setVersionList(supportedVersionMap.get(nodeReference.getValue()));
+                objectLocationList.addObjectLocation(objectLocation);
+                // A weighting parameter that provides a hint to the caller
+                // for the relative preference for nodes from which the content should be retrieved.
+                // XXX How to set the preference???
+                // objectLocation.setPreference(filterConfig)
+
 
             }
 
