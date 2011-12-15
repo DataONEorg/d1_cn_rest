@@ -52,7 +52,6 @@ public class IdentityController extends AbstractWebController implements Servlet
     private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
-    private static final String GROUPS_REMOVE_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS_REMOVE;
 
 
     private ServletContext servletContext;
@@ -333,27 +332,12 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.PUT)
+    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.PUT)
     public void updateGroup(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
-        String requesUri = fileRequest.getRequestURI();
-    	String path = GROUPS_PATH_V1 + "/";
-		Subject groupSubject = new Subject();
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	try {
-			groupSubject.setValue(subjectString);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create Group from input");
-		}
 		Group group = null;
     	MultipartFile groupPart = fileRequest.getFile("group");
     	try {
