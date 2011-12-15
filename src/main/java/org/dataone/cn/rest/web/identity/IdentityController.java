@@ -22,11 +22,11 @@ import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.v1.Group;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
-import org.dataone.service.types.v1.SubjectList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -311,27 +311,19 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.POST)
-    public ModelAndView createGroup(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.POST)
+    public ModelAndView createGroup(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-    	Subject group = null;
-        String requesUri = request.getRequestURI();
-    	String path = GROUPS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	Group group = null;
+    	MultipartFile groupPart = request.getFile("group");
     	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	try {
-			group = new Subject();
-			group.setValue(subjectString);
+			group = TypeMarshaller.unmarshalTypeFromStream(Group.class, groupPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create Group from input");
+			throw new ServiceFailure(null, "Could not create SubjectList from members input");
 		}
     	
 		Subject retGroup = cnIdentity.createGroup(session, group);
@@ -342,14 +334,14 @@ public class IdentityController extends AbstractWebController implements Servlet
     }
     
     @RequestMapping(value = GROUPS_PATH_V1 + "/*", method = RequestMethod.PUT)
-    public void addGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void updateGroup(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
-        Subject group = null;
         String requesUri = fileRequest.getRequestURI();
     	String path = GROUPS_PATH_V1 + "/";
+		Subject groupSubject = new Subject();
     	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
@@ -357,60 +349,25 @@ public class IdentityController extends AbstractWebController implements Servlet
 			// ignore
 		}
     	try {
-			group = new Subject();
-			group.setValue(subjectString);
+			groupSubject.setValue(subjectString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServiceFailure(null, "Could not create Group from input");
 		}
-		SubjectList members = null;
-    	MultipartFile memberPart = fileRequest.getFile("members");
+		Group group = null;
+    	MultipartFile groupPart = fileRequest.getFile("group");
     	try {
-			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, memberPart.getInputStream());
+			group = TypeMarshaller.unmarshalTypeFromStream(Group.class, groupPart.getInputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create SubjectList from members input");
+			throw new ServiceFailure(null, "Could not create Group from group input");
 		}
     	
-		boolean success = cnIdentity.addGroupMembers(session, group, members);
+		boolean success = cnIdentity.updateGroup(session, group);
 
 
     }
     
-    @RequestMapping(value = GROUPS_REMOVE_PATH_V1 + "/*", method = RequestMethod.POST)
-    public void removeGroupMembers(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
-
-    	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
-    	// get params from request
-    	Subject group = null;
-        String requesUri = fileRequest.getRequestURI();
-    	String path = GROUPS_REMOVE_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	try {
-			group = new Subject();
-			group.setValue(subjectString);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create Group from input");
-		}
-		SubjectList members = null;
-    	MultipartFile memberPart = fileRequest.getFile("members");
-    	try {
-			members = TypeMarshaller.unmarshalTypeFromStream(SubjectList.class, memberPart.getInputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create SubjectList from members input");
-		}
-    	
-		boolean success = cnIdentity.removeGroupMembers(session, group, members);
-
-    }
 
     @Override
     public void setServletContext(ServletContext sc) {
