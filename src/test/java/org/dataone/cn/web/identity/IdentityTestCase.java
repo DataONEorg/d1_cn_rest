@@ -19,11 +19,14 @@ import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
 import org.dataone.cn.rest.web.identity.IdentityController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
+import org.dataone.configuration.Settings;
 import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.v1.Group;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.types.v1.SubjectList;
+import org.dataone.service.util.Constants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,6 +39,8 @@ import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
+import java.security.cert.X509Certificate;
+import org.dataone.cn.ldap.v1.NodeLdapPopulation;
 
 /**
  *
@@ -50,6 +55,19 @@ public class IdentityTestCase {
     private IdentityController testController;
     private SubjectLdapPopulation subjectLdapPopulation;
     private X509CertificateGenerator x509CertificateGenerator;
+    private NodeLdapPopulation cnLdapPopulation;
+    private String primarySubject = Settings.getConfiguration().getString("testIdentity.primarySubject");
+    private String secondarySubject = Settings.getConfiguration().getString("testIdentity.secondarySubject");
+    private String groupName = Settings.getConfiguration().getString("testIdentity.groupName");
+    private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
+    private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
+    private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
+    private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
+
+    @Resource
+    public void setCNLdapPopulation(NodeLdapPopulation ldapPopulation) {
+        this.cnLdapPopulation = ldapPopulation;
+    }
     @Resource
     public void setCNLdapPopulation(SubjectLdapPopulation subjectLdapPopulation) {
         this.subjectLdapPopulation = subjectLdapPopulation;
@@ -64,6 +82,7 @@ public class IdentityTestCase {
     }
     @Before
     public void before() throws Exception {
+
         subjectLdapPopulation.populateTestIdentities();
     }
     @After
@@ -74,7 +93,7 @@ public class IdentityTestCase {
     @Test
     public void listSubjects() throws Exception {
         log.info("Test listSubjects");
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/accounts");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock" + ACCOUNTS_PATH_V1);
         request.setParameter("query", "");
         request.setParameter("start", "0");
         request.setParameter("count", "10");
@@ -98,7 +117,7 @@ public class IdentityTestCase {
     @Test
     public void getSubjectInfo() throws Exception {
         log.info("Test getSubjectInfo");
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/accounts/CN=Dracula,DC=dataone,DC=org");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock" + ACCOUNTS_PATH_V1 + "/CN=Dracula,DC=dataone,DC=org");
         MockHttpServletResponse response = new MockHttpServletResponse();
         SubjectInfo subjectInfo = null;
         try {
@@ -115,15 +134,14 @@ public class IdentityTestCase {
 
     @Test
     public void registerAccount() throws Exception {
-        log.info("Test registerAccount");
-    	String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
+        log.info("Test registerAccount of subject" + primarySubject);
         Subject subject = new Subject();
-        subject.setValue(subjectValue);
+        subject.setValue(primarySubject);
         Person person = new Person();
         person.setSubject(subject);
-        person.addGivenName("test");
-        person.setFamilyName("test");
-        person.addEmail("test@dataone.org");
+        person.setFamilyName("test1");
+        person.addGivenName("test1");
+        person.addEmail("test1@dataone.org");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(person, baos);
 
@@ -132,7 +150,7 @@ public class IdentityTestCase {
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("POST");
-        request.setContextPath("/Mock/accounts");
+        request.setContextPath("/Mock" + ACCOUNTS_PATH_V1);
         request.addFile(mockPersonFile);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -144,19 +162,54 @@ public class IdentityTestCase {
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
-
+        subjectLdapPopulation.testSubjectList.add(primarySubject);
         assertNotNull(retSubject);
-        assertTrue(retSubject.getValue().equals(subjectValue));
+        assertTrue(retSubject.getValue().equals(primarySubject));
 
-        subjectLdapPopulation.testSubjectList.add(subjectValue);
-        
     }
     
+    @Test
+    public void registerSecondAccount() throws Exception {
+        log.info("Test registerAccount of subject" + secondarySubject);
+        Subject subject = new Subject();
+        subject.setValue(secondarySubject);
+        Person person = new Person();
+        person.setSubject(subject);
+        person.setFamilyName("test2");
+        person.addGivenName("test2");
+        person.addEmail("test2@dataone.org");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(person, baos);
+
+
+        MockMultipartFile mockPersonFile = new MockMultipartFile("person",baos.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock" + ACCOUNTS_PATH_V1);
+        request.addFile(mockPersonFile);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        Subject retSubject = null;
+        try {
+            ModelAndView mav = testController.registerAccount(request, response);
+            retSubject = (Subject) mav.getModel().get("org.dataone.service.types.v1.Subject");
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+        subjectLdapPopulation.testSubjectList.add(secondarySubject);
+        assertNotNull(retSubject);
+        assertTrue(retSubject.getValue().equals(secondarySubject));
+
+    }
     @Test
     public void registerAccountFromCertificate() throws Exception {
         log.info("Test registerAccountFromCertificate");
         x509CertificateGenerator.storeSelfSignedCertificate();
-        String subjectValue = CertificateManager.getInstance().loadCertificate().getSubjectDN().toString();
+
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+        String subjectValue = CertificateManager.getInstance().getSubjectDN(certificate[0]);
         
         Subject subject = new Subject();
         subject.setValue(subjectValue);
@@ -171,7 +224,8 @@ public class IdentityTestCase {
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("POST");
-        request.setContextPath("/Mock/accounts");
+        request.setContextPath("/Mock" + ACCOUNTS_PATH_V1);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         request.addFile(mockPersonFile);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
@@ -182,11 +236,11 @@ public class IdentityTestCase {
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
-
-        assertNotNull(retSubject);
-        assertTrue(retSubject.getValue().equals(subjectValue));
         subjectLdapPopulation.testSubjectList.add(subjectValue);
         x509CertificateGenerator.cleanUpFiles();
+        assertNotNull(retSubject);
+        assertTrue(retSubject.getValue().equals(subjectValue));
+
     }
 
     @Test
@@ -196,9 +250,8 @@ public class IdentityTestCase {
     	registerAccount();
     	
     	// now update
-    	String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
         Subject subject = new Subject();
-        subject.setValue(subjectValue);
+        subject.setValue(primarySubject);
         Person person = new Person();
         person.setSubject(subject);
         person.addGivenName("update");
@@ -210,7 +263,7 @@ public class IdentityTestCase {
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("PUT");
-        request.setContextPath("/Mock/accounts");
+        request.setContextPath("/Mock" + ACCOUNTS_PATH_V1);
         request.addFile(mockPersonFile);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
@@ -223,22 +276,20 @@ public class IdentityTestCase {
         }
 
         assertNotNull(retSubject);
-        assertTrue(retSubject.getValue().equals(subjectValue));        
+        assertTrue(retSubject.getValue().equals(primarySubject));
 
     }
 
-    @Ignore
     @Test
     public void verifyAccount() throws Exception {
          log.info("Test verifyAccount");
     	// create the account first
     	registerAccount();
     	
-    	String subjectValue = "cn=Dracula,dc=cilogon,dc=org";
         Subject subject = new Subject();
-        subject.setValue(subjectValue);
+        subject.setValue(primarySubject);
         
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/accounts/" + subjectValue);
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock"  + ACCOUNTS_PATH_V1 + "/"+ primarySubject);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         boolean success = false;
@@ -257,24 +308,37 @@ public class IdentityTestCase {
      * Requires session in order to work!
      * @throws Exception
      */
-    @Ignore
     @Test
-    public void mapIdentity() throws Exception {
+    public void mapAndDeleteIdentity() throws Exception {
+        log.info("Test mapAndDeleteIdentity");
+        registerAccount();
+        registerSecondAccount();
+        cnLdapPopulation.populateTestCN();
+        x509CertificateGenerator.storeSelfSignedCertificate();
 
-    	String value = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
-        Subject subject = new Subject();
-        subject.setValue(value);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(subject, baos);
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
 
-        MockMultipartFile mockSubjectFile = new MockMultipartFile("subject",baos.toByteArray());
+        Subject subject1 = new Subject();
+        subject1.setValue(primarySubject);
+        Subject subject2 = new Subject();
+        subject2.setValue(secondarySubject);
 
+        ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(subject1, baos1);
+
+        MockMultipartFile mockSubject1File = new MockMultipartFile("primarySubject",baos1.toByteArray());
+
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(subject2, baos2);
+
+        MockMultipartFile mockSubject2File = new MockMultipartFile("secondarySubject",baos2.toByteArray());
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("POST");
-        request.setContextPath("/Mock/accounts/map");
-        request.addFile(mockSubjectFile);
-
+        request.setContextPath("/Mock" + ACCOUNT_MAPPING_PATH_V1);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.addFile(mockSubject1File);
+        request.addFile(mockSubject2File);
+        
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         boolean result = false;
@@ -282,67 +346,62 @@ public class IdentityTestCase {
             testController.mapIdentity(request, response);
             result = true;
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail("Test fail" + ex);
         }
 
         assertTrue(result);
-        
+
+        // Now Try and Delete the identities mapped
+         log.info("Test removeMapIdentity");
+    	// create the account first
+
+        MockHttpServletRequest deleteRequest = new MockHttpServletRequest("DELETE", "/Mock" + ACCOUNT_MAPPING_PATH_V1 + "/"+ secondarySubject);
+        deleteRequest.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        MockHttpServletResponse deleteResponse = new MockHttpServletResponse();
+
+        boolean success = false;
+        try {
+            testController.removeMapIdentity(deleteRequest, deleteResponse);
+            success = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Test fail" + ex);
+        }
+        x509CertificateGenerator.cleanUpFiles();
+        cnLdapPopulation.deletePopulatedNodes();
+        assertTrue(success);
+
     }
     
-    /**
-     * Requires session in order to work!
-     * @throws Exception
-     */
-    @Ignore
-    @Test
-    public void confirmMapIdentity() throws Exception {
 
-    	// make the mapping request before trying to confirm
-    	this.mapIdentity();
-    	
-    	String value = "CN=Test2,O=Test,C=US,DC=cilogon,DC=org";
-        Subject subject = new Subject();
-        subject.setValue(value);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(subject, baos);
-        MockMultipartFile mockSubjectFile = new MockMultipartFile("subject",baos.toByteArray());
-
-        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
-        request.setMethod("POST");
-        request.setContextPath("/Mock/accounts/confirm");
-        request.addFile(mockSubjectFile);
-
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        
-        boolean result = false;
-        try {
-            testController.confirmMapIdentity(request, response);
-            result = true;
-        } catch (Exception ex) {
-            fail("Test fail" + ex);
-        }
-
-        assertTrue(result);
-        
-    }
-    @Ignore
+    
     @Test
     public void createGroup() throws Exception {
 
-    	String value = "cn=testGroup,dc=cilogon,dc=org";
-        Subject group = new Subject();
-        group.setValue(value);
-        
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+        Subject groupSubject = new Subject();
+        groupSubject.setValue(groupName);
+
+        Group group = new Group();
+        group.setGroupName(groupName);
+        group.setSubject(groupSubject);
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(group, baos);
-        String groupString = baos.toString("UTF-8");
+
+        MockMultipartFile mockGroupFile = new MockMultipartFile("group",baos.toByteArray());
         
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/groups/");
-        request.addParameter("group", groupString);
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock" + GROUPS_PATH_V1);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.addFile(mockGroupFile);
+
         MockHttpServletResponse response = new MockHttpServletResponse();
-        
+
         boolean result = false;
         try {
             testController.createGroup(request, response);
@@ -350,101 +409,55 @@ public class IdentityTestCase {
         } catch (Exception ex) {
             fail("Test fail" + ex);
         }
-
+        subjectLdapPopulation.testSubjectList.add(groupName);
+        x509CertificateGenerator.cleanUpFiles();
         assertTrue(result);
-        
-    }
-    @Ignore
-    @Test
-    public void addGroupMembers() throws Exception {
 
-    	String value = "cn=testGroup,dc=cilogon,dc=org";
-        Subject group = new Subject();
-        group.setValue(value);
-        
-        String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
-        Subject subject = new Subject();
-        subject.setValue(subjectValue);
-        Person person = new Person();
-        person.setSubject(subject);
-        person.addGivenName("test");
-        person.setFamilyName("test");
-        person.addEmail("test@dataone.org");
-        SubjectList members = new SubjectList();
-        members.addSubject(person.getSubject());
-        
-        ByteArrayOutputStream groupBaos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(group, groupBaos);
-        MockMultipartFile mockGroupFile = new MockMultipartFile("groupName",groupBaos.toByteArray());
-        
-        ByteArrayOutputStream membersBaos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(members, membersBaos);
-        MockMultipartFile mockMembersFile = new MockMultipartFile("members",groupBaos.toByteArray());
+    }
+
+
+    @Test
+    public void updateGroupMembers() throws Exception {
+
+        this.createGroup();
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+        Subject groupSubject = new Subject();
+        groupSubject.setValue(groupName);
+
+        Group group = new Group();
+        group.setGroupName(groupName);
+        group.setSubject(groupSubject);
+
+        Subject newMember = new Subject();
+        newMember.setValue(secondarySubject);
+        SubjectList newMembers = new SubjectList();
+        newMembers.addSubject(newMember);
+
+        group.setHasMemberList(newMembers.getSubjectList());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, baos);
+        MockMultipartFile mockGroupFile = new MockMultipartFile("group",baos.toByteArray());
 
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("PUT");
-        request.setContextPath("/Mock/groups");
+        request.setContextPath("/Mock" + GROUPS_PATH_V1);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         request.addFile(mockGroupFile);
-        request.addFile(mockMembersFile);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean result = false;
         try {
-            testController.addGroupMembers(request, response);
+            testController.updateGroup(request, response);
             result = true;
         } catch (Exception ex) {
             fail("Test fail" + ex);
         }
-
+        x509CertificateGenerator.cleanUpFiles();
         assertTrue(result);
         
     }
 
-    @Ignore
-    @Test
-    public void removeGroupMembers() throws Exception {
-
-    	String value = "cn=testGroup,dc=cilogon,dc=org";
-        Subject group = new Subject();
-        group.setValue(value);
-        
-        String subjectValue = "CN=Test1,O=Test,C=US,DC=cilogon,DC=org";
-        Subject subject = new Subject();
-        subject.setValue(subjectValue);
-        Person person = new Person();
-        person.setSubject(subject);
-        person.addGivenName("test");
-        person.setFamilyName("test");
-        person.addEmail("test@dataone.org");
-        SubjectList members = new SubjectList();
-        members.addSubject(person.getSubject());
-        
-        ByteArrayOutputStream groupBaos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(group, groupBaos);
-        MockMultipartFile mockGroupFile = new MockMultipartFile("groupName",groupBaos.toByteArray());
-
-        ByteArrayOutputStream membersBaos = new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(members, membersBaos);
-        MockMultipartFile mockMembersFile = new MockMultipartFile("members",groupBaos.toByteArray());
-
-
-        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
-        request.setMethod("DELETE");
-        request.setContextPath("/Mock/groups");
-        request.addFile(mockGroupFile);
-        request.addFile(mockMembersFile);
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        boolean result = false;
-        try {
-            testController.removeGroupMembers(request, response);
-            result = true;
-        } catch (ServiceFailure ex) {
-            fail("Test misconfiguration: " + ex);
-        }
-
-        assertTrue(result);
-        
-    }
-    
 }

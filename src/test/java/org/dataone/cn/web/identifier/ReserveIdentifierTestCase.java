@@ -125,12 +125,13 @@ public class ReserveIdentifierTestCase {
         try {
             ModelAndView mav = testController.reserveIdentifier(request, response);
             result = (Identifier) mav.getModel().get("org.dataone.service.types.v1.Identifier");
+            this.cnLdapPopulation.deleteReservation(pidValue);
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
         }
 
         assertNotNull(result);
         assertEquals(pidValue, result.getValue());
-        this.cnLdapPopulation.deleteAllReservations();
+        
     }
 }

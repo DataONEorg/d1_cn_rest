@@ -81,7 +81,7 @@ public class NodeRegistryTestCase {
     }
     @After
     public void after() throws Exception {
-        cnLdapPopulation.deletePopulatedMns();
+        cnLdapPopulation.deletePopulatedNodes();
         subjectLdapPopulation.deletePopulatedSubjects();
     }
     @Autowired

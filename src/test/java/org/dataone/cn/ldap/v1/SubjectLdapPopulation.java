@@ -123,15 +123,15 @@ public class SubjectLdapPopulation {
         ldapTemplate.unbind(dn);
     }
 
-    public void deleteAllReservations() {
+    public void deleteReservation(String pid) {
         AndFilter filter = new AndFilter();
-        filter.and(new EqualsFilter("objectclass", "d1Reservation"));
-        filter.and(new EqualsFilter("subject", "cn=test1,dc=dataone,dc=org"));
+        filter.and(new EqualsFilter("objectClass", "d1Reservation"));
+        filter.and(new EqualsFilter("identifier", pid));
 
         List allDns = ldapTemplate.search(DistinguishedName.EMPTY_PATH, filter.encode(), getDNContextMapper());
         for (Object o: allDns) {
           DistinguishedName dn =   (DistinguishedName)o;
-          log.info(dn.toCompactString());
+          log.info("DELETE RESERVATION: " + dn.toCompactString());
           ldapTemplate.unbind(dn);
         }
     }

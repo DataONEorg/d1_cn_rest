@@ -342,7 +342,7 @@ public class NodeController extends AbstractProxyController implements ServletCo
         return new ModelAndView("xmlNodeReferenceViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
 
-    private Boolean isVerifiedSubject(Session session, Subject subject) throws ServiceFailure, InvalidRequest, NotAuthorized, NotImplemented {
+    private Boolean isVerifiedSubject(Session session, Subject subject) throws ServiceFailure, InvalidRequest, NotAuthorized, NotImplemented, InvalidToken {
         Boolean verifiedRegistration = false;
         SubjectInfo contactSubjectInfo;
         try {

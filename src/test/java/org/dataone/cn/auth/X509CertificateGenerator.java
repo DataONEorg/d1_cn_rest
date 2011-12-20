@@ -155,7 +155,7 @@ public class X509CertificateGenerator {
         if (!cert.getIssuerDN().equals(cert.getSubjectDN())) {
             logger.error("name comparison fails");
         }
-        logger.info(cert.getSubjectDN().getName());
+        logger.info("Self Signed Certificat is " + cert.getSubjectDN().getName());
         return cert;
     }
     public void storeSelfSignedCertificate() throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, IOException, KeyStoreException {
@@ -182,11 +182,18 @@ public class X509CertificateGenerator {
         //
         X500NameBuilder builder = new X500NameBuilder(RFC4519Style.INSTANCE);
 
-        builder.addRDN(RFC4519Style.cn, "TestTest");
-        builder.addRDN(RFC4519Style.o, "Test");
-        builder.addRDN(RFC4519Style.c, "US");
-        builder.addRDN(RFC4519Style.dc, "cilogon");
         builder.addRDN(RFC4519Style.dc, "org");
+        builder.addRDN(RFC4519Style.dc, "cilogon");
+        builder.addRDN(RFC4519Style.c, "US");
+        builder.addRDN(RFC4519Style.o, "Test");
+        builder.addRDN(RFC4519Style.cn, "Test1");
+
+//        builder.addRDN(RFC4519Style.cn, "Test1");
+//        builder.addRDN(RFC4519Style.o, "Test");
+//        builder.addRDN(RFC4519Style.c, "US");
+//        builder.addRDN(RFC4519Style.dc, "cilogon");
+//        builder.addRDN(RFC4519Style.dc, "org");
+
         X509Certificate cert = generateSelfSignedCertificate(publicKey, caPrivateKey, caCert, builder);
 
         storeCACert("dataoneCA", caPrivateKey, caCert);

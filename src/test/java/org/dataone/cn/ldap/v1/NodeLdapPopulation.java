@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.configuration.Settings;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.NodeType;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Service;
+import org.dataone.service.types.v1.ServiceMethodRestriction;
 import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v1.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ public class NodeLdapPopulation {
     public static List<Subject> testSubjectList = new ArrayList<Subject>();
     public static Log log = LogFactory.getLog(NodeLdapPopulation.class);
 
+    private String primarySubject = Settings.getConfiguration().getString("testIdentity.primarySubject");
     static {
         // Need this or context will lowercase all the rdn s
         System.setProperty(DistinguishedName.KEY_CASE_FOLD_PROPERTY, DistinguishedName.KEY_CASE_FOLD_NONE);
@@ -181,10 +184,30 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeServiceVersion", service.getVersion());
         context.setAttributeValue("d1NodeServiceAvailable", Boolean.toString(service.getAvailable()).toUpperCase());
     }
-    public void deletePopulatedMns() {
+    protected void mapServiceMethodRestriction(ServiceMethodRestriction restrict, String nodeId, String nodeServiceId, DirContextOperations context) {
+        
+        context.setAttributeValue("objectclass", "d1ServiceMethodRestriction");
+        context.setAttributeValue("d1NodeServiceId", nodeServiceId);
+        context.setAttributeValue("d1NodeId", nodeId);
+        context.setAttributeValue("d1ServiceMethodName", restrict.getMethodName());
+
+        if (restrict.getSubjectList() != null && !(restrict.getSubjectList().isEmpty())) {
+            for (Subject subject : restrict.getSubjectList()) {
+                context.setAttributeValue("d1AllowedSubject", subject.getValue());
+            }
+        }
+    }
+    public void deletePopulatedNodes() {
         for (Node node : testNodeList) {
             if ((node.getServices() != null) && (!node.getServices().getServiceList().isEmpty())) {
                 for (Service service : node.getServices().getServiceList()) {
+                    if (service.getRestrictionList() != null) {
+                         for (ServiceMethodRestriction restrict: service.getRestrictionList()) {
+                             deleteNodeServiceRestriction(node, service, restrict);
+                         }
+                    } else {
+                        log.error("ServiceMethodRestriction is NULL!!!" + node.getName() + ":" + service.getName());
+                    }
                     deleteNodeService(node, service);
                 }
             }
@@ -208,5 +231,120 @@ public class NodeLdapPopulation {
         dn.add("d1NodeServiceId",d1NodeServiceId);
         log.info("deleting : " + dn.toString());
         ldapTemplate.unbind(dn);
+    }
+    private void deleteNodeServiceRestriction(Node node, Service service, ServiceMethodRestriction restrict) {
+        String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+        DistinguishedName dn = new DistinguishedName();
+        dn.add("dc","dataone");
+        dn.add("cn", node.getIdentifier().getValue());
+        dn.add("d1NodeServiceId",d1NodeServiceId);
+        dn.add("d1ServiceMethodName", restrict.getMethodName());
+
+        log.info("deleting : " + dn.toString());
+        ldapTemplate.unbind(dn);
+    }
+    public void populateTestCN() {
+
+        Node sqrmCNNode = new Node();
+        String sqrmId = "sqrm";
+        NodeReference sq1dNodeReference = new NodeReference();
+        sq1dNodeReference.setValue(sqrmId);
+        sqrmCNNode.setIdentifier(sq1dNodeReference);
+        sqrmCNNode.setName("squirm");
+        sqrmCNNode.setDescription("this is a squirm test");
+        sqrmCNNode.setBaseURL("https://my.squirm.test/cn");
+        sqrmCNNode.setReplicate(false);
+        sqrmCNNode.setSynchronize(false);
+        sqrmCNNode.setState(NodeState.UP);
+        sqrmCNNode.setType(NodeType.CN);
+        Subject sqrmSubject = new Subject();
+        sqrmSubject.setValue("cn="+sqrmId+",dc=dataone,dc=org");
+        sqrmCNNode.addSubject(sqrmSubject);
+
+        Subject sqrmContactSubject = new Subject();
+        sqrmContactSubject.setValue("CN=Dracula,DC=cilogon,DC=org");
+        sqrmCNNode.addContactSubject(sqrmContactSubject);
+
+        Services sqrmservices = new Services();
+        Service sqrmcoreService = new Service();
+        sqrmcoreService.setName("CNCore");
+        sqrmcoreService.setVersion("v1");
+        sqrmcoreService.setAvailable(Boolean.TRUE);
+
+        Service sqrmreadService = new Service();
+        sqrmreadService.setName("CNRead");
+        sqrmreadService.setVersion("v1");
+        sqrmreadService.setAvailable(Boolean.TRUE);
+
+        Service sqrmAuthorizationService = new Service();
+        sqrmAuthorizationService.setName("CNAuthorization");
+        sqrmAuthorizationService.setVersion("v1");
+        sqrmAuthorizationService.setAvailable(Boolean.TRUE);
+
+        Service sqrmIdentityService = new Service();
+        sqrmIdentityService.setName("CNIdentity");
+        sqrmIdentityService.setVersion("v1");
+        sqrmIdentityService.setAvailable(Boolean.TRUE);
+
+        Service sqrmReplicationService = new Service();
+        sqrmReplicationService.setName("CNReplication");
+        sqrmReplicationService.setVersion("v1");
+        sqrmReplicationService.setAvailable(Boolean.TRUE);
+
+
+        Service sqrmRegisterService = new Service();
+        sqrmRegisterService.setName("CNRegister");
+        sqrmRegisterService.setVersion("v1");
+        sqrmRegisterService.setAvailable(Boolean.TRUE);
+
+        ServiceMethodRestriction restrictIdentity = new ServiceMethodRestriction();
+        restrictIdentity.setMethodName("mapIdentity");
+        Subject restrictToSubject = new Subject();
+        restrictToSubject.setValue(primarySubject);
+        restrictIdentity.addSubject(restrictToSubject);
+
+        sqrmIdentityService.addRestriction(restrictIdentity);
+        
+        sqrmservices.addService(sqrmcoreService);
+        sqrmservices.addService(sqrmreadService);
+        sqrmservices.addService(sqrmAuthorizationService);
+        sqrmservices.addService(sqrmIdentityService);
+        sqrmservices.addService(sqrmReplicationService);
+        sqrmservices.addService(sqrmRegisterService);
+
+        sqrmCNNode.setServices(sqrmservices);
+        // because we use a base DN, only need to supply the RDN
+        DistinguishedName dn = new DistinguishedName();
+        dn.add("dc","dataone");
+        dn.add("cn", sqrmId);
+
+        DirContextAdapter context = new DirContextAdapter(dn);
+        mapNodeToContext(sqrmCNNode, context);
+        ldapTemplate.bind(dn, context, null);
+
+        for (Service service : sqrmCNNode.getServices().getServiceList()) {
+            String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+            log.info("sqrm adding service " + d1NodeServiceId);
+            DistinguishedName dnService = new DistinguishedName();
+            dnService.add("dc","dataone");
+            dnService.add("cn", sqrmId);
+            dnService.add("d1NodeServiceId", d1NodeServiceId);
+            context = new DirContextAdapter(dnService);
+            mapServiceToContext(service, sqrmId, d1NodeServiceId, context);
+            ldapTemplate.bind(dnService, context, null);
+            for (ServiceMethodRestriction restrict: service.getRestrictionList()) {
+                DistinguishedName dnServiceRestriction = new DistinguishedName();
+                dnServiceRestriction.add("dc","dataone");
+                dnServiceRestriction.add("cn", sqrmId);
+                dnServiceRestriction.add("d1NodeServiceId", d1NodeServiceId);
+                dnServiceRestriction.add("d1ServiceMethodName", restrict.getMethodName());
+                log.info("sqrm adding restriction " + restrict.getMethodName());
+                context = new DirContextAdapter(dnServiceRestriction);
+                mapServiceMethodRestriction(restrict, sqrmId, d1NodeServiceId, context);
+                ldapTemplate.bind(dnServiceRestriction, context, null);
+            }
+        }
+
+        testNodeList.add(sqrmCNNode);
     }
 }

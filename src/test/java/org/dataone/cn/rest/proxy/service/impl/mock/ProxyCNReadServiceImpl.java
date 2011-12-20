@@ -121,6 +121,11 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
         this.readSystemMetadataResource = readSystemMetadataResource;
     }
 
+    @Override
+    public void describe(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 
 

@@ -36,6 +36,7 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.apache.log4j.Logger;
 
 /**
  * The controller for identity manager service
@@ -44,6 +45,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller("identityController")
 public class IdentityController extends AbstractWebController implements ServletContextAware {
+    Logger logger = Logger.getLogger(IdentityController.class.getName());
     /*
      * hard coded paths that this controller will proxy out.
      * easier to modify in future releases to keep them all at the top
@@ -62,53 +64,81 @@ public class IdentityController extends AbstractWebController implements Servlet
     @Qualifier("cnIdentity")
     CNIdentity  cnIdentity;
     public IdentityController() {}
-    
-    @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.GET)
-    public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+    /**
+     * Create a new mapping between the two identities, asserting that they represent the same subject.
+     * 
+     * POST /accounts/map 	
+     * CNIdentity.mapIdentity(session, subject) -> boolean
+     *
+     * @author leinfelder
+     */
+    @RequestMapping(value = {ACCOUNT_MAPPING_PATH_V1, ACCOUNT_MAPPING_PATH_V1 + "/" }, method = RequestMethod.POST)
+    public void mapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
-    	// get params from request
-    	String query = request.getParameter("query");
-    	String status = request.getParameter("status");
-    	int start = 0;
-    	int count = -1;
-    	try {
-    		start = Integer.parseInt(request.getParameter("start"));
-    	} catch (Exception e) {}
-    	try {
-    		count = Integer.parseInt(request.getParameter("count"));
-    	} catch (Exception e) {}
-    	
-    	SubjectInfo subjectInfo = cnIdentity.listSubjects(session, query, status, start, count);
+    	Session session = CertificateManager.getInstance().getSession(fileRequest);
 
-        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+    	// get params from request
+        Subject primarySubject = null;
+        MultipartFile primarySubjectPart = fileRequest.getFile("primarySubject");
+    	try {
+    		primarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, primarySubjectPart.getInputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create primary Subject from input");
+		}
+		Subject secondarySubject = null;
+        MultipartFile secondarySubjectPart = fileRequest.getFile("secondarySubject");
+    	try {
+    		secondarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, secondarySubjectPart.getInputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not create secondary Subject from input");
+		}
+
+		boolean success = cnIdentity.mapIdentity(session, primarySubject, secondarySubject);
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.GET)
-    public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
+    /**
+     * Removes a previously asserted identity mapping from the Subject in the Session to the Subject given by the parameter. 
+     * The reciprocal mapping entry is also removed.
+     * 
+     * DELETE /accounts/map/{subject} 	
+     * CNIdentity.removeMapIdentity(session, subject) -> boolean
+     *
+     * @author leinfelder
+     */
+    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    public void removeMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-    	String requesUri = request.getRequestURI();
-    	String path = ACCOUNTS_PATH_V1 + "/";
-    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+        logger.info("Removing Identity " + subjectString);
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
 		} catch (Exception e) {
-			// ignore
+			e.printStackTrace();
+			throw new ServiceFailure(null, "Could not determine Subject from path: " + requestUri);
 		}
     	Subject subject = new Subject();
     	subject.setValue(subjectString);
-    	
-    	SubjectInfo subjectInfo = cnIdentity.getSubjectInfo(session, subject);
 
-        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+		boolean success = cnIdentity.removeMapIdentity(session, subject);
 
     }
-    
+
+    /**
+     * 
+     * GET /accounts/pendingmap/{subject}
+     * CNIdentity.getPendingMapIdentity(session, subject) -> subjectInfo
+     *
+     * @author leinfelder
+     */
     @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.GET)
     public ModelAndView getPendingMapIdentity(HttpServletRequest request, HttpServletResponse response) 
     	throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
@@ -132,8 +162,183 @@ public class IdentityController extends AbstractWebController implements Servlet
         return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
 
     }
-    
-    @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.POST)
+    /**
+     *
+     * Request a new mapping between the authenticated identity in the session and the given identity,
+     * asserting that they represent the same subject.
+     *
+     * Mapping identities is a two-step process wherein a map request is made by a primary Subject and a subsequent
+     * (confirmation) map request is made by the secondary Subject. This ensures that mappings are
+     * performed only by those that have authority to do so.
+     *
+     * POST /accounts/pendingmap/{subject}
+     * CNIdentity.requestMapIdentity(session, subject) -> boolean
+     *
+     * @author leinfelder
+     * 
+     */
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.POST)
+    public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+
+		boolean success = cnIdentity.requestMapIdentity(session, subject);
+
+    }
+
+    /**
+     *
+     * Confirms a previously initiated identity mapping. If subject A asserts that B is the same identity through
+     * CNIdentity.requestMapIdentity(), then this method is called by B to confirm that assertion.
+     *
+     * PUT /accounts/pendingmap/{subject}
+     * CNIdentity.confirmMapIdentity(session, subject) -> boolean
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.PUT)
+    public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+
+		boolean success = cnIdentity.confirmMapIdentity(session, subject);
+
+    }
+
+    /**
+     *
+     * Denies a previously initiated identity mapping. If subject A asserts that B is the same identity through
+     * CNIdentity.requestMapIdentity(), then this method is called by B to deny that assertion.
+     *
+     * DELETE /accounts/pendingmap/{subject}
+     * CNIdentity.denyMapIdentity(session, subject) -> boolean
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    public void denyMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requestUri = request.getRequestURI();
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+
+		boolean success = cnIdentity.denyMapIdentity(session, subject);
+
+    }
+    /**
+     *
+     * List the subjects, including users, groups, and systems, that match search criteria.
+     *
+     * GET /accounts?query={query}[&status={status}&start={start}&count={count}]
+     * CNIdentity.listSubjects(session, query, status, start, count) -> Types.SubjectList
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.GET)
+    public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String query = request.getParameter("query");
+    	String status = request.getParameter("status");
+    	int start = 0;
+    	int count = -1;
+    	try {
+    		start = Integer.parseInt(request.getParameter("start"));
+    	} catch (Exception e) {}
+    	try {
+    		count = Integer.parseInt(request.getParameter("count"));
+    	} catch (Exception e) {}
+
+    	SubjectInfo subjectInfo = cnIdentity.listSubjects(session, query, status, start, count);
+
+        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+
+    }
+
+    /**
+     *
+     * Get the information about a Person (their equivalent identities, and the Groups to which they belong)
+     * or the Group (including members).
+     *
+     * GET /accounts/{subject}
+     * CNIdentity.getSubjectInfo(session, subject) -> Types.SubjectList
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.GET)
+    public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
+
+    	// get the Session object from certificate in request
+    	Session session = CertificateManager.getInstance().getSession(request);
+    	// get params from request
+    	String requesUri = request.getRequestURI();
+    	String path = ACCOUNTS_PATH_V1 + "/";
+    	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
+    	try {
+			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+		} catch (Exception e) {
+			// ignore
+		}
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+
+    	SubjectInfo subjectInfo = cnIdentity.getSubjectInfo(session, subject);
+
+        return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+
+    }
+
+    /**
+     *
+     * Create a new subject in the DataONE system.
+     *
+     * POST /accounts
+     * CNIdentity.registerAccount(session, person) -> Types.Subject
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.POST)
     public ModelAndView registerAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -154,7 +359,17 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     }
     
-    @RequestMapping(value = ACCOUNTS_PATH_V1, method = RequestMethod.PUT)
+    /**
+     *
+     * Update an existing subject in the DataONE system. The target subject is determined from the X509Certificate provided with the session.
+     *
+     * PUT /accounts
+     * CNIdentity.updateAccount(session, person) -> Types.Subject
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.PUT)
     public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -174,7 +389,19 @@ public class IdentityController extends AbstractWebController implements Servlet
         return new ModelAndView("xmlSubjectViewResolver", "org.dataone.service.types.v1.Subject", subject);
 
     }
-    
+
+    /**
+     *
+     * Verify that the Person data associated with this Subject is a true representation of the real world person.
+     *
+     * This service can only be called by users who have an administrative role for the domain of users in question.
+     *
+     * POST /accounts/{subject}
+     * CNIdentity.verifyAccount(session, subject) -> boolean
+     *
+     * @author leinfelder
+     *
+     */
     @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.POST)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
@@ -196,121 +423,22 @@ public class IdentityController extends AbstractWebController implements Servlet
 		boolean success = cnIdentity.verifyAccount(session, subject);
 
     }
-    
-    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1, method = RequestMethod.POST)
-    public void mapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
-    	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
-    	
-    	// get params from request
-        Subject primarySubject = null;
-        MultipartFile primarySubjectPart = fileRequest.getFile("primarySubject");
-    	try {
-    		primarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, primarySubjectPart.getInputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create primary Subject from input");
-		}
-		Subject secondarySubject = null;
-        MultipartFile secondarySubjectPart = fileRequest.getFile("secondarySubject");
-    	try {
-    		secondarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, secondarySubjectPart.getInputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create secondary Subject from input");
-		}
-    	
-		boolean success = cnIdentity.mapIdentity(session, primarySubject, secondarySubject);
-
-    }
-    
-    
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.POST)
-    public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
-
-    	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
-    	// get params from request
-    	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
-    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	Subject subject = new Subject();
-    	subject.setValue(subjectString);
-    	
-		boolean success = cnIdentity.requestMapIdentity(session, subject);
-
-    }
-    
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.PUT)
-    public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
-
-    	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
-    	// get params from request
-    	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
-    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	Subject subject = new Subject();
-    	subject.setValue(subjectString);
-    	
-		boolean success = cnIdentity.confirmMapIdentity(session, subject);
-
-    }
-    
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.DELETE)
-    public void denyMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
-
-    	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
-    	// get params from request
-    	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
-    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	Subject subject = new Subject();
-    	subject.setValue(subjectString);
-    	
-		boolean success = cnIdentity.denyMapIdentity(session, subject);
-
-    }
-    
-    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1 + "/*", method = RequestMethod.DELETE)
-    public void removeMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
-
-    	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
-    	// get params from request
-    	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PATH_V1 + "/";
-    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
-		} catch (Exception e) {
-			// ignore
-		}
-    	Subject subject = new Subject();
-    	subject.setValue(subjectString);
-    	
-		boolean success = cnIdentity.removeMapIdentity(session, subject);
-
-    }
-    
-    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.POST)
+    /**
+     *
+     * Create a group with the given name.
+     *
+     * Groups are lists of subjects that allow all members of the group to be referenced by listing
+     * solely the subject name of the group. Group names must be unique within the DataONE system.
+     * Groups can only be modified by Subjects listed as rightsHolders.
+     *
+     * 	POST /groups
+     *  CNIdentity.createGroup(session, group) -> Types.Subject
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = {GROUPS_PATH_V1, GROUPS_PATH_V1 + "/"}, method = RequestMethod.POST)
     public ModelAndView createGroup(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -331,8 +459,22 @@ public class IdentityController extends AbstractWebController implements Servlet
 
 
     }
-    
-    @RequestMapping(value = GROUPS_PATH_V1, method = RequestMethod.PUT)
+
+    /**
+     *
+     * Add members to the named group.
+     *
+     * Group members can be added by the original creator of the group, otherwise a NotAuthorized exception is thrown.
+     * Group members are provided as a list of subjects to be added to the group.
+     *
+     * PUT /groups
+     * CNIdentity.updateGroup(session, group) -> boolean
+     *
+     *
+     * @author leinfelder
+     *
+     */
+    @RequestMapping(value = {GROUPS_PATH_V1, GROUPS_PATH_V1 + "/"}, method = RequestMethod.PUT)
     public void updateGroup(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request

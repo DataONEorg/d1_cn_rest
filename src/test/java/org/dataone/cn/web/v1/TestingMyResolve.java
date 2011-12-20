@@ -101,7 +101,7 @@ public class TestingMyResolve {
 
     @After
     public void after() throws Exception {
-        cnLdapPopulation.deletePopulatedMns();
+        cnLdapPopulation.deletePopulatedNodes();
     }
 
     @Test
