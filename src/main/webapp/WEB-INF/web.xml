@@ -288,6 +288,14 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
+        <url-pattern>/monitor/ping</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
+        <url-pattern>/monitor/ping/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 

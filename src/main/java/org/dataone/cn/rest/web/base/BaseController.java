@@ -5,6 +5,9 @@
 
 package org.dataone.cn.rest.web.base;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +18,7 @@ import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeReference;
+import org.dataone.service.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +27,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.io.OutputStream;
 
 /**
  * This controller will provide a default xml serialization of the Node that is
@@ -36,6 +44,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller("baseController")
 public class BaseController implements ServletContextAware{
 
+    Logger logger = Logger.getLogger(BaseController.class.getName());
     @Autowired
     @Qualifier("cnNodeRegistry")
     NodeRegistryService  nodeRetrieval;
@@ -44,7 +53,10 @@ public class BaseController implements ServletContextAware{
     @Value("${cn.nodeId}")
     String nodeIdentifier;
     NodeReference nodeReference;
-    
+    private static final String RESOURCE_MONITOR_PING_V1 = "/v1/" + Constants.RESOURCE_MONITOR_PING;
+
+        SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+
     @PostConstruct
     public void init() {
         nodeReference = new NodeReference();
@@ -61,7 +73,36 @@ public class BaseController implements ServletContextAware{
         return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
 
     }
+    @RequestMapping(value = {RESOURCE_MONITOR_PING_V1, RESOURCE_MONITOR_PING_V1 + "/" }, method = RequestMethod.GET)
+    public void ping(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
+        OutputStream responseStream = null;
+        boolean throwFailure = false;
+        String failureMessage = "";
+        try {
+            Date today = new Date();
+            response.addDateHeader("Date", today.getTime());
+            response.addIntHeader("Expires", -1);
+            response.addHeader("Cache-Control", "private, max-age=0");
+            response.addHeader("Content-Type", "text/xml");
+            responseStream = response.getOutputStream();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            failureMessage = ex.getMessage();
+            throwFailure = true;
+        } finally {
+            try {
+                responseStream.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                failureMessage = ex.getMessage();
+                throwFailure = true;
+            }
+        }
+        if (throwFailure) {
+            throw new ServiceFailure("2042", failureMessage);
+        }
 
+    }
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;
