@@ -126,6 +126,11 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void create(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 
 
