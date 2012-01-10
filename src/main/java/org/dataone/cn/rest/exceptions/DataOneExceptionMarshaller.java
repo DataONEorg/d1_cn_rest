@@ -27,7 +27,6 @@ import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.exceptions.SynchronizationFailed;
 import org.dataone.service.exceptions.UnsupportedMetadataType;
-import org.dataone.service.exceptions.UnsupportedQueryType;
 import org.dataone.service.exceptions.UnsupportedType;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.MarshallingFailureException;
@@ -57,7 +56,6 @@ public class DataOneExceptionMarshaller implements Marshaller {
         validClasses.add(ServiceFailure.class.getName());
         validClasses.add(SynchronizationFailed.class.getName());
         validClasses.add(UnsupportedMetadataType.class.getName());
-        validClasses.add(UnsupportedQueryType.class.getName());
         validClasses.add(UnsupportedType.class.getName());
 
     }
