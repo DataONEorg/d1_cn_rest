@@ -112,6 +112,10 @@
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/reserve/</url-pattern>
     </servlet-mapping>
+   <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v1/obsoletedBy/*</url-pattern>
+    </servlet-mapping>
 <!-- Test Exclucing this
     <servlet>
         <servlet-name>metacatSearch</servlet-name>
@@ -184,6 +188,10 @@
     <servlet-mapping>
         <servlet-name>metacatCNReplication</servlet-name>
         <url-pattern>/v1/replicaAuthorizations/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v1/removeReplicaMetadata/*</url-pattern>
     </servlet-mapping>
 <!--
     <servlet>
