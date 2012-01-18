@@ -98,30 +98,6 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/v1/log</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/v1/log/</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/v1/reserve</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/v1/reserve/</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/v1/generate</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNCore</servlet-name>
-        <url-pattern>/v1/generate/</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/obsoletedBy/*</url-pattern>
     </servlet-mapping>
 <!-- Test Exclucing this
@@ -221,7 +197,7 @@
     <servlet>
         <servlet-name>cnNode</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>4</load-on-startup>
+        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet-mapping>
@@ -240,7 +216,7 @@
     <servlet>
         <servlet-name>identity</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>5</load-on-startup>
+        <load-on-startup>5</load-on-startup>
     </servlet>
     
     <servlet-mapping>
@@ -256,7 +232,7 @@
         <url-pattern>/v1/accounts/*</url-pattern>
     </servlet-mapping>
     
-     <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>identity</servlet-name>
         <url-pattern>/v1/groups</url-pattern>
     </servlet-mapping>
@@ -268,26 +244,42 @@
     <servlet>
         <servlet-name>identifier</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>6</load-on-startup>
+        <load-on-startup>6</load-on-startup>
     </servlet>
-    
-	<servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v1/reserve</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v1/reserve/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>identifier</servlet-name>
         <url-pattern>/v1/reserve/*</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v1/generate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v1/generate/</url-pattern>
+    </servlet-mapping>
+ 
     <servlet>
         <servlet-name>exception</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>7</load-on-startup>
+        <load-on-startup>7</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>exception</servlet-name>
         <url-pattern>/exception/*</url-pattern>
     </servlet-mapping>
-     <servlet>
+    <servlet>
         <servlet-name>xslt</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>8</load-on-startup>
+        <load-on-startup>8</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>xslt</servlet-name>
@@ -297,10 +289,10 @@
         <servlet-name>xslt</servlet-name>
         <url-pattern>/xslt/</url-pattern>
     </servlet-mapping>
-     <servlet>
+    <servlet>
         <servlet-name>cnBase</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>9</load-on-startup>
+        <load-on-startup>9</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>

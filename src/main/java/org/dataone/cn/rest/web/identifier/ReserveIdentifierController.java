@@ -88,7 +88,7 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
      * @return void
      * @exception
      */
-    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1, method = RequestMethod.POST)
+    @RequestMapping(value = {RESOURCE_RESERVE_PATH_V1, RESOURCE_RESERVE_PATH_V1 + "/" }, method = RequestMethod.POST)
     public ModelAndView reserveIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
         // get the Session object from certificate in request
@@ -177,7 +177,7 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
      * @throws InvalidCredentials
      * @throws InvalidRequest when the scheme is not recognized, or missing
      */
-    @RequestMapping(value = RESOURCE_GENERATE_PATH_V1, method = RequestMethod.POST)
+    @RequestMapping(value = {RESOURCE_GENERATE_PATH_V1, RESOURCE_GENERATE_PATH_V1 + "/" }, method = RequestMethod.POST)
     public ModelAndView generateIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
         // get the Session object from certificate in request
