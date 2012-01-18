@@ -18,9 +18,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
-import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
+import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -51,7 +51,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author leinfelder
  */
 @Controller("reserveIdentifierController")
-public class ReserveIdentifierController extends AbstractProxyController implements ServletContextAware {
+public class ReserveIdentifierController extends AbstractWebController implements ServletContextAware {
     public static Log log = LogFactory.getLog(ReserveIdentifierController.class);
 
     private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
@@ -148,6 +148,8 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
                 throw new IdentifierNotUnique("4210", "The given pid is already in use: " + pid.getValue());
             }
         } catch (NotFound e) {
+            response.setStatus(response.SC_OK);
+            
             // Identifier is not in use, continue
         }
 

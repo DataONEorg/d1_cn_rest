@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.ClientConfiguration;
-import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.mimemultipart.MultipartRequestResolver;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.cn.v1.CNIdentity;
@@ -54,6 +53,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.PostConstruct;
+import org.dataone.cn.rest.web.AbstractWebController;
 
 /**
  * Returns a list of nodes that have been registered with the DataONE infrastructure.
@@ -63,7 +63,7 @@ import javax.annotation.PostConstruct;
  * @author waltz
  */
 @Controller("nodeController")
-public class NodeController extends AbstractProxyController implements ServletContextAware {
+public class NodeController extends AbstractWebController implements ServletContextAware {
 
     Logger logger = Logger.getLogger(NodeController.class.getName());
     private static final String NODE_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE + "/";

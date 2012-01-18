@@ -6,8 +6,6 @@
 package org.dataone.cn.rest.web.base;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +29,9 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.io.OutputStream;
-
+import org.dataone.cn.rest.web.AbstractWebController;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 /**
  * This controller will provide a default xml serialization of the Node that is
  * represented by this CN. This functionality has not yet been defined in
@@ -42,9 +42,9 @@ import java.io.OutputStream;
  * @author waltz
  */
 @Controller("baseController")
-public class BaseController implements ServletContextAware{
+public class BaseController extends AbstractWebController implements ServletContextAware{
 
-    Logger logger = Logger.getLogger(BaseController.class.getName());
+    public static Log logger = LogFactory.getLog(BaseController.class);
     @Autowired
     @Qualifier("cnNodeRegistry")
     NodeRegistryService  nodeRetrieval;
