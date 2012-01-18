@@ -6,27 +6,21 @@ package org.dataone.cn.rest.web.identifier;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.codec.DecoderException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
 import org.dataone.cn.rest.proxy.controller.AbstractProxyController;
 import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.proxy.util.AcceptType;
-import org.dataone.service.util.Constants;
 import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -40,6 +34,7 @@ import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.SystemMetadata;
+import org.dataone.service.util.Constants;
 import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +55,7 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
     public static Log log = LogFactory.getLog(ReserveIdentifierController.class);
 
     private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
+    private static final String RESOURCE_GENERATE_PATH_V1 = "/v1/" + Constants.RESOURCE_GENERATE;
 
     private ServletContext servletContext;
     @Autowired
@@ -73,6 +69,7 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
     
     public ReserveIdentifierController() {
     }
+    
    /*
      * Given an optional scope and format, reserves and
      * returns an identifier within that scope and format
@@ -162,6 +159,54 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
         return new ModelAndView("xmlIdentifierViewResolver", "org.dataone.service.types.v1.Identifier", pid);
 
     }
+    
+    /**
+     * Generate a unique identifier that complies with the given identifier scheme,
+     * and then reserve the identifier for use only by the Subject of the current session.
+     * Future calls to MN_storage.create() and MN_storage.update() that
+     * reference this ID must originate from the session in which the
+     * identifier was reserved, otherwise an error is raised on those methods.
+     * 
+     * @param request the Servlet request containing parameters
+     * @param response the Servlet response to be returned to clients
+     * @return an identifier that is unique and will not be used by any other sessions
+     * @throws ServiceFailure
+     * @throws InvalidToken
+     * @throws NotAuthorized
+     * @throws NotImplemented
+     * @throws InvalidCredentials
+     * @throws InvalidRequest when the scheme is not recognized, or missing
+     */
+    @RequestMapping(value = RESOURCE_GENERATE_PATH_V1, method = RequestMethod.POST)
+    public ModelAndView generateIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+
+        // get the Session object from certificate in request
+        Session session = CertificateManager.getInstance().getSession(request);
+        
+        // get params from request
+        String scheme;
+        try {
+            scheme = EncodingUtilities.decodeString(request.getParameter("scheme"));
+        } catch (UnsupportedEncodingException ex) {
+           throw new InvalidRequest("4200", "Request missing 'scheme' parameter: " + ex.getMessage());
+        }
+        log.info(scheme);
+        String fragment;
+        try {
+            fragment = EncodingUtilities.decodeString(request.getParameter("fragment"));
+        } catch (UnsupportedEncodingException ex) {
+            // fragment is optional, so set it to null if it isn't included in the request
+            fragment = null;
+        }
+
+        // Generate the identifier, and reserve it
+        Identifier pid = reserveIdentifierService.generateIdentifier(session, scheme, fragment);
+        if (pid == null) {
+            throw new ServiceFailure("4210", "ReserveIdentifierService returned null value for Identifier for generateIdentifier()");
+        }
+        return new ModelAndView("xmlIdentifierViewResolver", "org.dataone.service.types.v1.Identifier", pid);
+    }
+    
    /*
      * Checks to determine if the caller (as determined by session)
      * has the reservation (i.e. is the owner) of the specified PID.

@@ -7,6 +7,7 @@ package org.dataone.cn.web.identifier;
 import java.security.cert.X509Certificate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 
@@ -133,5 +134,39 @@ public class ReserveIdentifierTestCase {
         assertNotNull(result);
         assertEquals(pidValue, result.getValue());
         
+    }
+    
+    @Test
+    public void generateIdentifier() throws Exception {
+        log.info("Test generateIdentifier");
+        ClassPathResource nonExistantMetadata = new ClassPathResource("nothere");
+        this.proxyCNReadService.setNodeSystemMetadataResource(nonExistantMetadata);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/generate");
+        request.addParameter("scheme", "UUID");
+
+        // the ssl_session may be important, but it does not appear to have a
+        // purpose in the CertificateManager other than to print
+        // a null if not found
+
+        Object bogus = new Object();
+        request.setAttribute("javax.servlet.request.ssl_session", bogus);
+
+        X509Certificate cert = x509CertificateGenerator.generateDataOneCert("test1");
+        X509Certificate[] certificates = {cert};
+        request.setAttribute("javax.servlet.request.X509Certificate", certificates);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        Identifier result = null;
+        try {
+            ModelAndView mav = testController.generateIdentifier(request, response);
+            result = (Identifier) mav.getModel().get("org.dataone.service.types.v1.Identifier");
+            assertNotNull(result);
+            this.cnLdapPopulation.deleteReservation(result.getValue());
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration" + ex);
+        }
+
+        assertTrue(result.getValue().startsWith("urn:uuid:"));
     }
 }

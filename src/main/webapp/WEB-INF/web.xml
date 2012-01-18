@@ -108,11 +108,19 @@
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/reserve</url-pattern>
     </servlet-mapping>
-   <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/reserve/</url-pattern>
     </servlet-mapping>
-   <servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v1/generate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v1/generate/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/obsoletedBy/*</url-pattern>
     </servlet-mapping>
