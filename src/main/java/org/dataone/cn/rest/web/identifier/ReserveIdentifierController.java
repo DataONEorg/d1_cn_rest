@@ -184,19 +184,26 @@ public class ReserveIdentifierController extends AbstractProxyController impleme
         Session session = CertificateManager.getInstance().getSession(request);
         
         // get params from request
-        String scheme;
-        try {
-            scheme = EncodingUtilities.decodeString(request.getParameter("scheme"));
-        } catch (UnsupportedEncodingException ex) {
-           throw new InvalidRequest("4200", "Request missing 'scheme' parameter: " + ex.getMessage());
+        String scheme = request.getParameter("scheme");
+        if (scheme != null) {
+            try {
+                scheme = EncodingUtilities.decodeString(request.getParameter("scheme"));
+            } catch (UnsupportedEncodingException ex) {
+               throw new InvalidRequest("4200", "Request missing 'scheme' parameter: " + ex.getMessage());
+            }
+        } else {
+            throw new InvalidRequest("4200", "Request missing 'scheme' parameter" );
         }
         log.info(scheme);
-        String fragment;
-        try {
-            fragment = EncodingUtilities.decodeString(request.getParameter("fragment"));
-        } catch (UnsupportedEncodingException ex) {
-            // fragment is optional, so set it to null if it isn't included in the request
-            fragment = null;
+        String fragment =request.getParameter("fragment");
+        if (fragment != null) {
+            try {
+                fragment = EncodingUtilities.decodeString(request.getParameter("fragment"));
+
+            } catch (UnsupportedEncodingException ex) {
+                // fragment is optional, so set it to null if it isn't included in the request
+                fragment = null;
+            }
         }
 
         // Generate the identifier, and reserve it
