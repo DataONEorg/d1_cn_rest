@@ -30,16 +30,20 @@ import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.EncodingUtilities;
+import org.dataone.service.util.TypeMarshaller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * The controller for identity manager service
+ * The controller for identifier manager service
+ * These methods are used for generating, reserving, and checking Identifier reservations.
  *
  * @author leinfelder
  */
@@ -63,40 +67,36 @@ public class ReserveIdentifierController extends AbstractWebController implement
     public ReserveIdentifierController() {
     }
     
-   /*
-     * Given an optional scope and format, reserves and
-     * returns an identifier within that scope and format
-     * that is unique and will not be used by any other sessions.
-     * Future calls to MN_storage.create() and MN_storage.update() that
-     * reference this ID must originate from the session in which the
-     * identifier was reserved, otherwise an error is raised on those methods.
-     *
-     * return the identifier that was reserved
-     * default serialized as XML because there was not an accept header
-     *
-     * @author leinfelder
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
-     * @param String acceptType
-     * @return void
-     * @exception
+
+    /**
+     * Reserves the given identifier
+     * 
+     * @param request
+     * @param response
+     * @return the identifier that was reserved
+     * @throws ServiceFailure
+     * @throws InvalidToken
+     * @throws NotAuthorized
+     * @throws NotImplemented
+     * @throws IdentifierNotUnique
+     * @throws InvalidCredentials
+     * @throws InvalidRequest
      */
     @RequestMapping(value = {RESOURCE_RESERVE_PATH_V1, RESOURCE_RESERVE_PATH_V1 + "/" }, method = RequestMethod.POST)
-    public ModelAndView reserveIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    public ModelAndView reserveIdentifier(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
         // get the Session object from certificate in request
         Session session = CertificateManager.getInstance().getSession(request);
-        String pidString ;
+        
+        // get params from request
+        Identifier pid = null;
         try {
-            pidString = EncodingUtilities.decodeString(request.getParameter("pid"));
-        } catch (UnsupportedEncodingException ex) {
+        	MultipartFile pidFile = request.getFile("pid");
+        	pid = TypeMarshaller.unmarshalTypeFromStream(Identifier.class, pidFile.getInputStream());
+
+        } catch (Exception ex) {
            throw new InvalidRequest("4200", "PID causes: " + ex.getMessage());
         }
-        log.info(pidString);
-
-        // get params from request
-        Identifier pid = new Identifier();
-        pid.setValue(pidString);
 
         // place the reservation
         pid = reserveIdentifierService.reserveIdentifier(session, pid);
@@ -161,18 +161,20 @@ public class ReserveIdentifierController extends AbstractWebController implement
         return new ModelAndView("xmlIdentifierViewResolver", "org.dataone.service.types.v1.Identifier", pid);
     }
     
-   /*
+    /**
      * Checks to determine if the caller (as determined by session)
      * has the reservation (i.e. is the owner) of the specified PID.
-     *
-     * return 200 if so, otherwise raise an exception
-     *
-     * @author leinfelder
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
-     * @param String acceptType
-     * @return void
-     * @exception
+     * 
+     * @param request
+     * @param response
+     * @throws ServiceFailure
+     * @throws InvalidToken
+     * @throws NotAuthorized
+     * @throws NotImplemented
+     * @throws IdentifierNotUnique
+     * @throws InvalidCredentials
+     * @throws InvalidRequest
+     * @throws NotFound
      */
     @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/**", method = RequestMethod.GET)
     public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
@@ -218,6 +220,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
         log.info("decoding PID/PID: " + pid + " to " + decodedPID);
         return decodedPID;
     }
+    
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;
