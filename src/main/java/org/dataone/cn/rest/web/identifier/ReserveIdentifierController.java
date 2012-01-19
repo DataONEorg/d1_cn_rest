@@ -28,6 +28,7 @@ import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
@@ -189,9 +190,12 @@ public class ReserveIdentifierController extends AbstractWebController implement
         } catch (DecoderException ex) {
             throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
         }
+        
+        // TODO: extract from the request
+        SubjectInfo subjectInfo = null;
 
         // check the reservation
-        boolean hasReservation = reserveIdentifierService.hasReservation(session, pid);      
+        boolean hasReservation = reserveIdentifierService.hasReservation(session, subjectInfo, pid);      
 
         // if we got here, we have the reservation
 
