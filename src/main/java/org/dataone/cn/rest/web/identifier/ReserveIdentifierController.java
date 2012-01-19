@@ -105,54 +105,6 @@ public class ReserveIdentifierController extends AbstractWebController implement
         Identifier pid = new Identifier();
         pid.setValue(pidString);
 
-        // look for existing use of the Identifier
-        BufferedHttpResponseWrapper metaResponse = new BufferedHttpResponseWrapper(response);
-        try {
-            proxyCNReadService.getSystemMetadata(servletContext, request, metaResponse, pid.getValue(), AcceptType.XML);
-            if (metaResponse.isException()) {
-                BaseException d1Exception = metaResponse.getD1Exception();
-                TreeMap<String, String> trace_information = new TreeMap<String, String>();
-                for (String key : d1Exception.getTraceKeySet()) {
-                    trace_information.put(key, d1Exception.getTraceDetail(key));
-                }
-                if (d1Exception.getDetail_code().equalsIgnoreCase("1050")) {
-                    throw new InvalidToken("4190", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1041")) {
-                    throw new NotImplemented("4191", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1090")) {
-                    throw new ServiceFailure("4210", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1040")) {
-                    throw new NotAuthorized("4180", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
-                    throw new NotFound("0", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1800")) {
-                    throw new NotFound("0", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
-                    throw new InvalidRequest("4200", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else {
-                    throw new ServiceFailure("4210", "Unrecognized getSystemMetadata failure: " + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                }
-            }
-            String bufferedData = new String(metaResponse.getBuffer());
-            log.info(bufferedData);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(bufferedData.getBytes());
-            SystemMetadata systemMetadata = null;
-            try {
-                systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, inputStream);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new ServiceFailure("4210", "Problem deserializing system metadata, " + e.getMessage());
-            }
-            // is there system meta data for the Identifier?
-            if (systemMetadata != null) {
-                throw new IdentifierNotUnique("4210", "The given pid is already in use: " + pid.getValue());
-            }
-        } catch (NotFound e) {
-            response.setStatus(response.SC_OK);
-            
-            // Identifier is not in use, continue
-        }
-
         // place the reservation
         pid = reserveIdentifierService.reserveIdentifier(session, pid);
         if (pid == null) {
