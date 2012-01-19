@@ -4,9 +4,7 @@
  */
 package org.dataone.cn.rest.web.identifier;
 
-import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -17,12 +15,9 @@ import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
 import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
-import org.dataone.cn.rest.proxy.util.AcceptType;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
-import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -33,10 +28,8 @@ import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
-import org.dataone.service.types.v1.SystemMetadata;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.EncodingUtilities;
-import org.dataone.service.util.TypeMarshaller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
