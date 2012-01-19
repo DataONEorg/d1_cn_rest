@@ -28,18 +28,18 @@
             </spring:list>
         </spring:property>
     </spring:bean>
-   <spring:bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-      <spring:property name="location">
-         <spring:value>classpath:/org/dataone/configuration/node.properties</spring:value>
-      </spring:property>
-   </spring:bean>
+    <spring:bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <spring:property name="location">
+            <spring:value>classpath:/org/dataone/configuration/node.properties</spring:value>
+        </spring:property>
+    </spring:bean>
     <!-- <util:properties id="controllerProperties" location="classpath:/org/dataone/configuration/node.properties"/> -->
-        <spring:bean id="mnNodeResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnNode.xml"/>
-        </spring:bean>
-        <spring:bean id="mnInvalidNodeResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnBadNodeBad.xml"/>
-        </spring:bean>
+    <spring:bean id="mnNodeResource" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnNode.xml"/>
+    </spring:bean>
+    <spring:bean id="mnInvalidNodeResource" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnBadNodeBad.xml"/>
+    </spring:bean>
     <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
     <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
@@ -70,10 +70,10 @@
     <spring:bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
         <spring:qualifier value="cnNodeRegistry"/>
     </spring:bean>
-	<spring:bean id="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
-            <spring:property name="server" value="ldap://localhost:389"/>
-            <spring:qualifier value="cnIdentity" />
-   	</spring:bean>
+    <spring:bean id="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
+        <spring:property name="server" value="ldap://localhost:389"/>
+        <spring:qualifier value="cnIdentity" />
+    </spring:bean>
     <context:component-scan base-package="org.dataone.cn.web.proxy.service" />
     <context:component-scan base-package="org.dataone.cn.rest.web.node" />
     <context:component-scan base-package="org.dataone.cn.ldap.v1" />

@@ -19,28 +19,38 @@
         <spring:property name="targetClass"
       value="org.springframework.util.Log4jConfigurer" />
         <spring:property name="targetMethod" value="initLogging" />
-		<spring:property name="arguments">
-			<spring:list>
-				<spring:value>classpath:org/dataone/cn/resources/web/log4j.properties</spring:value>
-			</spring:list>
-		</spring:property>
-	</spring:bean>
-        <spring:bean id="readSystemMetadataResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/systemMetadata-valid.xml"/>
-        </spring:bean>
+        <spring:property name="arguments">
+            <spring:list>
+                <spring:value>classpath:org/dataone/cn/resources/web/log4j.properties</spring:value>
+            </spring:list>
+        </spring:property>
+    </spring:bean>
+    <spring:bean id="hzInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" />
+    <spring:bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
+        <spring:constructor-arg value="org/dataone/cn/resources/web/hazelcastClientConf.xml" />
+        <spring:qualifier value="hzClientClasspathConfig" />
+    </spring:bean>
 
-        <spring:bean id="readScienceMetadataResource" class="org.springframework.core.io.ClassPathResource" >
-            <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/MD_ORNLDAAC_122_03032010095920"/>
-        </spring:bean>
+    <spring:bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
+        <spring:constructor-arg ref="hzConfig" />
+        <spring:qualifier value="hzClientConfiguration" />
+    </spring:bean>
+    <spring:bean id="readSystemMetadataResource" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/systemMetadata-valid.xml"/>
+    </spring:bean>
+
+    <spring:bean id="readScienceMetadataResource" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/MD_ORNLDAAC_122_03032010095920"/>
+    </spring:bean>
 
         
-       <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
+    <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
-        <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
+    <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
             factory-bean="contextSourceConfiguration" factory-method="getLdapContextSource" />
-        <spring:bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
-            <spring:constructor-arg ref="contextSource" />
-        </spring:bean>
+    <spring:bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+        <spring:constructor-arg ref="contextSource" />
+    </spring:bean>
         
     <!-- configure to match the LDAP server configuration -->
     <spring:bean name="reserveIdentifierService" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
@@ -48,9 +58,9 @@
         <spring:property name="password" value="password"/>
     </spring:bean>
     
-        <context:annotation-config/>
-        <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.mock" />
-	<context:component-scan base-package="org.dataone.cn.rest.web.identifier" />
-	<context:component-scan base-package="org.dataone.cn.ldap.v1" />
-        <context:component-scan base-package="org.dataone.cn.auth" />
+    <context:annotation-config/>
+    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.mock" />
+    <context:component-scan base-package="org.dataone.cn.rest.web.identifier" />
+    <context:component-scan base-package="org.dataone.cn.ldap.v1" />
+    <context:component-scan base-package="org.dataone.cn.auth" />
 </spring:beans>

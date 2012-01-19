@@ -4,6 +4,7 @@
  */
 package org.dataone.cn.web.identifier;
 
+import java.io.ByteArrayOutputStream;
 import java.security.cert.X509Certificate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
 import org.dataone.cn.rest.proxy.service.impl.mock.ProxyCNReadServiceImpl;
 import org.dataone.cn.rest.web.identifier.ReserveIdentifierController;
@@ -24,11 +26,14 @@ import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.util.EncodingUtilities;
+import org.dataone.service.util.TypeMarshaller;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
@@ -78,13 +83,26 @@ public class ReserveIdentifierTestCase {
     @Test
     public void failReserveIdentifier() throws Exception {
         log.info("Test failReserveIdentifier");
+        Object bogus = new Object();
+        X509Certificate cert = x509CertificateGenerator.generateDataOneCert("test1");
+        X509Certificate[] certificates = {cert};
         // should fail with a IdentifierNotUnique because it is able to discover metadata
         this.proxyCNReadService.setNodeSystemMetadataResource(readSystemMetadataResource);
         String pidValue = "MD_ORNLDAAC_122_030320010095920";
-        pidValue = EncodingUtilities.encodeUrlQuerySegment(pidValue);
 
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/reserve");
-        request.addParameter("pid", pidValue);
+        Identifier pid = new Identifier();
+        pid.setValue(pidValue);
+        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
+        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock/reserve");
+        request.setAttribute("javax.servlet.request.ssl_session", bogus);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificates);
+        request.addFile(pidFile);
+        
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Identifier result = null;
@@ -102,24 +120,30 @@ public class ReserveIdentifierTestCase {
     @Test
     public void reserveIdentifier() throws Exception {
         log.info("Test reserveIdentifier");
+        Object bogus = new Object();
+        X509Certificate cert = x509CertificateGenerator.generateDataOneCert("test1");
+        X509Certificate[] certificates = {cert};
         ClassPathResource nonExistantMetadata = new ClassPathResource("nothere");
         this.proxyCNReadService.setNodeSystemMetadataResource(nonExistantMetadata);
         String pidValue = "test" + Long.toHexString(System.currentTimeMillis());
-        pidValue = EncodingUtilities.encodeUrlQuerySegment(pidValue);
+        
+        Identifier pid = new Identifier();
+        pid.setValue(pidValue);
+        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
+        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
 
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock/reserve");
-        request.addParameter("pid", pidValue);
-
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("POST");
+        request.setContextPath("/Mock/reserve");
+        request.setAttribute("javax.servlet.request.ssl_session", bogus);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificates);
+        request.addFile(pidFile);
+        
         // the ssl_session may be important, but it does not appear to have a
         // purpose in the CertificateManager other than to print
         // a null if not found
 
-        Object bogus = new Object();
-        request.setAttribute("javax.servlet.request.ssl_session", bogus);
-
-        X509Certificate cert = x509CertificateGenerator.generateDataOneCert("test1");
-        X509Certificate[] certificates = {cert};
-        request.setAttribute("javax.servlet.request.X509Certificate", certificates);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Identifier result = null;
