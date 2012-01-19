@@ -5,4 +5,5 @@
 	<properties fileName="identity.properties"/>
 	<properties fileName="reserveIdentifier.properties"/>
         <properties fileName="testIdentity.properties"/>
+        <properties fileName="hzClientConfig.properties"/>
 </configuration>

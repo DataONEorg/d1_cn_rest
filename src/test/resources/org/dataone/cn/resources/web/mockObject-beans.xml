@@ -55,7 +55,7 @@
     </spring:bean>
     -->
     <spring:bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
-        <spring:constructor-arg value="org/dataone/cn/resources/web/hazelcastClientConf.xml" />
+        <spring:constructor-arg value="org/dataone/configuration/hazelcastTestClientConf.xml" />
         <spring:qualifier value="hzClientClasspathConfig" />
     </spring:bean>
 

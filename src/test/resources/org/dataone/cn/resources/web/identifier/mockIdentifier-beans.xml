@@ -26,15 +26,7 @@
         </spring:property>
     </spring:bean>
     <spring:bean id="hzInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" />
-    <spring:bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
-        <spring:constructor-arg value="org/dataone/cn/resources/web/hazelcastClientConf.xml" />
-        <spring:qualifier value="hzClientClasspathConfig" />
-    </spring:bean>
 
-    <spring:bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
-        <spring:constructor-arg ref="hzConfig" />
-        <spring:qualifier value="hzClientConfiguration" />
-    </spring:bean>
     <spring:bean id="readSystemMetadataResource" class="org.springframework.core.io.ClassPathResource" >
         <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/systemMetadata-valid.xml"/>
     </spring:bean>

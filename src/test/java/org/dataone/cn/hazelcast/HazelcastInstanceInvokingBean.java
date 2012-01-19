@@ -19,7 +19,7 @@ public class HazelcastInstanceInvokingBean {
 
     static {
         if (hazelcast == null) {
-            ClasspathXmlConfig config = new ClasspathXmlConfig("org/dataone/cn/resources/web/hazelcastClientConf.xml");
+            ClasspathXmlConfig config = new ClasspathXmlConfig("org/dataone/configuration/hazelcastTestClientConf.xml");
             hazelcast = Hazelcast.newHazelcastInstance(config);
         }
     }
