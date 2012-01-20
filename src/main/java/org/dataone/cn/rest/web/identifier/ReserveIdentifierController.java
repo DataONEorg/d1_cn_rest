@@ -15,7 +15,6 @@ import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.rest.proxy.service.ProxyCNReadService;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -60,9 +59,6 @@ public class ReserveIdentifierController extends AbstractWebController implement
     @Autowired
     @Qualifier("reserveIdentifierService")
     ReserveIdentifierService reserveIdentifierService;
-    @Autowired
-    @Qualifier("proxyCNReadService")
-    ProxyCNReadService proxyCNReadService;
 
     private URLCodec urlCodec = new URLCodec();
     
