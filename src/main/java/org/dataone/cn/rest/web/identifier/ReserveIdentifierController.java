@@ -53,6 +53,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
     public static Log log = LogFactory.getLog(ReserveIdentifierController.class);
 
     private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
+    private static final String RESOURCE_HAS_RESERVERVATION_PATH_V1 = "/v1/" + Constants.RESOURCE_HAS_RESERVATION;
     private static final String RESOURCE_GENERATE_PATH_V1 = "/v1/" + Constants.RESOURCE_GENERATE;
 
     private ServletContext servletContext;
@@ -177,23 +178,27 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidRequest
      * @throws NotFound
      */
-    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/**", method = RequestMethod.GET)
-    public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = RESOURCE_HAS_RESERVERVATION_PATH_V1, method = RequestMethod.POST)
+    public void hasReservation(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
         Session session = CertificateManager.getInstance().getSession(request);
+        
         // get params from request
-        Identifier pid = new Identifier();
+        Identifier pid = null;
         try {
-            String pidString = getRequestPID(request, RESOURCE_RESERVE_PATH_V1);
-            pid.setValue(pidString);
-        } catch (DecoderException ex) {
+        	MultipartFile pidFile = request.getFile("pid");
+        	pid = TypeMarshaller.unmarshalTypeFromStream(Identifier.class, pidFile.getInputStream());
+        } catch (Exception ex) {
+            throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
+        }        
+        SubjectInfo subjectInfo = null;
+        try {
+        	MultipartFile subjectInfoFile = request.getFile("subjectInfo");
+        	subjectInfo = TypeMarshaller.unmarshalTypeFromStream(SubjectInfo.class, subjectInfoFile.getInputStream());
+        } catch (Exception ex) {
             throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
         }
-        
-        // TODO: extract from the request
-        SubjectInfo subjectInfo = null;
-
         // check the reservation
         boolean hasReservation = reserveIdentifierService.hasReservation(session, subjectInfo, pid);      
 
