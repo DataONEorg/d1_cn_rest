@@ -28,7 +28,7 @@ import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
-import org.dataone.service.types.v1.SubjectInfo;
+import org.dataone.service.types.v1.Subject;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
@@ -192,15 +192,15 @@ public class ReserveIdentifierController extends AbstractWebController implement
         } catch (Exception ex) {
             throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
         }        
-        SubjectInfo subjectInfo = null;
+        Subject subject = null;
         try {
-        	MultipartFile subjectInfoFile = request.getFile("subjectInfo");
-        	subjectInfo = TypeMarshaller.unmarshalTypeFromStream(SubjectInfo.class, subjectInfoFile.getInputStream());
+        	MultipartFile subjectFile = request.getFile("subject");
+        	subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, subjectFile.getInputStream());
         } catch (Exception ex) {
-            throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
+            throw new ServiceFailure("4872", "Problem reading Subject , " + ex.getMessage());
         }
         // check the reservation
-        boolean hasReservation = reserveIdentifierService.hasReservation(session, subjectInfo, pid);      
+        boolean hasReservation = reserveIdentifierService.hasReservation(session, subject, pid);      
 
         // if we got here, we have the reservation
 
