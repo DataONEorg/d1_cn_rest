@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.io.IOUtils;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.rest.web.AbstractWebController;
@@ -179,21 +178,16 @@ public class IdentityController extends AbstractWebController implements Servlet
      * 
      */
     @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1, method = RequestMethod.POST)
-    public void requestMapIdentity(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String subjectString = request.getParameter("subject");
 
-    	Subject subject;
-		try {
-			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, IOUtils.toInputStream(subjectString, "UTF-8"));
-		} catch (Exception e) {
-			ServiceFailure sf = new ServiceFailure("2390", "Could not get subject from request: " + e.getMessage());
-			sf.initCause(e);
-			throw sf;
-		} 
+    	Subject subject = new Subject();
+    	subject.setValue(subjectString);
+		
 
 		boolean success = cnIdentity.requestMapIdentity(session, subject);
 
