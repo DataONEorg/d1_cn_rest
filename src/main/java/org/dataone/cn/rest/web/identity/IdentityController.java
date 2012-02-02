@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.io.IOUtils;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.rest.web.AbstractWebController;
@@ -171,28 +172,28 @@ public class IdentityController extends AbstractWebController implements Servlet
      * (confirmation) map request is made by the secondary Subject. This ensures that mappings are
      * performed only by those that have authority to do so.
      *
-     * POST /accounts/pendingmap/{subject}
+     * POST /accounts/pendingmap
      * CNIdentity.requestMapIdentity(session, subject) -> boolean
      *
      * @author leinfelder
      * 
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.POST)
-    public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1, method = RequestMethod.POST)
+    public void requestMapIdentity(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
-    	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
-    	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
-    	try {
-			subjectString = urlDecoder.decode(subjectString, "UTF-8");
+    	String subjectString = request.getParameter("subject");
+
+    	Subject subject;
+		try {
+			subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, IOUtils.toInputStream(subjectString, "UTF-8"));
 		} catch (Exception e) {
-			// ignore
-		}
-    	Subject subject = new Subject();
-    	subject.setValue(subjectString);
+			ServiceFailure sf = new ServiceFailure("2390", "Could not get subject from request: " + e.getMessage());
+			sf.initCause(e);
+			throw sf;
+		} 
 
 		boolean success = cnIdentity.requestMapIdentity(session, subject);
 
