@@ -52,6 +52,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      */
     private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
     private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
+    private static final String ACCOUNT_VERIFICATION_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_VERIFICATION;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
 
@@ -397,7 +398,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNT_VERIFICATION_PATH_V1 + "/*", method = RequestMethod.POST)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	
@@ -405,7 +406,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
-    	String path = ACCOUNTS_PATH_V1 + "/";
+    	String path = ACCOUNT_VERIFICATION_PATH_V1 + "/";
     	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
