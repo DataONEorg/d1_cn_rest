@@ -398,7 +398,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNT_VERIFICATION_PATH_V1 + "/*", method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNT_VERIFICATION_PATH_V1 + "/*", method = RequestMethod.PUT)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	
