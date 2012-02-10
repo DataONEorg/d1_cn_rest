@@ -227,7 +227,7 @@ public class NodeRegistryTestCase {
         x509CertificateGenerator.storeSelfSignedCertificate();
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
 
-        String sq1dId = "sq1d";
+        String sq1dId = "urn:node:sq1d";
         NodeReference sq1dNodeReference = new NodeReference();
         sq1dNodeReference.setValue(sq1dId);
         Node sq1dNode = nodeRegistryService.getNode(sq1dNodeReference);

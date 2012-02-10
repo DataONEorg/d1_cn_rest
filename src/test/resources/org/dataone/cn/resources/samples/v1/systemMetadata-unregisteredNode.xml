@@ -20,20 +20,20 @@
     <obsoletedBy>ObsoletedBy0</obsoletedBy>
     <dateUploaded>2006-05-04T18:13:51.0Z</dateUploaded>
     <dateSysMetadataModified>2006-05-04T18:13:51.0Z</dateSysMetadataModified>
-    <originMemberNode>OriginMemberNode0</originMemberNode>
-    <authoritativeMemberNode>AuthoritativeMemberNode0</authoritativeMemberNode>
+    <originMemberNode>urn:node:OriginMemberNode0</originMemberNode>
+    <authoritativeMemberNode>urn:node:AuthoritativeMemberNode0</authoritativeMemberNode>
     <replica>
-        <replicaMemberNode>sq1d</replicaMemberNode>
+        <replicaMemberNode>urn:node:sq1d</replicaMemberNode>
         <replicationStatus>completed</replicationStatus>
         <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
     </replica>
     <replica>
-        <replicaMemberNode>sqR1</replicaMemberNode>
+        <replicaMemberNode>urn:node:sqR1</replicaMemberNode>
         <replicationStatus>queued</replicationStatus>
         <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
     </replica>
     <replica>
-        <replicaMemberNode>sqrf</replicaMemberNode>
+        <replicaMemberNode>urn:node:sqrf</replicaMemberNode>
         <replicationStatus>completed</replicationStatus>
         <replicaVerified>2006-05-04T18:13:51.0Z</replicaVerified>
     </replica>

@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -77,7 +75,6 @@ public class NodeController extends AbstractWebController implements ServletCont
     // need to exclude certain patterns from urlBase,
     // do not want an entry that makes the CN a sychronization target as an MN node
     // or rather we do not want an MN node to point to a CN end-point
-    static final Pattern excludeNodeBaseURLPattern = Pattern.compile("^https?\\:\\/\\/(?:(?:localhost(?:\\:8080)?\\/)|(?:127\\.0)).+");
     @Autowired
     @Qualifier("cnNodeRegistry")
     NodeRegistryService nodeRegistry;
@@ -122,9 +119,12 @@ public class NodeController extends AbstractWebController implements ServletCont
     }
 
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.GET)
-    public void getNode(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response, @PathVariable String nodeId) throws Exception {
+        NodeReference reference = new NodeReference();
+        reference.setValue(nodeId);
+        Node node = nodeRegistry.getNode(reference);
 
-        throw new Exception("getNode Not implemented Yet!");
+        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
 
     }
 
@@ -232,23 +232,9 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw new NotAuthorized("4821", errorMessage.toString());
         }
 
-        // do not allow localhost to be baseURL of a node
-        Matcher httpPatternMatcher = excludeNodeBaseURLPattern.matcher(node.getBaseURL());
-        if (httpPatternMatcher.find()) {
-            throw new InvalidRequest("4823", "BaseURL may not point to localhost! " + node.getBaseURL());
-        }
-
         IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
-        //for (NodeReference noderef : hzNodes.keySet()) {
-        //    logger.info(noderef.getValue());
-        //}
+
         NodeReference nodeReference = node.getIdentifier();
-        //if (hzNodes.containsKey(nodeReference)) {
-        //    throw new IdentifierNotUnique("4844", "Sorry! Node Identifier " + nodeReference.getValue() + " already exists ");
-        //}
-        // XXX need to generate new Node Reference before putting it in the map
-        //       NodeReference nodeReference = nodeRegistry.generateNodeIdentifier();
-        //       node.setIdentifier(nodeReference);
 
         hzNodes.put(nodeReference, node);
         return;
@@ -295,7 +281,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         StringBuilder errorMessage = new StringBuilder();
         for (Subject contactSubject : contactSubjectList) {
             if (!(isVerifiedSubject(session, contactSubject))) {
-                errorMessage.append("Subject: " + contactSubject.getValue() + " is not verified! \n");
+                errorMessage.append("ContactSubject: " + contactSubject.getValue() + " is not verified! \n");
                 unVerifiedRegistration = true;
             }
             // this is an even stricter check, if any one user in a group is unverified
@@ -309,21 +295,17 @@ public class NodeController extends AbstractWebController implements ServletCont
                     List<Subject> contactGroupSubjectList = contactGroup.getHasMemberList();
                     for (Subject groupSubject : contactGroupSubjectList) {
                         if (!(isVerifiedSubject(session, contactSubject))) {
-                            errorMessage.append("Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
+                            errorMessage.append("ContactSubject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
                             unVerifiedRegistration = true;
                         }
                     }
                 }
             } catch (NotFound ex) {
-                throw new NotAuthorized("4841", contactSubject.getValue() + " is not a Registered Subject");
+                throw new NotAuthorized("4841", "ContactSubject:" + contactSubject.getValue() + " is not a Registered Subject");
             }
         }
         if (unVerifiedRegistration) {
             throw new NotAuthorized("4841", errorMessage.toString());
-        }
-        Matcher httpPatternMatcher = excludeNodeBaseURLPattern.matcher(node.getBaseURL());
-        if (httpPatternMatcher.find()) {
-            throw new InvalidRequest("4823", "BaseURL may not point to localhost! " + node.getBaseURL());
         }
 
         //IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");

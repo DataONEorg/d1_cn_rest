@@ -63,7 +63,7 @@ public class IdentityTestCase {
     private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
     private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
-
+    private static final String ACCOUNT_VERIFICATION_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_VERIFICATION;
     @Resource
     public void setCNLdapPopulation(NodeLdapPopulation ldapPopulation) {
         this.cnLdapPopulation = ldapPopulation;
@@ -289,7 +289,7 @@ public class IdentityTestCase {
         Subject subject = new Subject();
         subject.setValue(primarySubject);
         
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock"  + ACCOUNTS_PATH_V1 + "/"+ primarySubject);
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock"  + ACCOUNT_VERIFICATION_PATH_V1 + "/"+ primarySubject);
         MockHttpServletResponse response = new MockHttpServletResponse();
         
         boolean success = false;

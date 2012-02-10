@@ -5,13 +5,13 @@
     <groupId>org.dataone.cn</groupId>
     <artifactId>d1_cn_rest</artifactId>
     <packaging>war</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0-RC1</version>
     <name>DataONE_Cn_Rest</name>
     <url>http://dataone.org</url>
     <parent>
         <groupId>org.dataone</groupId>
         <artifactId>d1_cn_service</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <properties>
@@ -235,32 +235,32 @@
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_identity_manager</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0-RC1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_portal</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0-RC1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_rest_proxy</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.0-RC1</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_noderegistry</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0-RC1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0-RC1</version>
             <type>jar</type>
         </dependency>
         <dependency>

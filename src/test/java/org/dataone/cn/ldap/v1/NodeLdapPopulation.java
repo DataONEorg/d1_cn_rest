@@ -49,7 +49,7 @@ public class NodeLdapPopulation {
 
     public void populateTestMNs() {
         Node sq1dMNNode = new Node();
-        String sq1dId = "sq1d";
+        String sq1dId = "urn:node:sq1d";
         NodeReference sq1dNodeReference = new NodeReference();
         sq1dNodeReference.setValue(sq1dId);
         sq1dMNNode.setIdentifier(sq1dNodeReference);
@@ -104,7 +104,7 @@ public class NodeLdapPopulation {
         testNodeList.add(sq1dMNNode);
 
         Node sqR1MNNode = new Node();
-        String sqR1Id = "sqR1";
+        String sqR1Id = "urn:node:sqR1";
         NodeReference sqR1NodeReference = new NodeReference();
         sqR1NodeReference.setValue(sqR1Id);
         sqR1MNNode.setIdentifier(sqR1NodeReference);
@@ -246,7 +246,7 @@ public class NodeLdapPopulation {
     public void populateTestCN() {
 
         Node sqrmCNNode = new Node();
-        String sqrmId = "sqrm";
+        String sqrmId = "urn:node:sqrm";
         NodeReference sq1dNodeReference = new NodeReference();
         sq1dNodeReference.setValue(sqrmId);
         sqrmCNNode.setIdentifier(sq1dNodeReference);

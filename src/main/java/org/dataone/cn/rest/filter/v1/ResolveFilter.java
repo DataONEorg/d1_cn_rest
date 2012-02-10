@@ -372,8 +372,11 @@ public class ResolveFilter implements Filter {
 
 
         ObjectLocationList objectLocationList = createObjectLocationList(identifier.getValue(), systemMetadata.getReplicaList());
-
-
+        //Resolve will return a HTTP status of 303 (see other) on success.
+        //The HTTP header "Location" MUST be set, and it's value SHOULD be the full get()
+        // URL for retrieving the object from the first location in the resolve response
+        response.setStatus(response.SC_SEE_OTHER);
+        response.setHeader("Location", objectLocationList.getObjectLocation(0).getUrl());
         try {
             TypeMarshaller.marshalTypeToOutputStream(objectLocationList, response.getOutputStream());
         } catch (JiBXException ex) {

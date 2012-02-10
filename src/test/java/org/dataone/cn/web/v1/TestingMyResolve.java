@@ -135,7 +135,8 @@ public class TestingMyResolve {
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
         assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
-
+        assertTrue("status must be 303", responseWrapper.getStatus() == responseWrapper.SC_SEE_OTHER);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
         String content = new String(responseWrapper.getBuffer());
 
         assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
@@ -151,7 +152,8 @@ public class TestingMyResolve {
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
         assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
-
+        assertTrue("status must be 303", responseWrapper.getStatus() == responseWrapper.SC_SEE_OTHER);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
         String content = new String(responseWrapper.getBuffer());
 
         assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
@@ -168,7 +170,8 @@ public class TestingMyResolve {
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
         assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
-
+        assertTrue("status must be 303", responseWrapper.getStatus() == responseWrapper.SC_SEE_OTHER);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
         String content = new String(responseWrapper.getBuffer());
 
         //assertThat("wonky identifier is not escaped", content, containsString("<identifier>aAbBcC__/?param=5#__12345"));
@@ -184,7 +187,8 @@ public class TestingMyResolve {
         // examine contents of the response
         assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
         assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
-
+        assertTrue("status must be 303", responseWrapper.getStatus() == responseWrapper.SC_SEE_OTHER);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
         String content = new String(responseWrapper.getBuffer());
 
         if (debuggingOutput) {
@@ -451,7 +455,7 @@ public class TestingMyResolve {
         // read the baseURLmap to make sure it's working
         String url = null;
         try {
-            url = rf.lookupBaseURLbyNode("sq1d");
+            url = rf.lookupBaseURLbyNode("urn:node:sq1d");
         } catch (ServiceFailure e) {
             fail("baseURLmap lookup error: " + e);
         }
