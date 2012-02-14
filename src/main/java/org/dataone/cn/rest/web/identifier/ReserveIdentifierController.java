@@ -80,8 +80,8 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidCredentials
      * @throws InvalidRequest
      */
-    @RequestMapping(value = {RESOURCE_RESERVE_PATH_V1, RESOURCE_RESERVE_PATH_V1 + "/" }, method = RequestMethod.POST)
-    public ModelAndView reserveIdentifier(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
+    @RequestMapping(value = {RESOURCE_RESERVE_PATH_V1, RESOURCE_RESERVE_PATH_V1 }, method = RequestMethod.POST)
+    public ModelAndView reserveIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
         // get the Session object from certificate in request
         Session session = CertificateManager.getInstance().getSession(request);
@@ -89,9 +89,9 @@ public class ReserveIdentifierController extends AbstractWebController implement
         // get params from request
         Identifier pid = null;
         try {
-        	MultipartFile pidFile = request.getFile("pid");
-        	pid = TypeMarshaller.unmarshalTypeFromStream(Identifier.class, pidFile.getInputStream());
-
+        	String pidString = EncodingUtilities.decodeString(request.getParameter("pid"));
+        	pid = new Identifier();
+        	pid.setValue(pidString);
         } catch (Exception ex) {
            throw new InvalidRequest("4200", "PID causes: " + ex.getMessage());
         }
@@ -183,15 +183,17 @@ public class ReserveIdentifierController extends AbstractWebController implement
         // get params from request
         Identifier pid = null;
         try {
-        	MultipartFile pidFile = request.getFile("pid");
-        	pid = TypeMarshaller.unmarshalTypeFromStream(Identifier.class, pidFile.getInputStream());
+        	String pidString = EncodingUtilities.decodeString(request.getParameter("pid"));
+        	pid = new Identifier();
+        	pid.setValue(pidString);
         } catch (Exception ex) {
             throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
         }        
         Subject subject = null;
         try {
-        	MultipartFile subjectFile = request.getFile("subject");
-        	subject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, subjectFile.getInputStream());
+        	String subjectString = EncodingUtilities.decodeString(request.getParameter("subject"));
+        	subject = new Subject();
+        	subject.setValue(subjectString);
         } catch (Exception ex) {
             throw new ServiceFailure("4872", "Problem reading Subject , " + ex.getMessage());
         }
