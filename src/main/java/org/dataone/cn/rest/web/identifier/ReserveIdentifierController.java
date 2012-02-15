@@ -52,7 +52,6 @@ public class ReserveIdentifierController extends AbstractWebController implement
     public static Log log = LogFactory.getLog(ReserveIdentifierController.class);
 
     private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
-    private static final String RESOURCE_HAS_RESERVERVATION_PATH_V1 = "/v1/" + Constants.RESOURCE_HAS_RESERVATION;
     private static final String RESOURCE_GENERATE_PATH_V1 = "/v1/" + Constants.RESOURCE_GENERATE;
 
     private ServletContext servletContext;
@@ -160,7 +159,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
     }
     
     /**
-     * Checks to determine if the caller (as determined by session)
+     * Checks to determine if the subject
      * has the reservation (i.e. is the owner) of the specified PID.
      * 
      * @param request
@@ -174,8 +173,8 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidRequest
      * @throws NotFound
      */
-    @RequestMapping(value = RESOURCE_HAS_RESERVERVATION_PATH_V1, method = RequestMethod.POST)
-    public void hasReservation(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/*", method = RequestMethod.GET)
+    public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
         Session session = CertificateManager.getInstance().getSession(request);
@@ -183,7 +182,10 @@ public class ReserveIdentifierController extends AbstractWebController implement
         // get params from request
         Identifier pid = null;
         try {
-        	String pidString = EncodingUtilities.decodeString(request.getParameter("pid"));
+        	String requestUri = request.getRequestURI();
+        	String path = RESOURCE_RESERVE_PATH_V1 + "/";
+        	String pidString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
+        	pidString = EncodingUtilities.decodeString(pidString);
         	pid = new Identifier();
         	pid.setValue(pidString);
         } catch (Exception ex) {
