@@ -189,7 +189,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
         	pid = new Identifier();
         	pid.setValue(pidString);
         } catch (Exception ex) {
-            throw new ServiceFailure("4872", "Problem reading pid , " + ex.getMessage());
+            throw new InvalidRequest("4872", "Problem reading pid , " + ex.getMessage());
         }        
         Subject subject = null;
         try {
@@ -197,7 +197,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
         	subject = new Subject();
         	subject.setValue(subjectString);
         } catch (Exception ex) {
-            throw new ServiceFailure("4872", "Problem reading Subject , " + ex.getMessage());
+            throw new InvalidRequest("4872", "Problem reading Subject , " + ex.getMessage());
         }
         // check the reservation
         boolean hasReservation = reserveIdentifierService.hasReservation(session, subject, pid);      
