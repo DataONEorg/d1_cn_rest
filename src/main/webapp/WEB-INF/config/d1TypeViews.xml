@@ -103,5 +103,12 @@
         <property name="contentType" value="text/xml" />
         <property name="marshaller" ref="dataOneExceptionMarshaller" />
     </bean>
+    <bean id="xmlChecksumAlgorithmListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <property name="modelKey" value="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
+        <property name="contentType" value="text/xml" />
+        <property name="marshaller">
+            <oxm:jibx-marshaller id="jibxChecksumAlgorithmListMarshallerResponse" target-class="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
+        </property>
+    </bean>
 
 </beans>

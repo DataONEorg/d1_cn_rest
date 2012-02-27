@@ -30,6 +30,7 @@ import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SystemMetadata;
+import org.dataone.service.util.Constants;
 import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class ReserveIdentifierTestCase {
     private ReserveIdentifierController testController;
     private SubjectLdapPopulation cnLdapPopulation;
     private X509CertificateGenerator x509CertificateGenerator;
-
+    private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
     private HazelcastInstance hzInstance;
     @Resource
     public void setCNLdapPopulation(SubjectLdapPopulation ldapPopulation) {
@@ -90,16 +91,18 @@ public class ReserveIdentifierTestCase {
 
         Identifier pid = new Identifier();
         pid.setValue(pidValue);
-        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
-        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
+//        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
+//        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
+//        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("POST");
+
+        request.addParameter("pid", pidValue);
         request.setContextPath("/Mock/reserve");
         request.setAttribute("javax.servlet.request.ssl_session", bogus);
         request.setAttribute("javax.servlet.request.X509Certificate", certificates);
-        request.addFile(pidFile);
+//        request.addFile(pidFile);
         
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -130,16 +133,17 @@ public class ReserveIdentifierTestCase {
         
         Identifier pid = new Identifier();
         pid.setValue(pidValue);
-        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
-        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
+//        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
+//        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
+//        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("POST");
+        request.addParameter("pid", pidValue);
         request.setContextPath("/Mock/reserve");
         request.setAttribute("javax.servlet.request.ssl_session", bogus);
         request.setAttribute("javax.servlet.request.X509Certificate", certificates);
-        request.addFile(pidFile);
+//        request.addFile(pidFile);
         
         // the ssl_session may be important, but it does not appear to have a
         // purpose in the CertificateManager other than to print
@@ -206,20 +210,21 @@ public class ReserveIdentifierTestCase {
 
         String pidValue = "test" + Long.toHexString(System.currentTimeMillis());
 
-        Identifier pid = new Identifier();
-        pid.setValue(pidValue);
-        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
-        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
+//        Identifier pid = new Identifier();
+//        pid.setValue(pidValue);
+//        ByteArrayOutputStream pidOutput= new ByteArrayOutputStream();
+//        TypeMarshaller.marshalTypeToOutputStream(pid, pidOutput);
 
 
-        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
+//        MockMultipartFile pidFile = new MockMultipartFile("pid", pidOutput.toByteArray());
 
         MockMultipartHttpServletRequest requestReservation = new MockMultipartHttpServletRequest();
         requestReservation.setMethod("POST");
+        requestReservation.addParameter("pid", pidValue);
         requestReservation.setContextPath("/Mock/reserve");
         requestReservation.setAttribute("javax.servlet.request.ssl_session", bogus);
         requestReservation.setAttribute("javax.servlet.request.X509Certificate", certificates);
-        requestReservation.addFile(pidFile);
+//        requestReservation.addFile(pidFile);
 
         // the ssl_session may be important, but it does not appear to have a
         // purpose in the CertificateManager other than to print
@@ -228,13 +233,14 @@ public class ReserveIdentifierTestCase {
         MockHttpServletResponse responseReservation = new MockHttpServletResponse();
 
 
-        MockMultipartHttpServletRequest hasReservationRequest = new MockMultipartHttpServletRequest();
-        hasReservationRequest.setMethod("POST");
-        hasReservationRequest.setContextPath("/Mock/hasReservation");
+        MockHttpServletRequest hasReservationRequest = new MockHttpServletRequest();
+        hasReservationRequest.setMethod("GET");
+        hasReservationRequest.setRequestURI("/Mock/" + RESOURCE_RESERVE_PATH_V1 + "/" + pidValue);
+        hasReservationRequest.addParameter("subject", subjectDN);
         hasReservationRequest.setAttribute("javax.servlet.request.ssl_session", bogus);
         hasReservationRequest.setAttribute("javax.servlet.request.X509Certificate", certificates);
-        hasReservationRequest.addFile(pidFile);
-        hasReservationRequest.addFile(subjectFile);
+//        hasReservationRequest.addFile(pidFile);
+//        hasReservationRequest.addFile(subjectFile);
 
         MockHttpServletResponse hasReservationResponse = new MockHttpServletResponse();
 

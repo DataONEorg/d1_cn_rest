@@ -54,7 +54,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class TestingMyResolve {
 
     private static String resourcePath = "/org/dataone/cn/resources/samples/v1/";
-    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_1_0_0/dataoneTypes.xsd";
+    private static String objectlocationlistUrl = "https://repository.dataone.org/software/cicore/tags/D1_SCHEMA_1_0_2/dataoneTypes.xsd";
     private static boolean debuggingOutput = true;
     private static boolean useSchemas = true;
     private static Integer nodelistRefreshIntervalSeconds = 120;

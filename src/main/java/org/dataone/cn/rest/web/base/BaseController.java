@@ -32,6 +32,8 @@ import java.io.OutputStream;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.configuration.Settings;
+import org.dataone.service.types.v1.ChecksumAlgorithmList;
 /**
  * This controller will provide a default xml serialization of the Node that is
  * represented by this CN. This functionality has not yet been defined in
@@ -54,8 +56,9 @@ public class BaseController extends AbstractWebController implements ServletCont
     String nodeIdentifier;
     NodeReference nodeReference;
     private static final String RESOURCE_MONITOR_PING_V1 = "/v1/" + Constants.RESOURCE_MONITOR_PING;
+    private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 = "/v1/" + Constants.RESOURCE_CHECKSUM;
 
-        SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+    SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
     @PostConstruct
     public void init() {
@@ -101,6 +104,18 @@ public class BaseController extends AbstractWebController implements ServletCont
         if (throwFailure) {
             throw new ServiceFailure("2042", failureMessage);
         }
+
+    }
+
+    @RequestMapping(value = {RESOURCE_LIST_CHECKSUM_ALGORITHM_V1, RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 + "/" }, method = RequestMethod.GET)
+    public ModelAndView listChecksumAlgorithms(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
+        ChecksumAlgorithmList checksumAlgorithmList = new ChecksumAlgorithmList();
+        String cnChecksumList = Settings.getConfiguration().getString("cn.checksumAlgorithmList");
+        String[] checksums = cnChecksumList.split(";");
+        for (int i = 0; i < checksums.length; i++) {
+             checksumAlgorithmList.addAlgorithm(checksums[i]);
+        }
+        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.ChecksumAlgorithmList", checksumAlgorithmList);
 
     }
     @Override

@@ -173,7 +173,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidRequest
      * @throws NotFound
      */
-    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/*", method = RequestMethod.GET)
+    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/**", method = RequestMethod.GET)
     public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
@@ -183,7 +183,9 @@ public class ReserveIdentifierController extends AbstractWebController implement
         Identifier pid = null;
         try {
         	String requestUri = request.getRequestURI();
+                
         	String path = RESOURCE_RESERVE_PATH_V1 + "/";
+                log.info(requestUri + " last index of " + requestUri.lastIndexOf(path) + " path length " + path.length());
         	String pidString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
         	pidString = EncodingUtilities.decodeString(pidString);
         	pid = new Identifier();
@@ -204,30 +206,6 @@ public class ReserveIdentifierController extends AbstractWebController implement
 
         // if we got here, we have the reservation
 
-    }
-    /**
-     * pull the pid from an url
-     *  it maybe that the PID is url encoded or it may appear as a path
-     *  use the path as a way to delimit the pid
-     *
-     * @author rwaltz
-     * @param HttpServletRequest request
-     * @param String delimiter
-     * @return PID
-     * @exception DecoderException
-     */
-    private String getRequestPID(HttpServletRequest request, String delimiter) throws DecoderException {
-        StringBuffer urlBuffer = request.getRequestURL();
-        int objectStart = urlBuffer.indexOf(delimiter);
-        String pid = urlBuffer.substring(objectStart + delimiter.length(), urlBuffer.length());
-        String decodedPID = null;
-        try {
-            decodedPID = EncodingUtilities.decodeString(pid);
-        } catch (UnsupportedEncodingException e) {
-            decodedPID = urlCodec.decode(pid);
-        }
-        log.info("decoding PID/PID: " + pid + " to " + decodedPID);
-        return decodedPID;
     }
     
     @Override

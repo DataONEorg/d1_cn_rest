@@ -7,11 +7,13 @@ package org.dataone.cn.web.proxy;
 import java.io.File;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.support.*;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -64,5 +66,20 @@ public class ProxyWebApplicationContextLoader extends AbstractContextLoader {
     @Override
     protected String getResourceSuffix() {
         return "-context.xml";
+    }
+
+    @Override
+    public ApplicationContext loadContext(MergedContextConfiguration mcc) throws Exception {
+        final GenericWebApplicationContext webContext = new GenericWebApplicationContext();
+        SERVLET_CONTEXT.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webContext);
+
+        webContext.setServletContext(SERVLET_CONTEXT);
+        
+        createBeanDefinitionReader(webContext).loadBeanDefinitions(mcc.getLocations());
+        AnnotationConfigUtils.registerAnnotationConfigProcessors(webContext);
+        webContext.refresh();
+        webContext.registerShutdownHook();
+
+        return webContext;
     }
 }

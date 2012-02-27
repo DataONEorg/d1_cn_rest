@@ -52,6 +52,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.PostConstruct;
 import org.dataone.cn.rest.web.AbstractWebController;
+import org.dataone.configuration.Settings;
 
 /**
  * Returns a list of nodes that have been registered with the DataONE infrastructure.
@@ -98,13 +99,8 @@ public class NodeController extends AbstractWebController implements ServletCont
     public void init() {
         nodeReference = new NodeReference();
         nodeReference.setValue(nodeIdentifier);
+        this.constructNodeAdministrators();
 
-        String[] administrators =nodeAdministrators.split(";");
-        for (int i = 0; i < administrators.length; i++) {
-            Subject adminSubject = new Subject();
-            adminSubject.setValue(administrators[0]);
-            nodeAdminSubjects.add(adminSubject);
-        }
     }
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented {
@@ -176,6 +172,9 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (!updateNodeReference.equals(node.getIdentifier())) {
             throw new InvalidRequest("4843", "Updated Node Xml Node Reference " + updateNodeReference.getValue()
                     + " does not equal path node identifier " + node.getIdentifier().getValue());
+        }
+        if (this.hasNodeAdministratorsChanged()) {
+             this.constructNodeAdministrators();
         }
         // decide if the subject requesting an update has permission to update
         Boolean approvedAdmin = false;
@@ -348,6 +347,24 @@ public class NodeController extends AbstractWebController implements ServletCont
         return verifiedRegistration;
     }
 
+    private boolean hasNodeAdministratorsChanged() {
+        if (!nodeAdministrators.equalsIgnoreCase( Settings.getConfiguration().getString("cn.administrators"))) {
+            nodeAdministrators =  Settings.getConfiguration().getString("cn.administrators");
+            nodeAdminSubjects  = new ArrayList<Subject>();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    private void constructNodeAdministrators() {
+
+        String[] administrators =nodeAdministrators.split(";");
+        for (int i = 0; i < administrators.length; i++) {
+            Subject adminSubject = new Subject();
+            adminSubject.setValue(administrators[i]);
+            nodeAdminSubjects.add(adminSubject);
+        }
+    }
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;

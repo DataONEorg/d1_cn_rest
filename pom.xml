@@ -15,8 +15,17 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <properties>
-        <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>3.1.1.RELEASE</spring.version>
+        <hazelcast.version>1.9.4.6</hazelcast.version>
+        <d1_libclient_version>1.0.1-RC3-SNAPSHOT</d1_libclient_version>
+        <d1_portal_version>1.0.0-RC2-SNAPSHOT</d1_portal_version>
+        <d1_cn_common_version>1.0.0-RC2-SNAPSHOT</d1_cn_common_version>
+        <d1_identity_manager_version>1.0.0-RC2-SNAPSHOT</d1_identity_manager_version>
+        <d1_cn_noderegistry_version>1.0.0-RC2-SNAPSHOT</d1_cn_noderegistry_version>
+        <d1_cn_rest_proxy_version>1.0.0-RC2-SNAPSHOT</d1_cn_rest_proxy_version>
     </properties>
     <build>
         <finalName>cn</finalName>
@@ -113,41 +122,41 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
             <type>jar</type>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${spring.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -212,6 +221,76 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.jibx</groupId>
+            <artifactId>jibx-run</artifactId>
+            <version>1.2.3</version>
+            <optional>false</optional>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+        	<groupId>com.hazelcast</groupId>
+        	<artifactId>hazelcast</artifactId>
+        	<version>${hazelcast.version}</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
+        <dependency>
+        	<groupId>com.hazelcast</groupId>
+        	<artifactId>hazelcast-spring</artifactId>
+        	<version>${hazelcast.version}</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
+        <!--  and we have dependencies on re-usable projects that we maintain -->
+
+        <dependency>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_libclient_java</artifactId>
+            <version>${d1_libclient_version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_identity_manager</artifactId>
+            <version>${d1_identity_manager_version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_portal</artifactId>
+            <version>${d1_portal_version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_cn_rest_proxy</artifactId>
+            <version>${d1_cn_rest_proxy_version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_cn_noderegistry</artifactId>
+            <version>${d1_cn_noderegistry_version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_cn_common</artifactId>
+            <version>${d1_cn_common_version}</version>
+            <type>jar</type>
+        </dependency>
+
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.springframework.ldap</groupId>
+            <artifactId>spring-ldap-core</artifactId>
+            <version>1.3.1.RELEASE</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
@@ -223,66 +302,6 @@
             <artifactId>bcmail-jdk16</artifactId>
             <version>1.46</version>
             <scope>test</scope>
-        </dependency>
-        <!--  and we have dependencies on re-usable projects that we maintain -->
-
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_libclient_java</artifactId>
-            <version>1.0.1-RC3-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_identity_manager</artifactId>
-            <version>1.0.0-RC2-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_portal</artifactId>
-            <version>1.0.0-RC2-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_cn_rest_proxy</artifactId>
-            <version>1.0.0-RC2-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_cn_noderegistry</artifactId>
-            <version>1.0.0-RC2-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_cn_common</artifactId>
-            <version>1.0.0-RC2-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.ldap</groupId>
-            <artifactId>spring-ldap-core</artifactId>
-            <version>1.3.1.RELEASE</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>com.hazelcast</groupId>
-        	<artifactId>hazelcast</artifactId>
-        	<version>1.9.4.6</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
-        </dependency>
-        <dependency>
-        	<groupId>com.hazelcast</groupId>
-        	<artifactId>hazelcast-spring</artifactId>
-        	<version>1.9.4.6</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
         </dependency>
     </dependencies>
     <profiles>
