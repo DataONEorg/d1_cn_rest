@@ -20,6 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.1.1.RELEASE</spring.version>
         <hazelcast.version>1.9.4.6</hazelcast.version>
+        <bouncycastle.version>1.46</bouncycastle.version>
         <d1_libclient_version>1.0.1-RC3-SNAPSHOT</d1_libclient_version>
         <d1_portal_version>1.0.0-RC2-SNAPSHOT</d1_portal_version>
         <d1_cn_common_version>1.0.0-RC2-SNAPSHOT</d1_cn_common_version>
@@ -294,13 +295,13 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
-            <version>1.46</version>
+            <version>${bouncycastle.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk16</artifactId>
-            <version>1.46</version>
+            <version>${bouncycastle.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
