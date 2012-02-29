@@ -32,7 +32,7 @@
 					<td>
 						<a>
 							<!-- TODO: evaluate relative resolve href -->
-							<xsl:attribute name="href">../v1/resolve/<xsl:value-of select="identifier"/></xsl:attribute>
+							<xsl:attribute name="href">/cn/v1/resolve/<xsl:value-of select="identifier"/></xsl:attribute>
 							<xsl:attribute name="target">_blank</xsl:attribute>							
 							<xsl:value-of select="identifier"/>
 						</a>
