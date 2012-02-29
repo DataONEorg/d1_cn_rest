@@ -308,7 +308,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
-        <url-pattern>/v1/checksum/</url-pattern>
+        <url-pattern>/v1/checksum</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
