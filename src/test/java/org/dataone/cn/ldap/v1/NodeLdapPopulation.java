@@ -156,6 +156,59 @@ public class NodeLdapPopulation {
             ldapTemplate.bind(dnService, context, null);
         }
         testNodeList.add(sqR1MNNode);
+        Node sq1shMNNode = new Node();
+        String sq1shId = "urn:node:sq1sh";
+        NodeReference sq1shNodeReference = new NodeReference();
+        sq1shNodeReference.setValue(sq1shId);
+        sq1shMNNode.setIdentifier(sq1shNodeReference);
+        sq1shMNNode.setName("squish");
+        sq1shMNNode.setDescription("this is a squish test");
+        sq1shMNNode.setBaseURL("https://my.squish.test/mn");
+        sq1shMNNode.setReplicate(false);
+        sq1shMNNode.setSynchronize(false);
+        sq1shMNNode.setState(NodeState.DOWN);
+        sq1shMNNode.setType(NodeType.MN);
+        Subject sq1shSubject = new Subject();
+        sq1shSubject.setValue("cn="+sq1shId+",dc=dataone,dc=org");
+        sq1shMNNode.addSubject(sq1shSubject);
+
+        Subject sq1shContactSubject = new Subject();
+        sq1shContactSubject.setValue("CN=Frankenstein,DC=cilogon,DC=org");
+        sq1shMNNode.addContactSubject(sq1shContactSubject);
+
+        Services sq1shservices = new Services();
+        Service sq1shcoreService = new Service();
+        sq1shcoreService.setName("MNCore");
+        sq1shcoreService.setVersion("v1");
+        sq1shcoreService.setAvailable(Boolean.TRUE);
+
+        Service sq1shreadService = new Service();
+        sq1shreadService.setName("MNRead");
+        sq1shreadService.setVersion("v1");
+        sq1shreadService.setAvailable(Boolean.TRUE);
+        sq1shservices.addService(sq1shcoreService);
+        sq1shservices.addService(sq1shreadService);
+        sq1shMNNode.setServices(sq1shservices);
+
+        // because we use a base DN, only need to supply the RDN
+        dn = new DistinguishedName();
+        dn.add("dc","dataone");
+        dn.add("cn", sq1shId);
+
+        context = new DirContextAdapter(dn);
+        mapNodeToContext(sq1shMNNode, context);
+        ldapTemplate.bind(dn, context, null);
+        for (Service service : sq1shMNNode.getServices().getServiceList()) {
+            String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+            DistinguishedName dnService = new DistinguishedName();
+            dnService.add("dc","dataone");
+            dnService.add("cn", sq1shId);
+            dnService.add("d1NodeServiceId", d1NodeServiceId);
+            context = new DirContextAdapter(dnService);
+            mapServiceToContext(service, sq1shId, d1NodeServiceId, context);
+            ldapTemplate.bind(dnService, context, null);
+        }
+        testNodeList.add(sq1shMNNode);
     }
 
     protected void mapNodeToContext(Node node, DirContextOperations context) {

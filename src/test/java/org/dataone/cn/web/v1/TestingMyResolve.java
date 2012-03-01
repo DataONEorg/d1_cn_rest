@@ -310,32 +310,6 @@ public class TestingMyResolve {
     }
 
     @Test
-    public void testSystemMetadataError() throws FileNotFoundException {
-
-        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml");
-
-        String content = new String(responseWrapper.getBuffer());
-        if (debuggingOutput) {
-            System.out.println("testSystemMetadataError");
-            System.out.println("===== output =====");
-            System.out.print(content.toString());
-            System.out.print("http response code = " + responseWrapper.getStatus());
-            System.out.println("------------------");
-        }
-        // examine status code
-        int httpStatus = responseWrapper.getStatus();
-        assertTrue("error response status is 500", httpStatus == 500);
-
-        // examine contents of the response
-        assertTrue("response is non-null-(1)", responseWrapper.getBufferSize() > 0);
-        assertTrue("response is non-null-(2)", responseWrapper.getBuffer().length > 0);
-
-        assertThat("systemMetadata unregistered node error produced-1", content, containsString("errorCode=\"500\""));
-        assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4150\""));
-        assertThat("systemMetadata unregistered node error produced-3", content, containsString("unregistered Node identifier"));
-    }
-
-    @Test
     public void testSystemMetadataInvalidVsSchema() throws FileNotFoundException {
 
         BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-malformedXML.xml");
@@ -406,7 +380,42 @@ public class TestingMyResolve {
         assertThat("systemMetadata unregistered node error produced-2", content, containsString("detailCode=\"4140\""));
         assertThat("systemMetadata unregistered node error produced-3", content, containsString("The requested object is not presently available"));
     }
+    /*
+     * Test the situation where a node is reported to have a replica
+     * but no record of that node exists
+     * Bug #2423: cn.resolve() chokes on bad nodeIdentifiers
+     */
+    @Test
+    public void testSystemMetadataSpuriousNodeEntry() throws FileNotFoundException {
 
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-unregisteredNode.xml");
+
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
+        assertTrue("status must be 303", responseWrapper.getStatus() == responseWrapper.SC_SEE_OTHER);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
+        String content = new String(responseWrapper.getBuffer());
+        assertFalse("There should be not be a node entry, but there is!", content.contains("urn:node:sqrf"));
+        assertTrue("There should be a node entry, but there is not!", content.contains("urn:node:sq1d"));
+    }
+    /*
+     * Test the situation where a node state is not UP
+     * 
+     * Bug #2423: cn.resolve() chokes on bad nodeIdentifiers
+     */
+    @Test
+    public void testSystemMetadataDisabledNodeReplica() throws FileNotFoundException {
+
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter("systemMetadata-disabledReplicaNodeIdentifier.xml");
+
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
+        assertTrue("status must be 303", responseWrapper.getStatus() == responseWrapper.SC_SEE_OTHER);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
+        String content = new String(responseWrapper.getBuffer());
+        assertFalse("There should be not be a node entry, but there is!", content.contains("urn:node:sq1sh"));
+        assertTrue("There should be a node entry, but there is not!", content.contains("urn:node:sq1d"));
+    }
     @Test
     public void testLookupBaseURL() {
 

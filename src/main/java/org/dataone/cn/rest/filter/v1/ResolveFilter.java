@@ -40,6 +40,7 @@ import org.dataone.service.types.v1.ReplicationStatus;
 import org.dataone.service.types.v1.SystemMetadata;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.types.v1.Node;
+import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v1.Service;
 import org.dataone.service.types.v1.util.NodelistUtil;
@@ -152,7 +153,7 @@ public class ResolveFilter implements Filter {
 
                 ArrayList<String> supportedVersions = new ArrayList<String>();
                 Services services = node.getServices();
-                if (services != null) {
+                if (node.getState().equals(NodeState.UP) && (services != null)) {
                     for (Service service : services.getServiceList()) {
                         if (service.getName().contains("Read") && service.getAvailable()) {
                             supportedVersions.add(service.getVersion());
@@ -406,8 +407,7 @@ public class ResolveFilter implements Filter {
                 String baseURLString = lookupBaseURLbyNode(nodeReference.getValue());
                 String versionedbaseURL = lookupVersionedBaseURLbyNode(nodeReference.getValue());
                 if ((baseURLString == null) || (versionedbaseURL == null)) {
-                    throw new ServiceFailure("4150", "unregistered Node identifier ("
-                            + nodeReference.getValue() + ") in systemmetadata document for object: " + idString);
+                    continue;
                 }
                 // the id is put into the path portion of the url, so encoding thusly ;)
                 String encodedIdString = EncodingUtilities.encodeUrlPathSegment(idString);
