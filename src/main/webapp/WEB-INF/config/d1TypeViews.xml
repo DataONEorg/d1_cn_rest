@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-
+<spring:beans xmlns:spring="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:p="http://www.springframework.org/schema/p"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:oxm="http://www.springframework.org/schema/oxm"
        xmlns:aop="http://www.springframework.org/schema/aop"
@@ -15,98 +13,98 @@
 
 
 	<!-- for marshalling jibx objects including a stylesheet processing directive -->
-    <bean id="stylesheetTypeMarshaller" class="org.dataone.cn.rest.util.StylesheetTypeMarshaller">
-        <property name="stylesheet" value="/cn/xslt/dataone.types.v1.xsl" />
-    </bean>
+    <spring:bean id="stylesheetTypeMarshaller" class="org.dataone.cn.rest.util.StylesheetTypeMarshaller">
+        <spring:property name="stylesheet" value="/cn/xslt/dataone.types.v1.xsl" />
+    </spring:bean>
 
-    <bean id="xmlIdentifierViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.Identifier"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+    <spring:bean id="xmlIdentifierViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.Identifier"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxIdentifierMarshallerResponse" target-class="org.dataone.service.types.v1.Identifier"/>
-        </property>
-    </bean>
+        </spring:property>
+    </spring:bean>
     
-    <bean id="xmlMetaViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.SystemMetadata"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+    <spring:bean id="xmlMetaViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.SystemMetadata"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxMarshallerSystemMetadataResponse" target-class="org.dataone.service.types.v1.SystemMetadata"/>
-        </property>
-    </bean>
+        </spring:property>
+    </spring:bean>
 
-    <bean id="xmlObjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.ObjectList"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller" ref="stylesheetTypeMarshaller"/>
+    <spring:bean id="xmlObjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.ObjectList"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller" ref="stylesheetTypeMarshaller"/>
         <!-- 
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxObjectListMarshallerResponse" target-class="org.dataone.service.types.v1.ObjectList"/>
         </property>
         -->
-    </bean>
-    <bean id="xmlNodeListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.NodeList"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller" ref="stylesheetTypeMarshaller"/>
+    </spring:bean>
+    <spring:bean id="xmlNodeListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.NodeList"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller" ref="stylesheetTypeMarshaller"/>
         <!-- 
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxNodeListMarshallerResponse" target-class="org.dataone.service.types.v1.NodeList"/>
         </property>
          -->
-    </bean>
-    <bean id="xmlNodeViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.Node"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller" ref="stylesheetTypeMarshaller"/>
+    </spring:bean>
+    <spring:bean id="xmlNodeViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.Node"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller" ref="stylesheetTypeMarshaller"/>
         <!--
         <property name="marshaller">
             <oxm:jibx-marshaller id="jibxNodeMarshallerResponse" target-class="org.dataone.service.types.v1.Node"/>
         </property>
         -->
-    </bean>
-    <bean id="xmlNodeReferenceViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+    </spring:bean>
+    <spring:bean id="xmlNodeReferenceViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxNodeReferenceMarshallerResponse" target-class="org.dataone.service.types.v1.NodeReference"/>
-        </property>
-    </bean>
-    <bean id="xmlSubjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.SubjectList"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+        </spring:property>
+    </spring:bean>
+    <spring:bean id="xmlSubjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.SubjectList"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxSubjectListMarshallerResponse" target-class="org.dataone.service.types.v1.SubjectList"/>
-        </property>
-    </bean>
-    <bean id="xmlSubjectInfoViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.SubjectInfo"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+        </spring:property>
+    </spring:bean>
+    <spring:bean id="xmlSubjectInfoViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.SubjectInfo"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxSubjectInfoMarshallerResponse" target-class="org.dataone.service.types.v1.SubjectInfo"/>
-        </property>
-    </bean>
+        </spring:property>
+    </spring:bean>
 
-    <bean id="xmlSubjectViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.Subject"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+    <spring:bean id="xmlSubjectViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.Subject"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxSubjectViewMarshallerResponse" target-class="org.dataone.service.types.v1.Subject"/>
-        </property>
-    </bean>
-<bean id="dataOneExceptionMarshaller" class="org.dataone.cn.rest.exceptions.DataOneExceptionMarshaller" />
+        </spring:property>
+    </spring:bean>
+<spring:bean id="dataOneExceptionMarshaller" class="org.dataone.cn.rest.exceptions.DataOneExceptionMarshaller" />
 
-    <bean id="xmlBaseExceptionViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.exception.BaseException"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller" ref="dataOneExceptionMarshaller" />
-    </bean>
-    <bean id="xmlChecksumAlgorithmListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
-        <property name="modelKey" value="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
-        <property name="contentType" value="text/xml" />
-        <property name="marshaller">
+    <spring:bean id="xmlBaseExceptionViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.exception.BaseException"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller" ref="dataOneExceptionMarshaller" />
+    </spring:bean>
+    <spring:bean id="xmlChecksumAlgorithmListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
             <oxm:jibx-marshaller id="jibxChecksumAlgorithmListMarshallerResponse" target-class="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
-        </property>
-    </bean>
+        </spring:property>
+    </spring:bean>
 
-</beans>
+</spring:beans>

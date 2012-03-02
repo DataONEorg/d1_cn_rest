@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-
+<spring:beans xmlns:spring="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:oxm="http://www.springframework.org/schema/oxm"
 	xmlns:aop="http://www.springframework.org/schema/aop"
@@ -13,38 +11,38 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-    <bean id="fileUploadResource" class="org.springframework.core.io.FileSystemResource" >
-        <constructor-arg type="java.lang.String" value="/tmp"/>
-    </bean>
+    <spring:bean id="fileUploadResource" class="org.springframework.core.io.FileSystemResource" >
+        <spring:constructor-arg type="java.lang.String" value="/tmp"/>
+    </spring:bean>
    <!-- one of the properties available; the maximum file size in bytes -->
     <!-- Configure the multipart resolver-->
-    <bean id="multipartResolver" class="org.dataone.cn.rest.web.DataoneMultipartResolver">
-        <property name="maxUploadSize" value="10000000000"/>
-        <property name="maxInMemorySize" value="10000"/>
-        <property name="uploadTempDir" ref="fileUploadResource"/>
-    </bean>
+    <spring:bean id="multipartResolver" class="org.dataone.cn.rest.web.DataoneMultipartResolver">
+        <spring:property name="maxUploadSize" value="10000000000"/>
+        <spring:property name="maxInMemorySize" value="10000"/>
+        <spring:property name="uploadTempDir" ref="fileUploadResource"/>
+    </spring:bean>
 
     <!-- configure to match the LDAP server configuration -->
-    <bean name="reserveIdentifierService" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
-        <property name="server" value="ldap://localhost:389"/>
-        <property name="password" value="password"/>
-    </bean>
+    <spring:bean name="reserveIdentifierService" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
+        <spring:property name="server" value="ldap://localhost:389"/>
+        <spring:property name="password" value="password"/>
+    </spring:bean>
     
-    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-        <property name="alwaysUseFullPath" value="true"/>
-        <property name="urlDecode" value="false"/>
-    </bean>
+    <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <spring:property name="alwaysUseFullPath" value="true"/>
+        <spring:property name="urlDecode" value="false"/>
+    </spring:bean>
     
-    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-        <property name="alwaysUseFullPath" value="true"/>
-        <property name="urlDecode" value="false"/>
-        <property name="useDefaultSuffixPattern" value="false" />
-    </bean>
-    <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="alwaysUseFullPath" value="true"/>
+    <spring:bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+        <spring:property name="alwaysUseFullPath" value="true"/>
+        <spring:property name="urlDecode" value="false"/>
+        <spring:property name="useDefaultSuffixPattern" value="false" />
+    </spring:bean>
+    <spring:bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <spring:property name="alwaysUseFullPath" value="true"/>
     <!-- other properties -->
-    </bean>
+    </spring:bean>
     
     <context:component-scan base-package="org.dataone.cn.rest.web.identifier"  />
 
-</beans>
+</spring:beans>

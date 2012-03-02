@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-
+<spring:beans
+        xmlns:spring="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:oxm="http://www.springframework.org/schema/oxm"
 	xmlns:aop="http://www.springframework.org/schema/aop"
@@ -12,12 +11,12 @@
 		http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
-   <bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-      <property name="location">
-         <value>file:/etc/dataone/node.properties</value>
-      </property>
-   </bean>
+   <spring:bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <spring:property name="location">
+         <spring:value>file:/etc/dataone/node.properties</spring:value>
+      </spring:property>
+   </spring:bean>
     <context:component-scan base-package="org.dataone.cn.rest.web.base"  />
 
 
-</beans>
+</spring:beans>

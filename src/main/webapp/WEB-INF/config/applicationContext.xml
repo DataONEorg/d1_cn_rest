@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-
+<spring:beans xmlns:spring="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:context="http://www.springframework.org/schema/context"
@@ -14,40 +13,40 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 
-    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver" p:order="1" />
+    <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver" p:order="1" />
 <!--    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver" p:order="2" p:defaultErrorView="uncaughtException"> -->
 
-    <bean id="mylog"
+    <spring:bean id="mylog"
     class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
-        <property name="logName" value="log"/>
-    </bean>
+        <spring:property name="logName" value="log"/>
+    </spring:bean>
 
-    <bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
-        <constructor-arg ref="hzConfig" />
-        <qualifier value="hzClientConfiguration" />
-    </bean>
-    <bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
-        <constructor-arg value="org/dataone/cn/rest/resources/hazelcastClientConf.xml" />
-        <qualifier value="hzConfig" />
-    </bean>
+    <spring:bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
+        <spring:constructor-arg ref="hzConfig" />
+        <spring:qualifier value="hzClientConfiguration" />
+    </spring:bean>
+    <spring:bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
+        <spring:constructor-arg value="org/dataone/cn/rest/resources/hazelcastClientConf.xml" />
+        <spring:qualifier value="hzConfig" />
+    </spring:bean>
 
 
-    <bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
-        <qualifier value="cnNodeRegistry"/>
-    </bean>
+    <spring:bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
+        <spring:qualifier value="cnNodeRegistry"/>
+    </spring:bean>
 
     <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
     
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" />
 
-    <bean id="ResolveFilterV1" class="org.dataone.cn.rest.filter.v1.ResolveFilter">
-        <property name="nodelistRefreshIntervalSeconds" value="180" />
-    </bean>
+    <spring:bean id="ResolveFilterV1" class="org.dataone.cn.rest.filter.v1.ResolveFilter">
+        <spring:property name="nodelistRefreshIntervalSeconds" value="180" />
+    </spring:bean>
 
 
-    <bean id="xmlViewResolverIdentity" class="org.springframework.web.servlet.view.XmlViewResolver">
-        <property name="order" value="1"/>
-        <property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
-    </bean>
+    <spring:bean id="xmlViewResolverIdentity" class="org.springframework.web.servlet.view.XmlViewResolver">
+        <spring:property name="order" value="1"/>
+        <spring:property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
+    </spring:bean>
 
-</beans>
+</spring:beans>
