@@ -5,13 +5,13 @@
     <groupId>org.dataone.cn</groupId>
     <artifactId>d1_cn_rest</artifactId>
     <packaging>war</packaging>
-    <version>1.0.0-RC3-SNAPSHOT</version>
+    <version>1.0.0-RC4-SNAPSHOT</version>
     <name>DataONE_Cn_Rest</name>
     <url>http://dataone.org</url>
     <parent>
         <groupId>org.dataone</groupId>
         <artifactId>d1_cn_service</artifactId>
-        <version>1.0.0-RC3-SNAPSHOT</version>
+        <version>1.0.0-RC4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <properties>
@@ -22,7 +22,7 @@
         <hazelcast.version>1.9.4.6</hazelcast.version>
         <bouncycastle.version>1.46</bouncycastle.version>
         <d1_libclient_version>1.0.1-RC4-SNAPSHOT</d1_libclient_version>
-        <d1_portal_version>1.0.0-RC3</d1_portal_version>
+        <d1_portal_version>1.0.0-RC4-SNAPSHOT</d1_portal_version>
         <d1_cn_common_version>1.0.0-RC3-SNAPSHOT</d1_cn_common_version>
         <d1_identity_manager_version>1.0.0-RC3-SNAPSHOT</d1_identity_manager_version>
         <d1_cn_noderegistry_version>1.0.0-RC3-SNAPSHOT</d1_cn_noderegistry_version>
