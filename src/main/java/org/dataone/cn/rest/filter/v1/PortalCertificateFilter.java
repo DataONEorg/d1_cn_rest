@@ -57,7 +57,6 @@ public class PortalCertificateFilter implements Filter {
             // and because this filter does not know how each rest endpoint
             // handles InvalidTokens.
             logger.error("Invalid Token in the PortalCertificateFilter. Passing to endpoint " + httpRequest.getRequestURI() + " for triage");
-            session = new Session();
         }
     	if (session == null) {
 	    	// try to get the certificate from the portal instead
