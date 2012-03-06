@@ -52,10 +52,8 @@ public class PortalCertificateFilter implements Filter {
             // If everything beyond this filter has been implemented correctly,
             // then the InvalidToken will be caught by the rest endpoint whose job
             // it is to validate any certificate it finds on the request.
-            // Sooo... set the session to something bogus for now
-            // because PortalCertificateManager shouldn't know what to do
-            // and because this filter does not know how each rest endpoint
-            // handles InvalidTokens.
+            // But pass it on the PortalCertificateManager in case that component
+            // knows what to do
             logger.error("Invalid Token in the PortalCertificateFilter. Passing to endpoint " + httpRequest.getRequestURI() + " for triage");
         }
     	if (session == null) {
