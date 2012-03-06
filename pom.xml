@@ -26,7 +26,7 @@
         <d1_cn_common_version>1.0.0-RC3-SNAPSHOT</d1_cn_common_version>
         <d1_identity_manager_version>1.0.0-RC3-SNAPSHOT</d1_identity_manager_version>
         <d1_cn_noderegistry_version>1.0.0-RC3-SNAPSHOT</d1_cn_noderegistry_version>
-        <d1_cn_rest_proxy_version>1.0.0-RC3-SNAPSHOT</d1_cn_rest_proxy_version>
+        <d1_cn_rest_proxy_version>1.0.0-RC4-SNAPSHOT</d1_cn_rest_proxy_version>
     </properties>
     <build>
         <finalName>cn</finalName>
