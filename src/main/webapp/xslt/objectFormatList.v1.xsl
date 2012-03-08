@@ -12,7 +12,14 @@
 			(displaying 
 			<xsl:value-of select="*[local-name()='objectFormatList']/@start"/>
 			<xsl:text>-</xsl:text>
-			<xsl:value-of select="*[local-name()='objectFormatList']/@count"/> 
+			<xsl:choose>
+				<xsl:when test="*[local-name()='objectFormatList']/@count > 0">
+					<xsl:value-of select="*[local-name()='objectFormatList']/@start + *[local-name()='objectFormatList']/@count - 1"/> 
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="*[local-name()='objectFormatList']/@start + *[local-name()='objectFormatList']/@count"/> 
+				</xsl:otherwise>
+			</xsl:choose>
 			of 
 			<xsl:value-of select="*[local-name()='objectFormatList']/@total"/>
 			total).
