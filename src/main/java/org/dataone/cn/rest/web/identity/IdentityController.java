@@ -365,7 +365,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.PUT)
+    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/**", method = RequestMethod.PUT)
     public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
