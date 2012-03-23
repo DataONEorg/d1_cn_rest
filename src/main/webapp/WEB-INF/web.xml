@@ -32,16 +32,7 @@
         <param-name>log4jConfigLocation</param-name>
         <param-value>/WEB-INF/config/log4j.properties</param-value>
     </context-param>
-    <!--
-    <filter>
-        <filter-name>PathRecodingFilter</filter-name>
-        <filter-class>org.dataone.cn.rest.filter.PathRecodingFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>PathRecodingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    -->
+
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -58,6 +49,7 @@
         <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
     <filter>
         <filter-name>PortalCertificateFilterV1</filter-name>
         <filter-class>org.dataone.cn.rest.filter.v1.PortalCertificateFilter</filter-class>
@@ -66,6 +58,7 @@
         <filter-name>PortalCertificateFilterV1</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
     <filter>
         <filter-name>ResolveFilterV1</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -78,6 +71,7 @@
         <filter-name>ResolveFilterV1</filter-name>
         <url-pattern>/v1/resolve/*</url-pattern>
     </filter-mapping>
+
 
     <servlet>
         <servlet-name>metacatCNCore</servlet-name>
@@ -100,33 +94,13 @@
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/obsoletedBy/*</url-pattern>
     </servlet-mapping>
-<!-- Test Exclucing this
-    <servlet>
-        <servlet-name>metacatSearch</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>metacatSearch</servlet-name>
-        <url-pattern>/v1/metacat/*</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>mercurySearch</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>mercurySearch</servlet-name>
-        <url-pattern>/v1/mercury/*</url-pattern>
-    </servlet-mapping>
-    -->
+
+
     <servlet>
         <servlet-name>metacatCNRead</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
-
-    <!-- Test Including this -->
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v1/object</url-pattern>
@@ -135,7 +109,6 @@
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v1/object/</url-pattern>
     </servlet-mapping>
-    <!-- End of Tests -->
     <servlet-mapping>
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v1/object/*</url-pattern>
@@ -152,10 +125,31 @@
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v1/checksum/*</url-pattern>
     </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <url-pattern>/v1/owner/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <url-pattern>/v1/isAuthorized/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <url-pattern>/v1/accessRules/*</url-pattern>
+    </servlet-mapping>
+
+
     <servlet>
         <servlet-name>metacatCNReplication</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
+        <load-on-startup>4</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>metacatCNReplication</servlet-name>
@@ -177,29 +171,13 @@
         <servlet-name>metacatCNReplication</servlet-name>
         <url-pattern>/v1/removeReplicaMetadata/*</url-pattern>
     </servlet-mapping>
-<!--
-    <servlet>
-        <servlet-name>notify</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-         <load-on-startup>3</load-on-startup>
-    </servlet>
 
-    <servlet-mapping>
-        <servlet-name>notify</servlet-name>
-        <url-pattern>/notify</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>notify</servlet-name>
-        <url-pattern>/notify/</url-pattern>
-    </servlet-mapping>
--->
 
     <servlet>
         <servlet-name>cnNode</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
+        <load-on-startup>5</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>cnNode</servlet-name>
         <url-pattern>/v1/node</url-pattern>
@@ -212,13 +190,13 @@
         <servlet-name>cnNode</servlet-name>
         <url-pattern>/v1/node/*</url-pattern>
     </servlet-mapping>
-    
+
+
     <servlet>
         <servlet-name>identity</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>5</load-on-startup>
-    </servlet>
-    
+        <load-on-startup>6</load-on-startup>
+    </servlet> 
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
         <url-pattern>/v1/accounts</url-pattern>
@@ -231,7 +209,6 @@
         <servlet-name>identity</servlet-name>
         <url-pattern>/v1/accounts/*</url-pattern>
     </servlet-mapping>
-    
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
         <url-pattern>/v1/groups</url-pattern>
@@ -240,11 +217,12 @@
         <servlet-name>identity</servlet-name>
         <url-pattern>/v1/groups/</url-pattern>
     </servlet-mapping>
-    
+
+
     <servlet>
         <servlet-name>identifier</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>6</load-on-startup>
+        <load-on-startup>7</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>identifier</servlet-name>
@@ -266,20 +244,23 @@
         <servlet-name>identifier</servlet-name>
         <url-pattern>/v1/generate/</url-pattern>
     </servlet-mapping>
- 
+
+
     <servlet>
         <servlet-name>exception</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>7</load-on-startup>
+        <load-on-startup>8</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>exception</servlet-name>
         <url-pattern>/exception/*</url-pattern>
     </servlet-mapping>
+
+
     <servlet>
         <servlet-name>xslt</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>8</load-on-startup>
+        <load-on-startup>9</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>xslt</servlet-name>
@@ -289,10 +270,12 @@
         <servlet-name>xslt</servlet-name>
         <url-pattern>/xslt/</url-pattern>
     </servlet-mapping>
+
+
     <servlet>
         <servlet-name>cnBase</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>9</load-on-startup>
+        <load-on-startup>10</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
@@ -314,6 +297,8 @@
         <servlet-name>cnBase</servlet-name>
         <url-pattern>/v1/checksum/</url-pattern>
     </servlet-mapping>
+
+    
     <error-page>
         <error-code>400</error-code>
         <location>/exception/400</location>

@@ -30,15 +30,7 @@
     </properties>
     <build>
         <finalName>cn</finalName>
-        <defaultGoal>package</defaultGoal>
-        <directory>target</directory>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
-        <outputDirectory>target/main-classes</outputDirectory>
-        <testOutputDirectory>target/test-classes</testOutputDirectory>
-        <filters>
-            <filter>src/main/filters/production.properties</filter>
-        </filters>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
