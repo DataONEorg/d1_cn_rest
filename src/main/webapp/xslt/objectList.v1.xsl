@@ -10,16 +10,16 @@
 		<p>
 			Registered DataONE objects 
 			(displaying 
-			<xsl:value-of select="*[local-name()='objectList']/@start"/>
-			<xsl:text>-</xsl:text>
 			<xsl:choose>
 				<xsl:when test="*[local-name()='objectList']/@count > 0">
-					<xsl:value-of select="*[local-name()='objectList']/@start + *[local-name()='objectList']/@count - 1"/> 
+					<xsl:value-of select="*[local-name()='objectList']/@start + 1"/>
 				</xsl:when>
 				<xsl:otherwise>
-					<xsl:value-of select="*[local-name()='objectList']/@start + *[local-name()='objectList']/@count"/> 
+					<xsl:value-of select="*[local-name()='objectList']/@start"/>
 				</xsl:otherwise>
-			</xsl:choose>	
+			</xsl:choose>
+			<xsl:text>-</xsl:text>
+			<xsl:value-of select="*[local-name()='objectList']/@start + *[local-name()='objectList']/@count"/> 	
 			of 
 			<xsl:value-of select="*[local-name()='objectList']/@total"/>
 			total).
