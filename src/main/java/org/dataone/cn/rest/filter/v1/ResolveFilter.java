@@ -308,7 +308,7 @@ public class ResolveFilter implements Filter {
             try {
                 TreeMap<String, String> trace_information = new TreeMap<String, String>();
 
-                BaseException d1Exception = responseWrapper.getD1Exception();
+                BaseException d1be = responseWrapper.getD1Exception();
                 /*
                  * Check for these exceptions from getSystemMetadata and re-raise them as resolve exceptions
                  * Exceptions.InvalidToken – (errorCode=401, detailCode=1050)
@@ -316,29 +316,39 @@ public class ResolveFilter implements Filter {
                  * Exceptions.ServiceFailure – (errorCode=500, detailCode=1090)
                  * Exceptions.NotAuthorized – (errorCode=401, detailCode=1040)
                  * Exceptions.NotFound – (errorCode=404, detailCode=1060)
-                 * Exceptions.InvalidRequest – (errorCode=400, detailCode=1080)
                  */
 
-                for (String key : d1Exception.getTraceKeySet()) {
-                    trace_information.put(key, d1Exception.getTraceDetail(key));
+                for (String key : d1be.getTraceKeySet()) {
+                    trace_information.put(key, d1be.getTraceDetail(key));
                 }
 
-                if (d1Exception.getDetail_code().equalsIgnoreCase("1050")) {
-                    throw new InvalidToken("4130", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1041")) {
-                    throw new NotImplemented("4131", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1090")) {
-                    throw new ServiceFailure("4150", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1040")) {
-                    throw new NotAuthorized("4120", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1060")) {
-                    throw new NotFound("4140", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1800")) {
-                    throw new NotFound("4140", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
-                } else if (d1Exception.getDetail_code().equalsIgnoreCase("1080")) {
-                    throw new InvalidRequest("4132", "getSystemMetadata failed:" + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                String augmentedDescription = String.format("getSystemMetadata failed: %s - %s: %s",
+                		d1be.getClass().getSimpleName(),
+                		d1be.getDetail_code(),
+                		d1be.getDescription());
+                
+                if (d1be instanceof InvalidToken) {
+                    throw new InvalidToken("4130", augmentedDescription, d1be.getPid(), trace_information);
+                
+                } else if (d1be instanceof NotImplemented) {
+                    throw new NotImplemented("4131", augmentedDescription, d1be.getPid(), trace_information);
+                
+                } else if (d1be instanceof ServiceFailure) {
+                    throw new ServiceFailure("4150", augmentedDescription, d1be.getPid(), trace_information);
+                
+                } else if (d1be instanceof NotAuthorized) {
+                    throw new NotAuthorized("4120", augmentedDescription, d1be.getPid(), trace_information);
+                
+                } else if (d1be instanceof NotFound) {
+                    throw new NotFound("4140", augmentedDescription, d1be.getPid(), trace_information);
+                
                 } else {
-                    throw new ServiceFailure("4150", "Unrecognized getSystemMetadata failure: " + d1Exception.getDescription(), d1Exception.getPid(), trace_information);
+                    throw new ServiceFailure("4150", "Unrecognized getSystemMetadata failure: " + 
+                    		String.format("%s - %s: %s", 
+                    				d1be.getClass().getSimpleName(),
+                    				d1be.getDetail_code(),
+                    				d1be.getDescription()),
+                    		d1be.getPid(), trace_information);
                 }
             } catch (IllegalStateException ex) {
                 throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
