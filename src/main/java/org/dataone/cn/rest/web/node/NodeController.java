@@ -143,7 +143,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     }
 
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
-    public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented {
+    public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
         Session session = CertificateManager.getInstance().getSession(fileRequest);
         if (session == null) {
             throw new NotAuthorized("4821", "Need a valid certificate before request can be processed");
@@ -153,12 +153,19 @@ public class NodeController extends AbstractWebController implements ServletCont
         NodeReference updateNodeReference = new NodeReference();
         updateNodeReference.setValue(nodeId);
         // don't think lazy init will not work in this case since this is the controller for a servlet
-        // so lazy init the client here. the hzStore instance (or whereever hzNodes is housed should
-        // already be initialized or BOOM goes updateNodeCapabilities)
+        // so lazy init the client here. the hz cluster  should be up before
+        // calls to update node capabilities is called (or write to LDAP will reflect the changes  )
         logger.info("group " + clientConfiguration.getGroup() + " pwd " + clientConfiguration.getPassword() + " addresses " + clientConfiguration.getLocalhost());
         if (hzclient == null) {
+            // try to work around 
+            try {
+                // TODO: try to connect to each hzClusterMember (localhost being the first one) should a connection fail
             hzclient = HazelcastClient.newHazelcastClient(clientConfiguration.getGroup(), clientConfiguration.getPassword(),
                     clientConfiguration.getLocalhost());
+            } catch (Exception e) {
+                logger.error("hzclient is not able to connect to cluster");
+                hzclient = null;
+            }
         }
 
         // retrieve the node structure being updated
@@ -222,7 +229,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         StringBuilder errorMessage = new StringBuilder();
         for (Subject contactSubject : contactSubjectList) {
             if (!(isVerifiedSubject(session, contactSubject))) {
-                errorMessage.append("Subject: " + contactSubject.getValue() + " is not verified! \n");
+                errorMessage.append("Node Contact Subject: " + contactSubject.getValue() + " is not verified! \n");
                 unVerifiedRegistration = true;
             }
             // this is an even stricter check, if any one user in a group is unverified
@@ -236,24 +243,27 @@ public class NodeController extends AbstractWebController implements ServletCont
                     List<Subject> contactGroupSubjectList = contactGroup.getHasMemberList();
                     for (Subject groupSubject : contactGroupSubjectList) {
                         if (!(isVerifiedSubject(session, contactSubject))) {
-                            errorMessage.append("Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
+                            errorMessage.append("Node Contact Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
                             unVerifiedRegistration = true;
                         }
                     }
                 }
             } catch (NotFound ex) {
-                throw new NotAuthorized("4821", contactSubject.getValue() + " is not a Registered Subject");
+                throw new NotAuthorized("4821", "Node Contact Subject: " + contactSubject.getValue() + " is not a Registered Subject, and cannot be found");
             }
         }
         if (unVerifiedRegistration) {
             throw new NotAuthorized("4821", errorMessage.toString());
         }
-
+        if (hzclient == null) {
+        nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
+        } else {
         IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
 
         NodeReference nodeReference = node.getIdentifier();
 
-        hzNodes.put(nodeReference, node);
+        hzNodes.put(updateNodeReference, node);
+        }
         return;
 
     }
@@ -366,8 +376,10 @@ public class NodeController extends AbstractWebController implements ServletCont
     }
 
     private boolean hasNodeAdministratorsChanged() {
+        logger.info(Settings.getConfiguration().getString("cn.administrators"));
         if (!nodeAdministrators.equalsIgnoreCase( Settings.getConfiguration().getString("cn.administrators"))) {
             nodeAdministrators =  Settings.getConfiguration().getString("cn.administrators");
+            logger.info(nodeAdministrators);
             nodeAdminSubjects  = new ArrayList<Subject>();
             return true;
         } else {
@@ -378,6 +390,7 @@ public class NodeController extends AbstractWebController implements ServletCont
 
         String[] administrators =nodeAdministrators.split(";");
         for (int i = 0; i < administrators.length; i++) {
+            logger.info(administrators[i]);
             Subject adminSubject = new Subject();
             adminSubject.setValue(administrators[i]);
             nodeAdminSubjects.add(adminSubject);

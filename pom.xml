@@ -20,7 +20,7 @@
         <spring.version>3.1.1.RELEASE</spring.version>
         <hazelcast.version>1.9.4.6</hazelcast.version>
         <bouncycastle.version>1.46</bouncycastle.version>
-        <d1_libclient_version>1.0.1-RC7-SNAPSHOT</d1_libclient_version>
+        <d1_libclient_version>1.0.1-RC9-SNAPSHOT</d1_libclient_version>
         <d1_portal_version>1.0.0-RC7-SNAPSHOT</d1_portal_version>
         <d1_cn_common_version>1.0.0-RC6-SNAPSHOT</d1_cn_common_version>
         <d1_identity_manager_version>1.0.0-RC6-SNAPSHOT</d1_identity_manager_version>

@@ -94,7 +94,10 @@
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/obsoletedBy/*</url-pattern>
     </servlet-mapping>
-
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v1/archive/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>metacatCNRead</servlet-name>
