@@ -34,6 +34,14 @@
     </context-param>
 
     <filter>
+        <filter-name>CNServiceDisableFilter</filter-name>
+        <filter-class>org.dataone.cn.rest.filter.CNServiceDisableFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CNServiceDisableFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter>
         <filter-name>characterEncodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
         <init-param>
