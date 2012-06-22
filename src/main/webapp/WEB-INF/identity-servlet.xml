@@ -25,8 +25,7 @@
     
     <!-- configure to match the LDAP server configuration -->
     <spring:bean name="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
-        <spring:property name="server" value="ldap://localhost:389"/>
-        <spring:property name="password" value="password"/>
+        <spring:qualifier value="cnIdentity" />
     </spring:bean>
     
     <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">

@@ -28,8 +28,6 @@
       </spring:property>
    </spring:bean>
     <spring:bean name="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
-        <spring:property name="server" value="ldap://localhost:389"/>
-        <spring:property name="password" value="password"/>
         <spring:qualifier value="cnIdentity" />
     </spring:bean>
     <context:component-scan base-package="org.dataone.cn.rest.web.node"  />

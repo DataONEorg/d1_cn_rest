@@ -30,12 +30,6 @@
     <build>
         <finalName>cn</finalName>
 
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -45,7 +39,80 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+
+                    <execution>
+                        <id>exclude-src-resources-beforeTests</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>org/dataone/cn/**/*.*</include>
+                                    </includes>
+                                    <excludes>
+                                        <include>buildInfo/*.*</include>
+                                        <exclude>org/dataone/configuration/*.*</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>include-src-resources-afterTests</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>buildInfo/buildInfo.properties</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>**/*.*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
+        
     </build>
     <repositories>
         <repository>
@@ -222,18 +289,18 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-        	<groupId>com.hazelcast</groupId>
-        	<artifactId>hazelcast</artifactId>
-        	<version>${hazelcast.version}</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-        	<groupId>com.hazelcast</groupId>
-        	<artifactId>hazelcast-spring</artifactId>
-        	<version>${hazelcast.version}</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
         <!--  and we have dependencies on re-usable projects that we maintain -->
 
@@ -361,5 +428,11 @@
             <url>LICENSE.txt</url>
         </license>
     </licenses>
+    <scm>
+        <url>https://repository.dataone.org/software/cicore</url>
+        <connection>scm:svn:https://repository.dataone.org/software/cicore</connection>
+        <developerConnection>scm:svn:https://repository.dataone.org/software/cicore</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 </project>
 
