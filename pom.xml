@@ -29,7 +29,17 @@
     </properties>
     <build>
         <finalName>cn</finalName>
-
+        <!-- copying of resources are performed with different goal 
+        than resources:resources, maven-resources-plugin definition -->
+        <resources>
+            <resource>
+                <directory>src/main/resources/</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.*</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

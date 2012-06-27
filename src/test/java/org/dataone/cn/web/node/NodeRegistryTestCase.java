@@ -282,4 +282,47 @@ public class NodeRegistryTestCase {
             x509CertificateGenerator.cleanUpFiles();
         }
     }
+    @Test
+    public void testUpdateNodeCapabilitiesNullSubjectList() throws Exception {
+
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+        String sq1shId = "urn:node:sq1sh";
+        NodeReference sq1shNodeReference = new NodeReference();
+        sq1shNodeReference.setValue(sq1shId);
+        Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
+        Subject sq1shContactSubject = new Subject();
+        sq1shContactSubject.setValue("CN=Dracula,DC=cilogon,DC=org");
+        sq1shNode.addContactSubject(sq1shContactSubject);
+        sq1shNode.addSubject(sq1shContactSubject);
+
+        ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(sq1shNode, mnNodeOutput);
+
+        testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
+
+        MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.setMethod("PUT");
+        request.setContextPath("/Mock/node/" + sq1shId);
+        request.addFile(mockNodeFile);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        NodeReference nodeReference = null;
+        try {
+            testController.updateNodeCapabilities(request, response, sq1shId);
+            Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            log.info("sizeContactSubjectList " + sq1shUpdatedNode.sizeContactSubjectList());
+            assertTrue(sq1shUpdatedNode.sizeContactSubjectList() == 2);
+        } catch (Exception ex) {
+                ex.printStackTrace();
+                fail("Test misconfiguration " + ex);
+        } finally {
+
+            x509CertificateGenerator.cleanUpFiles();
+        }
+    }
 }

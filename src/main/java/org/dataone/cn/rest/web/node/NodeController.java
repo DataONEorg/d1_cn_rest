@@ -207,12 +207,14 @@ public class NodeController extends AbstractWebController implements ServletCont
         logger.debug("Certificate has subject " + clientCertSubject.getValue());
         // is the subject equal to the value found in the subject list of the node?
         // XXX this would be easy to manipuate, in order to subvert a node
-        for (Subject subject : node.getSubjectList()) {
-            if (subject.equals(clientCertSubject)) {
-                approvedAdmin = true;
+        if ((node.getSubjectList() != null) && !(node.getSubjectList().isEmpty())) {
+            for (Subject subject : node.getSubjectList()) {
+                if (subject.equals(clientCertSubject)) {
+                    approvedAdmin = true;
+                }
             }
         }
-        if (!approvedAdmin) {
+        if (!approvedAdmin && (nodeAdminSubjects != null)) {
             for (Subject subject : nodeAdminSubjects) {
                 logger.debug("Administrative subject is " + subject.getValue());
                 if (subject.equals(clientCertSubject)) {
@@ -227,29 +229,31 @@ public class NodeController extends AbstractWebController implements ServletCont
         List<Subject> contactSubjectList = node.getContactSubjectList();
         Boolean unVerifiedRegistration = false;
         StringBuilder errorMessage = new StringBuilder();
-        for (Subject contactSubject : contactSubjectList) {
-            if (!(isVerifiedSubject(session, contactSubject))) {
-                errorMessage.append("Node Contact Subject: " + contactSubject.getValue() + " is not verified! \n");
-                unVerifiedRegistration = true;
-            }
-            // this is an even stricter check, if any one user in a group is unverified
-            // then throw an exception
-            SubjectInfo contactSubjectInfo;
-            try {
-                contactSubjectInfo = cnIdentity.getSubjectInfo(session, contactSubject);
+        if ( (contactSubjectList != null) && !(contactSubjectList.isEmpty())) {
+            for (Subject contactSubject : contactSubjectList) {
+                if (!(isVerifiedSubject(session, contactSubject))) {
+                    errorMessage.append("Node Contact Subject: " + contactSubject.getValue() + " is not verified! \n");
+                    unVerifiedRegistration = true;
+                }
+                // this is an even stricter check, if any one user in a group is unverified
+                // then throw an exception
+                SubjectInfo contactSubjectInfo;
+                try {
+                    contactSubjectInfo = cnIdentity.getSubjectInfo(session, contactSubject);
 
-                List<Group> contactGroupList = contactSubjectInfo.getGroupList();
-                for (Group contactGroup : contactGroupList) {
-                    List<Subject> contactGroupSubjectList = contactGroup.getHasMemberList();
-                    for (Subject groupSubject : contactGroupSubjectList) {
-                        if (!(isVerifiedSubject(session, contactSubject))) {
-                            errorMessage.append("Node Contact Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
-                            unVerifiedRegistration = true;
+                    List<Group> contactGroupList = contactSubjectInfo.getGroupList();
+                    for (Group contactGroup : contactGroupList) {
+                        List<Subject> contactGroupSubjectList = contactGroup.getHasMemberList();
+                        for (Subject groupSubject : contactGroupSubjectList) {
+                            if (!(isVerifiedSubject(session, contactSubject))) {
+                                errorMessage.append("Node Contact Subject: " + groupSubject.getValue() + " of Group: " + groupSubject.getValue() + " is not verified! \n");
+                                unVerifiedRegistration = true;
+                            }
                         }
                     }
+                } catch (NotFound ex) {
+                    throw new NotAuthorized("4821", "Node Contact Subject: " + contactSubject.getValue() + " is not a Registered Subject, and cannot be found");
                 }
-            } catch (NotFound ex) {
-                throw new NotAuthorized("4821", "Node Contact Subject: " + contactSubject.getValue() + " is not a Registered Subject, and cannot be found");
             }
         }
         if (unVerifiedRegistration) {
