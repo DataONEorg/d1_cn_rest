@@ -69,8 +69,7 @@ public class BaseController extends AbstractWebController implements ServletCont
     NodeRegistryService  nodeRetrieval;
     private ServletContext servletContext;
 
-    @Value("${cn.nodeId}")
-    String nodeIdentifier;
+    String nodeIdentifier = Settings.getConfiguration().getString("cn.nodeId");
     NodeReference nodeReference;
     private static final String RESOURCE_MONITOR_PING_V1 = "/v1/" + Constants.RESOURCE_MONITOR_PING;
     private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 = "/v1/" + Constants.RESOURCE_CHECKSUM;
@@ -130,9 +129,10 @@ public class BaseController extends AbstractWebController implements ServletCont
         String cnChecksumList = Settings.getConfiguration().getString("cn.checksumAlgorithmList");
         String[] checksums = cnChecksumList.split(";");
         for (int i = 0; i < checksums.length; i++) {
+             logger.debug(checksums[i]);
              checksumAlgorithmList.addAlgorithm(checksums[i]);
         }
-        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.ChecksumAlgorithmList", checksumAlgorithmList);
+        return new ModelAndView("xmlChecksumAlgorithmListViewResolver", "org.dataone.service.types.v1.ChecksumAlgorithmList", checksumAlgorithmList);
 
     }
     @Override
