@@ -132,6 +132,11 @@
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v1/resolve/*</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNRead</servlet-name>
+        <url-pattern>/v1/checksum/*</url-pattern>
+    </servlet-mapping>
+
 
     <servlet>
         <servlet-name>metacatCNAuthorization</servlet-name>
@@ -304,10 +309,6 @@
         <url-pattern>/</url-pattern>
     </servlet-mapping>
     
-    <servlet-mapping>
-        <servlet-name>metacatCNRead</servlet-name>
-        <url-pattern>/v1/checksum/*</url-pattern>
-    </servlet-mapping>
     
     <error-page>
         <error-code>400</error-code>
