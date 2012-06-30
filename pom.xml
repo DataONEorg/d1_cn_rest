@@ -36,8 +36,16 @@
                 <directory>src/main/resources/</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>**/*.*</exclude>
+                    <exclude>org/dataone/configuration/*.*</exclude>
                 </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                   <include>org/dataone/cn/**/*.*</include>
+                   <include>buildInfo/*.*</include>
+                </includes>
             </resource>
         </resources>
         <plugins>
@@ -69,7 +77,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.4.3</version>
                 <executions>
-
+<!-- default resources goal should take care of this
                     <execution>
                         <id>exclude-src-resources-beforeTests</id>
                         <phase>process-resources</phase>
@@ -84,15 +92,16 @@
                                     <filtering>false</filtering>
                                     <includes>
                                         <include>org/dataone/cn/**/*.*</include>
+                                        <include>buildInfo/*.*</include>
                                     </includes>
                                     <excludes>
-                                        <include>buildInfo/*.*</include>
                                         <exclude>org/dataone/configuration/*.*</exclude>
                                     </excludes>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
+-->
                     <execution>
                         <id>include-src-resources-afterTests</id>
                         <phase>test</phase>
@@ -106,14 +115,7 @@
                                     <directory>src/main/resources</directory>
                                     <filtering>true</filtering>
                                     <includes>
-                                        <include>buildInfo/buildInfo.properties</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>**/*.*</include>
+                                        <include>org/dataone/configuration/*.*</include>
                                     </includes>
                                 </resource>
                             </resources>
