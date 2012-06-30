@@ -95,7 +95,7 @@
                     </execution>
                     <execution>
                         <id>include-src-resources-afterTests</id>
-                        <phase>prepare-package</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
