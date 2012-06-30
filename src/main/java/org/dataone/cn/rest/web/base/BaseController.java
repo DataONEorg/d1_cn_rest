@@ -126,8 +126,10 @@ public class BaseController extends AbstractWebController implements ServletCont
     @RequestMapping(value = {RESOURCE_LIST_CHECKSUM_ALGORITHM_V1, RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 + "/" }, method = RequestMethod.GET)
     public ModelAndView listChecksumAlgorithms(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
         ChecksumAlgorithmList checksumAlgorithmList = new ChecksumAlgorithmList();
-        String cnChecksumList = Settings.getConfiguration().getString("cn.checksumAlgorithmList");
-        String[] checksums = cnChecksumList.split(";");
+
+
+        String[] checksums = Settings.getConfiguration().getStringArray("cn.checksumAlgorithmList");
+
         for (int i = 0; i < checksums.length; i++) {
              logger.debug(checksums[i]);
              checksumAlgorithmList.addAlgorithm(checksums[i]);

@@ -42,7 +42,7 @@ public class BaseControllerTestCase {
     public void setTestController(BaseController testController) {
         this.testController = testController;
     }
-//    @Test
+    @Test
     public void testValidBaseControllerChecksumList() throws Exception {
         testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
 

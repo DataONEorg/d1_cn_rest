@@ -69,6 +69,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
 
@@ -109,8 +111,8 @@ public class NodeController extends AbstractWebController implements ServletCont
     String nodeIdentifier;
     NodeReference nodeReference;
 
-    @Value("${cn.administrators}")
-    String nodeAdministrators;
+
+    List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
     List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
 
     @PostConstruct
@@ -380,10 +382,11 @@ public class NodeController extends AbstractWebController implements ServletCont
     }
 
     private boolean hasNodeAdministratorsChanged() {
-        logger.info(Settings.getConfiguration().getString("cn.administrators"));
-        if (!nodeAdministrators.equalsIgnoreCase( Settings.getConfiguration().getString("cn.administrators"))) {
-            nodeAdministrators =  Settings.getConfiguration().getString("cn.administrators");
-            logger.info(nodeAdministrators);
+
+        List<String> tmpNodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
+        
+        if (!CollectionUtils.isEqualCollection(nodeAdministrators, tmpNodeAdministrators)) {
+            nodeAdministrators =  tmpNodeAdministrators;
             nodeAdminSubjects  = new ArrayList<Subject>();
             return true;
         } else {
@@ -392,11 +395,10 @@ public class NodeController extends AbstractWebController implements ServletCont
     }
     private void constructNodeAdministrators() {
 
-        String[] administrators =nodeAdministrators.split(";");
-        for (int i = 0; i < administrators.length; i++) {
-            logger.info(administrators[i]);
+        for (String administrator : nodeAdministrators) {
+            logger.info("AdminList entry " + administrator);
             Subject adminSubject = new Subject();
-            adminSubject.setValue(administrators[i]);
+            adminSubject.setValue(administrator);
             nodeAdminSubjects.add(adminSubject);
         }
     }
