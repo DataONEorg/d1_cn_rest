@@ -431,16 +431,15 @@ public class ResolveFilter implements Filter {
             // assuming there should be at least one location to retrieve, so will throw an error
             throw new NotFound("4140", "The requested object is not presently available: " + idString);
         }
-        boolean isReplicaNotCompleted = true;
         for (Replica replica : nodes) {
             if (replica.getReplicationStatus() == ReplicationStatus.COMPLETED) {
-                isReplicaNotCompleted = false;
                 NodeReference nodeReference = replica.getReplicaMemberNode();
                 String baseURLString = lookupBaseURLbyNode(nodeReference.getValue());
                 String versionedbaseURL = lookupVersionedBaseURLbyNode(nodeReference.getValue());
                 if ((baseURLString == null) || (versionedbaseURL == null)) {
                     continue;
                 }
+                
                 // the id is put into the path portion of the url, so encoding thusly ;)
                 String encodedIdString = EncodingUtilities.encodeUrlPathSegment(idString);
 
@@ -457,11 +456,10 @@ public class ResolveFilter implements Filter {
                 // XXX How to set the preference???
                 // objectLocation.setPreference(filterConfig)
 
-
             }
 
         }
-        if (isReplicaNotCompleted) {
+        if (objectLocationList.getObjectLocationList() == null || objectLocationList.getObjectLocationList().isEmpty()) {
             // assuming there should be at least one location to retrieve, so will throw an error
             throw new NotFound("4140", "The requested object is not presently available: " + idString);
         }
