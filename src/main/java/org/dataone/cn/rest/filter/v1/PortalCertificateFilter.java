@@ -81,7 +81,8 @@ public class PortalCertificateFilter implements Filter {
 				certificate = PortalCertificateManager.getInstance().getCertificate((HttpServletRequest) request);
 				logger.debug("Proxy certificate for the request = " + certificate);
 				if (certificate != null) {
-					request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+				    X509Certificate[] x509Certificates = new X509Certificate[] { certificate };
+					request.setAttribute("javax.servlet.request.X509Certificate", x509Certificates);
 					logger.debug("Added proxy certificate to the request");
 				}
 			} catch (IOException e) {
