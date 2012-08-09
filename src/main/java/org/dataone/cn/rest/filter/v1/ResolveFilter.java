@@ -426,8 +426,8 @@ public class ResolveFilter implements Filter {
         Identifier identifier = new Identifier();
         identifier.setValue(idString);
         objectLocationList.setIdentifier(identifier);
-
-        if (nodes.isEmpty()) {
+        logger.debug("resolving for " + idString);
+        if (nodes == null || nodes.isEmpty()) {
             // assuming there should be at least one location to retrieve, so will throw an error
             throw new NotFound("4140", "The requested object is not presently available: " + idString);
         }
