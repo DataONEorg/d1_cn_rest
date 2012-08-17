@@ -127,8 +127,12 @@ public class NodeController extends AbstractWebController implements ServletCont
 
         //NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
         NodeList nodeList;
-
-        nodeList = nodeRegistry.listNodes();
+        try {
+            nodeList = nodeRegistry.listNodes();
+        } catch (ServiceFailure ex) {
+            ex.setDetail_code("4862");
+            throw ex;
+        }
 
         return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.v1.NodeList", nodeList);
 
