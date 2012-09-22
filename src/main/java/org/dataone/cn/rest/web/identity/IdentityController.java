@@ -92,28 +92,19 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      */
     @RequestMapping(value = {ACCOUNT_MAPPING_PATH_V1, ACCOUNT_MAPPING_PATH_V1 + "/" }, method = RequestMethod.POST)
-    public void mapIdentity(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	Session session = CertificateManager.getInstance().getSession(request);
 
     	// get params from request
-        Subject primarySubject = null;
-        MultipartFile primarySubjectPart = fileRequest.getFile("primarySubject");
-    	try {
-    		primarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, primarySubjectPart.getInputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create primary Subject from input");
-		}
-		Subject secondarySubject = null;
-        MultipartFile secondarySubjectPart = fileRequest.getFile("secondarySubject");
-    	try {
-    		secondarySubject = TypeMarshaller.unmarshalTypeFromStream(Subject.class, secondarySubjectPart.getInputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ServiceFailure(null, "Could not create secondary Subject from input");
-		}
+        Subject primarySubject = new Subject();
+        String primarySubjectString = request.getParameter("primarySubject");
+        primarySubject.setValue(primarySubjectString);
+        
+		Subject secondarySubject = new Subject();
+		String secondarySubjectString = request.getParameter("secondarySubject");
+        secondarySubject.setValue(secondarySubjectString);
 
 		boolean success = cnIdentity.mapIdentity(session, primarySubject, secondarySubject);
 
