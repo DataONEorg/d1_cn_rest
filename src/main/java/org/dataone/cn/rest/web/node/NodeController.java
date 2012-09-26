@@ -73,13 +73,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
+import org.dataone.service.types.v1.*;
 
 /**
- * Returns a list of nodes that have been registered with the DataONE infrastructure.
- * This list is also referred to as the registry.
  *
- * This package will also edit and add to the registry
+ * This package will expose endpoints to handle manipulation of the Node Registry structure.
+ * 
  * @author waltz
+ * 
  */
 @Controller("nodeController")
 public class NodeController extends AbstractWebController implements ServletContextAware {
@@ -115,13 +116,34 @@ public class NodeController extends AbstractWebController implements ServletCont
     List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
     List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
 
+    /*
+     * initialize a couple class scope variables immediately after the controller has
+     * been initialized by Spring
+     * 
+     * @author waltz
+     * @returns void
+     */
     @PostConstruct
     public void init() {
         nodeReference = new NodeReference();
         nodeReference.setValue(nodeIdentifier);
+        
+        // during intialization, construct the NodeAdminSubjects regardless
+        // of whether nodeAdministrators have changed
+        this.hasNodeAdministratorsChanged();
         this.constructNodeAdministrators();
-
+        
     }
+    /* 
+     * Returns a list of nodes that have been registered with and approved by the DataONE infrastructure.
+     * 
+     * @author waltz
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @throws NotImplemented
+     * @throws ServiceFailure
+     * @return ModelAndView
+     */
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented {
 
@@ -138,8 +160,19 @@ public class NodeController extends AbstractWebController implements ServletCont
 
     }
 
+    /*
+     * pass in a Node Identifier and receive back the node structure.
+     * 
+     * @author waltz
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @param String nodeId
+     * @throws NotFound
+     * @throws ServiceFailure
+     * @return ModelAndView
+     */
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.GET)
-    public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response, @PathVariable String nodeId) throws Exception {
+    public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response, @PathVariable String nodeId) throws ServiceFailure, NotFound {
         NodeReference reference = new NodeReference();
         reference.setValue(nodeId);
         Node node = nodeRegistry.getNode(reference);
@@ -147,7 +180,29 @@ public class NodeController extends AbstractWebController implements ServletCont
         return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
 
     }
-
+    /*
+     * For updating the capabilities of the specified node. Most information is replaced by information in the new node,
+     * however, the node identifier, nodeType, ping, syncrhonization.lastHarvested, and
+     * synchronization.lastCompleteHarvest are preserved from the existing entry. Services in the old record not
+     * included in the new Node will be removed.
+     *
+     * Successful completion of this operation is indicated by a HTTP response status code of 200.
+     *
+     * Unsuccessful completion of this operation MUST be indicated by returning an appropriate exception.
+     * 
+     * @author waltz
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @param String nodeId
+     * @throws InvalidToken 
+     * @throws InvalidRequest
+     * @throws IdentifierNotUnique
+     * @throws NotAuthorized
+     * @throws NotImplemented
+     * @throws NotFound
+     * @throws ServiceFailure
+     * @return ModelAndView
+     */
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
     public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
         Session session = CertificateManager.getInstance().getSession(fileRequest);
@@ -277,7 +332,22 @@ public class NodeController extends AbstractWebController implements ServletCont
         return;
 
     }
-
+    
+    /*
+     * Register a new node in the system. If the node already exists, then a IdentifierNotUnique exception MUST be returned.
+     * 
+     * @author waltz
+     * @param MultipartHttpServletRequest request
+     * @param HttpServletResponse response
+     * @throws InvalidToken 
+     * @throws InvalidRequest
+     * @throws IdentifierNotUnique
+     * @throws NotAuthorized
+     * @throws NotImplemented
+     * @throws ServiceFailure
+     * @return ModelAndView
+     * 
+     */
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
     public ModelAndView register(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidRequest, NotAuthorized, IdentifierNotUnique, InvalidToken {
         Session session = CertificateManager.getInstance().getSession(fileRequest);
@@ -360,7 +430,20 @@ public class NodeController extends AbstractWebController implements ServletCont
         NodeReference nodeReference = nodeRegistry.register(node);
         return new ModelAndView("xmlNodeReferenceViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
-
+    
+    /*
+     * determine if the passed in subject has been verified in the Identity service
+     * 
+     * @author waltz
+     * @param Session session
+     * @param Subject subject
+     * @throws ServiceFailure
+     * @throws InvalidRequest
+     * @throws NotAuthorized
+     * @throws NotImplemented
+     * @throws InvalidToken
+     * @return Boolean
+     */
     private Boolean isVerifiedSubject(Session session, Subject subject) throws ServiceFailure, InvalidRequest, NotAuthorized, NotImplemented, InvalidToken {
         Boolean verifiedRegistration = false;
         SubjectInfo contactSubjectInfo;
@@ -384,27 +467,101 @@ public class NodeController extends AbstractWebController implements ServletCont
         }
         return verifiedRegistration;
     }
-
-    private boolean hasNodeAdministratorsChanged() {
-
-        List<String> tmpNodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
+    
+    /*
+     * determine if any changes have occurred either on the NodeList or 
+     * in the properties file to CN administrative subjects
+     * 
+     * @author waltz
+     * @return boolean
+     */
+    private boolean hasNodeAdministratorsChanged()  {
+        try {
+        List<String> tmpNodeAdministrators = buildUpdateNodeCapabilitiesAdministrativeList();
         
         if (!CollectionUtils.isEqualCollection(nodeAdministrators, tmpNodeAdministrators)) {
             nodeAdministrators =  tmpNodeAdministrators;
-            nodeAdminSubjects  = new ArrayList<Subject>();
             return true;
-        } else {
-            return false;
         }
+        } catch (NotImplemented ex) {
+            ex.printStackTrace();
+        } catch (ServiceFailure ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
+    
+    /*
+     * from nodeAdministrators list, build a list of Administrator subjects
+     * 
+     * @author waltz
+     * @return void
+     */
     private void constructNodeAdministrators() {
-
+        nodeAdminSubjects  = new ArrayList<Subject>();
         for (String administrator : nodeAdministrators) {
             logger.info("AdminList entry " + administrator);
             Subject adminSubject = new Subject();
             adminSubject.setValue(administrator);
             nodeAdminSubjects.add(adminSubject);
         }
+    }
+    
+    /*
+     * refreshes an array of subjects listed as CN's in the nodelist or in a properties file.
+     * If the ServiceMethodRestriction list of updateNodeCapabilities is set, 
+     * then those subjects act as administrators as well.
+     * 
+     * @author waltz
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @param String acceptType
+     * @throws NotImplemented
+     * @throws ServiceFailure
+     * 
+     * @return List<String>
+     */
+    private List<String> buildUpdateNodeCapabilitiesAdministrativeList() throws NotImplemented, ServiceFailure {
+        List<String> administrators = new ArrayList<String>();
+
+        List<String> administratorsProperties = Settings.getConfiguration().getList("cn.administrators");
+        if (administrators != null) {
+            for (String administrator : administratorsProperties) {
+                logger.debug("AdminList entry " + administrator);
+                administrators.add(administrator);
+            }
+        }
+
+        List<Node> nodeList = nodeRegistry.listNodes().getNodeList();
+        for (Node node : nodeList) {
+            if (node.getType().equals(NodeType.CN) && node.getState().equals(NodeState.UP)) {
+                for (Subject adminstrativeSubject : node.getSubjectList()) {
+                     administrators.add(adminstrativeSubject.getValue());
+                }
+                List<Service> cnServices = node.getServices().getServiceList();
+                for (Service service : cnServices) {
+                    if (service.getName().equalsIgnoreCase("CNRegister")) {
+                        if ((service.getRestrictionList() != null)
+                                && !service.getRestrictionList().isEmpty()) {
+                            List<ServiceMethodRestriction> serviceMethodRestrictionList = service
+                                    .getRestrictionList();
+                            for (ServiceMethodRestriction serviceMethodRestriction : serviceMethodRestrictionList) {
+                                if (serviceMethodRestriction.getMethodName().equalsIgnoreCase(
+                                        "updateNodeCapabilities")) {
+                                    if (serviceMethodRestriction.getSubjectList() != null) {
+                                           for (Subject administrator : serviceMethodRestriction.getSubjectList()) {
+                                                logger.debug("updateNodeCapabilities ServiceMethodRestriction entry " + administrator);
+                                                administrators.add(administrator.getValue());
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return administrators;
     }
     @Override
     public void setServletContext(ServletContext sc) {

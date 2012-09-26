@@ -335,7 +335,7 @@ public class IdentityTestCase {
         x509CertificateGenerator.storeSelfSignedCertificate();
 
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
-
+        /*
         Subject subject1 = new Subject();
         subject1.setValue(primarySubject);
         Subject subject2 = new Subject();
@@ -348,14 +348,19 @@ public class IdentityTestCase {
 
         ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(subject2, baos2);
-
+        
         MockMultipartFile mockSubject2File = new MockMultipartFile("secondarySubject",baos2.toByteArray());
+        * 
+        */
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+
         request.setMethod("POST");
         request.setContextPath("/Mock" + ACCOUNT_MAPPING_PATH_V1);
         request.setAttribute("javax.servlet.request.X509Certificate", certificate);
-        request.addFile(mockSubject1File);
-        request.addFile(mockSubject2File);
+        request.addParameter("primarySubject", primarySubject);
+        request.addParameter("secondarySubject", secondarySubject);
+        //request.addFile(mockSubject1File);
+        //request.addFile(mockSubject2File);
         
         MockHttpServletResponse response = new MockHttpServletResponse();
         
