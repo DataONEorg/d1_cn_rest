@@ -10,13 +10,25 @@
 		<p>
 			DataONE Query Engine Description 
 			<br></br>
-			Query Engine:<xsl:value-of select="*[local-name()='queryEngineDescription']/name"/>
 			<br></br>
-			Engine Version:<xsl:value-of select="*[local-name()='queryEngineDescription']/queryEngineVersion"/>
-			<br></br>
-			Schema Version:<xsl:value-of select="*[local-name()='queryEngineDescription']/querySchemaVersion"/>
-			<br></br>
-			Additional Info:<xsl:value-of select="*[local-name()='queryEngineDescription']/additionalInfo"/>
+			<table>
+				<tr>
+					<td>Query Engine</td>
+					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/name"/></td>
+				</tr>
+				<tr>
+					<td>Engine Version</td>
+					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/queryEngineVersion"/></td>
+				</tr>
+				<tr>
+					<td>Schema Version</td>
+					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/querySchemaVersion"/></td>
+				</tr>
+				<tr>
+					<td>Additional Info:</td>
+					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/additionalInfo"/></td>
+				</tr>
+			</table>
 		</p>
 		<hr/>
 		<xsl:for-each select="*[local-name()='queryEngineDescription']/queryField">

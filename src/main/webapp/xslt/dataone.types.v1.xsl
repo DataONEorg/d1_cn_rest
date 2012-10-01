@@ -8,7 +8,8 @@
 	<xsl:import href="nodeList.v1.xsl"/>
 	<xsl:import href="objectList.v1.xsl"/>
 	<xsl:import href="objectFormatList.v1.xsl"/>
-	<xsl:import href="queryEngineDescription.v1.xsl" />
+	<xsl:import href="queryEngineDescription.v1.xsl"/>
+	<xsl:import href="queryEngineList.v1.xsl"/>
 
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 	
@@ -51,10 +52,15 @@
                            	</div>
                         </xsl:if>
                         <xsl:if test="*[local-name()='queryEngineDescription']">
-                        	<div id="queryEngineDescription"> 	
+                        	<div id="queryEngineDescription">
                             	<xsl:call-template name="queryEngineDescription"/>
                            	</div>
-                        </xsl:if>                        
+                        </xsl:if>
+                        <xsl:if test="*[local-name()='queryEngineList']">
+                        	<div id="queryEngineList">
+                            	<xsl:call-template name="queryEngineList"/>
+                           	</div>
+                        </xsl:if>
 					</div>
                         
 				<xsl:call-template name="bodyfooter"/>
@@ -106,6 +112,9 @@
 					}
 					if ($("#queryEngineDescription").is("div")) {
 						$("#content").tabs("add", "#queryEngineDescription", "Query Engine Description");
+					}
+					if ($("#queryEngineList").is("div")) {
+						$("#content").tabs("add", "#queryEngineList", "Query Engine List");
 					}
 				});
 			}
