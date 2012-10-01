@@ -8,6 +8,7 @@
 	<xsl:import href="nodeList.v1.xsl"/>
 	<xsl:import href="objectList.v1.xsl"/>
 	<xsl:import href="objectFormatList.v1.xsl"/>
+	<xsl:import href="queryEngineDescription.v1.xsl" />
 
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 	
@@ -49,7 +50,11 @@
                             	<xsl:call-template name="objectFormatList"/>
                            	</div>
                         </xsl:if>
-                        
+                        <xsl:if test="*[local-name()='queryEngineDescription']">
+                        	<div id="queryEngineDescription"> 	
+                            	<xsl:call-template name="queryEngineDescription"/>
+                           	</div>
+                        </xsl:if>                        
 					</div>
                         
 				<xsl:call-template name="bodyfooter"/>
