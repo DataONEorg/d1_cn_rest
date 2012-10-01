@@ -52,6 +52,10 @@
 					<td>Multivalued: </td>
 					<td><xsl:value-of select="multivalued"/></td>
 				</tr>
+				<tr>
+					<td>Sortable: </td>
+					<td><xsl:value-of select="sortable"/></td>
+				</tr>
 			</table>		
 		</xsl:for-each>
 	</xsl:template>	

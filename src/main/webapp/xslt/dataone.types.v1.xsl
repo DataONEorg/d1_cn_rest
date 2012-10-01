@@ -104,6 +104,9 @@
 					if ($("#objectFormatList").is("div")) {
 						$("#content").tabs("add", "#objectFormatList", "Object Format List");
 					}
+					if ($("#queryEngineDescription").is("div")) {
+						$("#content").tabs("add", "#queryEngineDescription", "Query Engine Description");
+					}
 				});
 			}
 			</script>
