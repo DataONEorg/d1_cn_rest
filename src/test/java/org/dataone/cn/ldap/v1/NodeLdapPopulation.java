@@ -1,27 +1,23 @@
 /**
- * This work was created by participants in the DataONE project, and is
- * jointly copyrighted by participating institutions in DataONE. For 
- * more information on DataONE, see our web site at http://dataone.org.
+ * This work was created by participants in the DataONE project, and is jointly copyrighted by participating
+ * institutions in DataONE. For more information on DataONE, see our web site at http://dataone.org.
  *
- *   Copyright ${year}
+ * Copyright ${year}
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and 
- * limitations under the License.
- * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
  * $Id$
  */
-
 package org.dataone.cn.ldap.v1;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -36,12 +32,20 @@ import org.dataone.service.types.v1.Service;
 import org.dataone.service.types.v1.ServiceMethodRestriction;
 import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v1.Subject;
+import org.dataone.service.util.TypeMarshaller;
+import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.DistinguishedName;
 import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.ContextMapper;
+import org.springframework.ldap.filter.AndFilter;
+import org.springframework.ldap.filter.EqualsFilter;
+import org.springframework.ldap.filter.Filter;
+import org.springframework.ldap.filter.WhitespaceWildcardsFilter;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,8 +59,10 @@ public class NodeLdapPopulation {
     public static List<Node> testNodeList = new ArrayList<Node>();
     public static List<Subject> testSubjectList = new ArrayList<Subject>();
     public static Log log = LogFactory.getLog(NodeLdapPopulation.class);
-
     private String primarySubject = Settings.getConfiguration().getString("testIdentity.primarySubject");
+
+    final static int SIZE = 16384;
+    
     static {
         // Need this or context will lowercase all the rdn s
         System.setProperty(DistinguishedName.KEY_CASE_FOLD_PROPERTY, DistinguishedName.KEY_CASE_FOLD_NONE);
@@ -66,43 +72,15 @@ public class NodeLdapPopulation {
     private LdapTemplate ldapTemplate;
 
     public void populateTestMNs() {
-        Node sq1dMNNode = new Node();
-        String sq1dId = "urn:node:sq1d";
-        NodeReference sq1dNodeReference = new NodeReference();
-        sq1dNodeReference.setValue(sq1dId);
-        sq1dMNNode.setIdentifier(sq1dNodeReference);
-        sq1dMNNode.setName("squid");
-        sq1dMNNode.setDescription("this is a squid test");
-        sq1dMNNode.setBaseURL("https://my.squid.test/mn");
-        sq1dMNNode.setReplicate(false);
-        sq1dMNNode.setSynchronize(false);
-        sq1dMNNode.setState(NodeState.UP);
-        sq1dMNNode.setType(NodeType.MN);
-        Subject sq1dSubject = new Subject();
-        sq1dSubject.setValue("cn="+sq1dId+",dc=dataone,dc=org");
-        sq1dMNNode.addSubject(sq1dSubject);
+        try {
 
-        Subject sq1dContactSubject = new Subject();
-        sq1dContactSubject.setValue("CN=Dracula,DC=cilogon,DC=org");
-        sq1dMNNode.addContactSubject(sq1dContactSubject);
-        
-        Services sq1dservices = new Services();
-        Service sq1dcoreService = new Service();
-        sq1dcoreService.setName("MNCore");
-        sq1dcoreService.setVersion("v1");
-        sq1dcoreService.setAvailable(Boolean.TRUE);
+        Node sq1dMNNode = buildTestNode("/org/dataone/cn/resources/samples/v1/mnNodeTest1.xml");
+        searchAndDestroyNode(sq1dMNNode.getIdentifier().getValue());       
 
-        Service sq1dreadService = new Service();
-        sq1dreadService.setName("MNRead");
-        sq1dreadService.setVersion("v1");
-        sq1dreadService.setAvailable(Boolean.TRUE);
-        sq1dservices.addService(sq1dcoreService);
-        sq1dservices.addService(sq1dreadService);
-        sq1dMNNode.setServices(sq1dservices);
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", sq1dId);
+        dn.add("dc", "dataone");
+        dn.add("cn", sq1dMNNode.getIdentifier().getValue());
 
         DirContextAdapter context = new DirContextAdapter(dn);
         mapNodeToContext(sq1dMNNode, context);
@@ -111,54 +89,23 @@ public class NodeLdapPopulation {
         for (Service service : sq1dMNNode.getServices().getServiceList()) {
             String d1NodeServiceId = service.getName() + "-" + service.getVersion();
             DistinguishedName dnService = new DistinguishedName();
-            dnService.add("dc","dataone");
-            dnService.add("cn", sq1dId);
+            dnService.add("dc", "dataone");
+            dnService.add("cn", sq1dMNNode.getIdentifier().getValue());
             dnService.add("d1NodeServiceId", d1NodeServiceId);
             context = new DirContextAdapter(dnService);
-            mapServiceToContext(service, sq1dId, d1NodeServiceId, context);
+            mapServiceToContext(service, sq1dMNNode.getIdentifier().getValue(), d1NodeServiceId, context);
             ldapTemplate.bind(dnService, context, null);
         }
 
         testNodeList.add(sq1dMNNode);
-
-        Node sqR1MNNode = new Node();
-        String sqR1Id = "urn:node:sqR1";
-        NodeReference sqR1NodeReference = new NodeReference();
-        sqR1NodeReference.setValue(sqR1Id);
-        sqR1MNNode.setIdentifier(sqR1NodeReference);
-        sqR1MNNode.setName("squirrel");
-        sqR1MNNode.setDescription("this is a squirrel test");
-        sqR1MNNode.setBaseURL("https://my.squirrel.test/mn");
-        sqR1MNNode.setReplicate(false);
-        sqR1MNNode.setSynchronize(false);
-        sqR1MNNode.setState(NodeState.UP);
-        sqR1MNNode.setType(NodeType.MN);
-        Subject sqR1Subject = new Subject();
-        sqR1Subject.setValue("cn="+sqR1Id+",dc=dataone,dc=org");
-        sqR1MNNode.addSubject(sqR1Subject);
-
-        Subject sqR1ContactSubject = new Subject();
-        sqR1ContactSubject.setValue("CN=Frankenstein,DC=cilogon,DC=org");
-        sqR1MNNode.addContactSubject(sqR1ContactSubject);
+               
+        Node sqR1MNNode =  buildTestNode("/org/dataone/cn/resources/samples/v1/mnNodeTest3.xml");
+        searchAndDestroyNode(sqR1MNNode.getIdentifier().getValue());
         
-        Services sqR1services = new Services();
-        Service sqR1coreService = new Service();
-        sqR1coreService.setName("MNCore");
-        sqR1coreService.setVersion("v1");
-        sqR1coreService.setAvailable(Boolean.TRUE);
-
-        Service sqR1readService = new Service();
-        sqR1readService.setName("MNRead");
-        sqR1readService.setVersion("v1");
-        sqR1readService.setAvailable(Boolean.TRUE);
-        sqR1services.addService(sqR1coreService);
-        sqR1services.addService(sqR1readService);
-        sqR1MNNode.setServices(sqR1services);
-
         // because we use a base DN, only need to supply the RDN
         dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", sqR1Id);
+        dn.add("dc", "dataone");
+        dn.add("cn", sqR1MNNode.getIdentifier().getValue());
 
         context = new DirContextAdapter(dn);
         mapNodeToContext(sqR1MNNode, context);
@@ -166,53 +113,24 @@ public class NodeLdapPopulation {
         for (Service service : sqR1MNNode.getServices().getServiceList()) {
             String d1NodeServiceId = service.getName() + "-" + service.getVersion();
             DistinguishedName dnService = new DistinguishedName();
-            dnService.add("dc","dataone");
-            dnService.add("cn", sqR1Id);
+            dnService.add("dc", "dataone");
+            dnService.add("cn", sqR1MNNode.getIdentifier().getValue());
             dnService.add("d1NodeServiceId", d1NodeServiceId);
             context = new DirContextAdapter(dnService);
-            mapServiceToContext(service, sqR1Id, d1NodeServiceId, context);
+            mapServiceToContext(service, sqR1MNNode.getIdentifier().getValue(), d1NodeServiceId, context);
             ldapTemplate.bind(dnService, context, null);
         }
         testNodeList.add(sqR1MNNode);
-        Node sq1shMNNode = new Node();
-        String sq1shId = "urn:node:sq1sh";
-        NodeReference sq1shNodeReference = new NodeReference();
-        sq1shNodeReference.setValue(sq1shId);
-        sq1shMNNode.setIdentifier(sq1shNodeReference);
-        sq1shMNNode.setName("squish");
-        sq1shMNNode.setDescription("this is a squish test");
-        sq1shMNNode.setBaseURL("https://my.squish.test/mn");
-        sq1shMNNode.setReplicate(false);
-        sq1shMNNode.setSynchronize(false);
-        sq1shMNNode.setState(NodeState.DOWN);
-        sq1shMNNode.setType(NodeType.MN);
-        // exclude a subject for testing purposes
-        //Subject sq1shSubject = new Subject();
-        //sq1shSubject.setValue("cn="+sq1shId+",dc=dataone,dc=org");
-        //sq1shMNNode.addSubject(sq1shSubject);
+        
+        
 
-        Subject sq1shContactSubject = new Subject();
-        sq1shContactSubject.setValue("CN=Frankenstein,DC=cilogon,DC=org");
-        sq1shMNNode.addContactSubject(sq1shContactSubject);
-
-        Services sq1shservices = new Services();
-        Service sq1shcoreService = new Service();
-        sq1shcoreService.setName("MNCore");
-        sq1shcoreService.setVersion("v1");
-        sq1shcoreService.setAvailable(Boolean.TRUE);
-
-        Service sq1shreadService = new Service();
-        sq1shreadService.setName("MNRead");
-        sq1shreadService.setVersion("v1");
-        sq1shreadService.setAvailable(Boolean.TRUE);
-        sq1shservices.addService(sq1shcoreService);
-        sq1shservices.addService(sq1shreadService);
-        sq1shMNNode.setServices(sq1shservices);
-
+        Node sq1shMNNode =  buildTestNode("/org/dataone/cn/resources/samples/v1/mnNodeTest2.xml");
+        searchAndDestroyNode(sq1shMNNode.getIdentifier().getValue());
+       
         // because we use a base DN, only need to supply the RDN
         dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", sq1shId);
+        dn.add("dc", "dataone");
+        dn.add("cn", sq1shMNNode.getIdentifier().getValue());
 
         context = new DirContextAdapter(dn);
         mapNodeToContext(sq1shMNNode, context);
@@ -220,16 +138,69 @@ public class NodeLdapPopulation {
         for (Service service : sq1shMNNode.getServices().getServiceList()) {
             String d1NodeServiceId = service.getName() + "-" + service.getVersion();
             DistinguishedName dnService = new DistinguishedName();
-            dnService.add("dc","dataone");
-            dnService.add("cn", sq1shId);
+            dnService.add("dc", "dataone");
+            dnService.add("cn", sq1shMNNode.getIdentifier().getValue());
             dnService.add("d1NodeServiceId", d1NodeServiceId);
             context = new DirContextAdapter(dnService);
-            mapServiceToContext(service, sq1shId, d1NodeServiceId, context);
+            mapServiceToContext(service, sq1shMNNode.getIdentifier().getValue(), d1NodeServiceId, context);
             ldapTemplate.bind(dnService, context, null);
         }
         testNodeList.add(sq1shMNNode);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            deletePopulatedNodes();
+        }
     }
 
+    public void populateTestCN() {
+        try {
+        Node sqrmCNNode =  buildTestNode("/org/dataone/cn/resources/samples/v1/cnNodeTest1.xml");
+        searchAndDestroyNode(sqrmCNNode.getIdentifier().getValue());
+
+        // because we use a base DN, only need to supply the RDN
+        DistinguishedName dn = new DistinguishedName();
+        dn.add("dc", "dataone");
+        dn.add("cn", sqrmCNNode.getIdentifier().getValue());
+
+        DirContextAdapter context = new DirContextAdapter(dn);
+        mapNodeToContext(sqrmCNNode, context);
+        ldapTemplate.bind(dn, context, null);
+
+        for (Service service : sqrmCNNode.getServices().getServiceList()) {
+            String d1NodeServiceId = service.getName() + "-" + service.getVersion();
+            log.info("sqrm adding service " + d1NodeServiceId);
+            DistinguishedName dnService = new DistinguishedName();
+            dnService.add("dc", "dataone");
+            dnService.add("cn", sqrmCNNode.getIdentifier().getValue());
+            dnService.add("d1NodeServiceId", d1NodeServiceId);
+            context = new DirContextAdapter(dnService);
+            mapServiceToContext(service, sqrmCNNode.getIdentifier().getValue(), d1NodeServiceId, context);
+            ldapTemplate.bind(dnService, context, null);
+            if (service.getName().equalsIgnoreCase("CNIdentity")) {
+                ServiceMethodRestriction restrict = new ServiceMethodRestriction();
+                restrict.setMethodName("mapIdentity");
+                Subject restrictToSubject = new Subject();
+                restrictToSubject.setValue(primarySubject);
+                restrict.addSubject(restrictToSubject);
+                DistinguishedName dnServiceRestriction = new DistinguishedName();
+                dnServiceRestriction.add("dc", "dataone");
+                dnServiceRestriction.add("cn", sqrmCNNode.getIdentifier().getValue());
+                dnServiceRestriction.add("d1NodeServiceId", d1NodeServiceId);
+                dnServiceRestriction.add("d1ServiceMethodName", restrict.getMethodName());
+                log.info("sqrm adding restriction " + restrict.getMethodName());
+                context = new DirContextAdapter(dnServiceRestriction);
+                mapServiceMethodRestriction(restrict, sqrmCNNode.getIdentifier().getValue(), d1NodeServiceId, context);
+                ldapTemplate.bind(dnServiceRestriction, context, null);
+            }
+        }
+
+        testNodeList.add(sqrmCNNode);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            deletePopulatedNodes();
+        }
+    }
+    
     protected void mapNodeToContext(Node node, DirContextOperations context) {
 
         context.setAttributeValue("objectclass", "device");
@@ -249,6 +220,7 @@ public class NodeLdapPopulation {
         }
         context.setAttributeValue("d1NodeContactSubject", node.getContactSubject(0).getValue());
     }
+
     protected void mapServiceToContext(org.dataone.service.types.v1.Service service, String nodeId, String nodeServiceId, DirContextOperations context) {
         context.setAttributeValue("objectclass", "d1NodeService");
         context.setAttributeValue("d1NodeServiceId", nodeServiceId);
@@ -258,8 +230,9 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeServiceVersion", service.getVersion());
         context.setAttributeValue("d1NodeServiceAvailable", Boolean.toString(service.getAvailable()).toUpperCase());
     }
+
     protected void mapServiceMethodRestriction(ServiceMethodRestriction restrict, String nodeId, String nodeServiceId, DirContextOperations context) {
-        
+
         context.setAttributeValue("objectclass", "d1ServiceMethodRestriction");
         context.setAttributeValue("d1NodeServiceId", nodeServiceId);
         context.setAttributeValue("d1NodeId", nodeId);
@@ -271,154 +244,77 @@ public class NodeLdapPopulation {
             }
         }
     }
+
     public void deletePopulatedNodes() {
         for (Node node : testNodeList) {
-            if ((node.getServices() != null) && (!node.getServices().getServiceList().isEmpty())) {
-                for (Service service : node.getServices().getServiceList()) {
-                    if (service.getRestrictionList() != null) {
-                         for (ServiceMethodRestriction restrict: service.getRestrictionList()) {
-                             deleteNodeServiceRestriction(node, service, restrict);
-                         }
-                    } else {
-                        log.error("ServiceMethodRestriction is NULL!!!" + node.getName() + ":" + service.getName());
-                    }
-                    deleteNodeService(node, service);
-                }
-            }
-            deleteNode(node);
+            searchAndDestroyNode(node.getIdentifier().getValue());
         }
         testNodeList.clear();
     }
 
-    private void deleteNode(Node node) {
-        DistinguishedName dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", node.getIdentifier().getValue());
-        log.info("deleting : " + dn.toString());
-        ldapTemplate.unbind(dn);
-    }
-    private void deleteNodeService(Node node, Service service) {
-        String d1NodeServiceId = service.getName() + "-" + service.getVersion();
-        DistinguishedName dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", node.getIdentifier().getValue());
-        dn.add("d1NodeServiceId",d1NodeServiceId);
-        log.info("deleting : " + dn.toString());
-        ldapTemplate.unbind(dn);
-    }
-    private void deleteNodeServiceRestriction(Node node, Service service, ServiceMethodRestriction restrict) {
-        String d1NodeServiceId = service.getName() + "-" + service.getVersion();
-        DistinguishedName dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", node.getIdentifier().getValue());
-        dn.add("d1NodeServiceId",d1NodeServiceId);
-        dn.add("d1ServiceMethodName", restrict.getMethodName());
+    /*
+     * if a test fails, then LDAP testing artifacts are sometimes left. So, we clean them up before we attempt testing
+     * again
+     *
+     */
 
-        log.info("deleting : " + dn.toString());
-        ldapTemplate.unbind(dn);
-    }
-    public void populateTestCN() {
-
-        Node sqrmCNNode = new Node();
-        String sqrmId = "urn:node:sqrm";
-        NodeReference sq1dNodeReference = new NodeReference();
-        sq1dNodeReference.setValue(sqrmId);
-        sqrmCNNode.setIdentifier(sq1dNodeReference);
-        sqrmCNNode.setName("squirm");
-        sqrmCNNode.setDescription("this is a squirm test");
-        sqrmCNNode.setBaseURL("https://my.squirm.test/cn");
-        sqrmCNNode.setReplicate(false);
-        sqrmCNNode.setSynchronize(false);
-        sqrmCNNode.setState(NodeState.UP);
-        sqrmCNNode.setType(NodeType.CN);
-        Subject sqrmSubject = new Subject();
-        sqrmSubject.setValue("cn="+sqrmId+",dc=dataone,dc=org");
-        sqrmCNNode.addSubject(sqrmSubject);
-
-        Subject sqrmContactSubject = new Subject();
-        sqrmContactSubject.setValue("CN=Dracula,DC=cilogon,DC=org");
-        sqrmCNNode.addContactSubject(sqrmContactSubject);
-
-        Services sqrmservices = new Services();
-        Service sqrmcoreService = new Service();
-        sqrmcoreService.setName("CNCore");
-        sqrmcoreService.setVersion("v1");
-        sqrmcoreService.setAvailable(Boolean.TRUE);
-
-        Service sqrmreadService = new Service();
-        sqrmreadService.setName("CNRead");
-        sqrmreadService.setVersion("v1");
-        sqrmreadService.setAvailable(Boolean.TRUE);
-
-        Service sqrmAuthorizationService = new Service();
-        sqrmAuthorizationService.setName("CNAuthorization");
-        sqrmAuthorizationService.setVersion("v1");
-        sqrmAuthorizationService.setAvailable(Boolean.TRUE);
-
-        Service sqrmIdentityService = new Service();
-        sqrmIdentityService.setName("CNIdentity");
-        sqrmIdentityService.setVersion("v1");
-        sqrmIdentityService.setAvailable(Boolean.TRUE);
-
-        Service sqrmReplicationService = new Service();
-        sqrmReplicationService.setName("CNReplication");
-        sqrmReplicationService.setVersion("v1");
-        sqrmReplicationService.setAvailable(Boolean.TRUE);
-
-
-        Service sqrmRegisterService = new Service();
-        sqrmRegisterService.setName("CNRegister");
-        sqrmRegisterService.setVersion("v1");
-        sqrmRegisterService.setAvailable(Boolean.TRUE);
-
-        ServiceMethodRestriction restrictIdentity = new ServiceMethodRestriction();
-        restrictIdentity.setMethodName("mapIdentity");
-        Subject restrictToSubject = new Subject();
-        restrictToSubject.setValue(primarySubject);
-        restrictIdentity.addSubject(restrictToSubject);
-
-        sqrmIdentityService.addRestriction(restrictIdentity);
-        
-        sqrmservices.addService(sqrmcoreService);
-        sqrmservices.addService(sqrmreadService);
-        sqrmservices.addService(sqrmAuthorizationService);
-        sqrmservices.addService(sqrmIdentityService);
-        sqrmservices.addService(sqrmReplicationService);
-        sqrmservices.addService(sqrmRegisterService);
-
-        sqrmCNNode.setServices(sqrmservices);
+    private void searchAndDestroyNode(String nodeId) {
+        log.info("Testing search " + nodeId);
         // because we use a base DN, only need to supply the RDN
-        DistinguishedName dn = new DistinguishedName();
-        dn.add("dc","dataone");
-        dn.add("cn", sqrmId);
+        DnContextMapper dnContextMapper = new DnContextMapper();
+        AndFilter nodeFilter = new AndFilter();
+        nodeFilter.and(new EqualsFilter("objectclass", "d1Node"));
+        nodeFilter.and(new EqualsFilter("d1NodeId", nodeId));
 
-        DirContextAdapter context = new DirContextAdapter(dn);
-        mapNodeToContext(sqrmCNNode, context);
-        ldapTemplate.bind(dn, context, null);
+        List nodeDnList = ldapTemplate.search(DistinguishedName.EMPTY_PATH, nodeFilter.encode(), dnContextMapper);
+        if ((nodeDnList != null) && !(nodeDnList.isEmpty())) {
+            AndFilter serviceRestrictionFilter = new AndFilter();
+            serviceRestrictionFilter.and(new EqualsFilter("objectclass", "d1ServiceMethodRestriction"));
+            serviceRestrictionFilter.and(new EqualsFilter("d1NodeId", nodeId));
+            searchAndDestroySubElements(serviceRestrictionFilter);
 
-        for (Service service : sqrmCNNode.getServices().getServiceList()) {
-            String d1NodeServiceId = service.getName() + "-" + service.getVersion();
-            log.info("sqrm adding service " + d1NodeServiceId);
-            DistinguishedName dnService = new DistinguishedName();
-            dnService.add("dc","dataone");
-            dnService.add("cn", sqrmId);
-            dnService.add("d1NodeServiceId", d1NodeServiceId);
-            context = new DirContextAdapter(dnService);
-            mapServiceToContext(service, sqrmId, d1NodeServiceId, context);
-            ldapTemplate.bind(dnService, context, null);
-            for (ServiceMethodRestriction restrict: service.getRestrictionList()) {
-                DistinguishedName dnServiceRestriction = new DistinguishedName();
-                dnServiceRestriction.add("dc","dataone");
-                dnServiceRestriction.add("cn", sqrmId);
-                dnServiceRestriction.add("d1NodeServiceId", d1NodeServiceId);
-                dnServiceRestriction.add("d1ServiceMethodName", restrict.getMethodName());
-                log.info("sqrm adding restriction " + restrict.getMethodName());
-                context = new DirContextAdapter(dnServiceRestriction);
-                mapServiceMethodRestriction(restrict, sqrmId, d1NodeServiceId, context);
-                ldapTemplate.bind(dnServiceRestriction, context, null);
+            AndFilter serviceFilter = new AndFilter();
+            serviceFilter.and(new EqualsFilter("objectclass", "d1NodeService"));
+            serviceFilter.and(new EqualsFilter("d1NodeId", nodeId));
+            searchAndDestroySubElements(serviceFilter);
+            for (Object nodeDnInstance : nodeDnList) {
+                DistinguishedName nodeDn = (DistinguishedName) nodeDnInstance;
+                ldapTemplate.unbind(nodeDn);
             }
         }
+    }
 
-        testNodeList.add(sqrmCNNode);
+    private void searchAndDestroySubElements(Filter searchFilter) {
+        DnContextMapper dnContextMapper = new DnContextMapper();
+        List subDnList = ldapTemplate.search(DistinguishedName.EMPTY_PATH, searchFilter.encode(), dnContextMapper);
+        if ((subDnList != null) && !(subDnList.isEmpty())) {
+            for (Object subDnInstance : subDnList) {
+                DistinguishedName subDn = (DistinguishedName) subDnInstance;
+                ldapTemplate.unbind(subDn);
+            }
+        }
+    }
+
+    private static class DnContextMapper implements ContextMapper {
+
+        public Object mapFromContext(Object ctx) {
+            DirContextAdapter context = (DirContextAdapter) ctx;
+            return new DistinguishedName(context.getDn());
+        }
+    }
+    private Node buildTestNode(String resourcePath) throws IOException, InstantiationException, IllegalAccessException, JiBXException {
+        ByteArrayOutputStream mnNodeOutput = new ByteArrayOutputStream();
+        InputStream is = this.getClass().getResourceAsStream(resourcePath);
+
+        BufferedInputStream bInputStream = new BufferedInputStream(is);
+        byte[] barray = new byte[SIZE];
+        int nRead = 0;
+        while ((nRead = bInputStream.read(barray, 0, SIZE)) != -1) {
+            mnNodeOutput.write(barray, 0, nRead);
+        }
+        bInputStream.close();
+        ByteArrayInputStream bArrayInputStream = new ByteArrayInputStream(mnNodeOutput.toByteArray());
+        Node testNode = TypeMarshaller.unmarshalTypeFromStream(Node.class, bArrayInputStream);
+        return testNode;
     }
 }
