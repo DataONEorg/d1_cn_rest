@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : mnNode.xml
+    Created on : September 20, 2011, 3:42 PM
+    Author     : waltz
+    Description:
+        Purpose of the document follows.
+-->
+<d1:node xmlns:d1="http://ns.dataone.org/service/types/v1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        replicate="false" synchronize="false" type="mn" state="up">
+    <identifier>urn:node:sqR1</identifier>
+    <name>sqR1-mntest-1</name>
+    <description>Nowhere Test Coordinating node</description>
+    <baseURL>https://rest.nowhere.com/mn</baseURL>
+    <services>
+        <service name="CNCore" version="v1" available="true"/>
+        <service name="CNRead" version="v1" available="true"/>
+        <service name="CNAuthorization" version="v1" available="true"/>
+        <service name="CNRegister" version="v1" available="true"/>
+        <service name="CNReplication" version="v1" available="true" />
+        <service name="CNIdentity" version="v1" available="true" />
+    </services>
+    <subject>cn=sqR1-mntest-1,dc=dataone,dc=org</subject>
+    <contactSubject>CN=Frankenstein,DC=cilogon,DC=org</contactSubject>
+</d1:node>
+
