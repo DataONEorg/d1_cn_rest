@@ -13,6 +13,7 @@ import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Checksum;
 import org.dataone.service.types.v1.ChecksumAlgorithmList;
 import org.dataone.service.types.v1.NodeList;
+import org.dataone.service.types.v1.QueryEngineList;
 import org.dataone.service.util.Constants;
 import org.junit.Test;
 
@@ -34,7 +35,7 @@ public class BaseControllerTestCase {
     public static Log log = LogFactory.getLog(BaseControllerTestCase.class);
     @Test
     public void testJunk() {
-        log.debug("hello");
+        log.info("hello hello hello");
     }
 
     private BaseController testController;
@@ -65,5 +66,27 @@ public class BaseControllerTestCase {
         }
         assertTrue(checksumAlgorithmList.getAlgorithmList().size() == 2);
     }
+    @Test
+    public void testValidBaseControllerListQueryEngines() throws Exception {
+        testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
 
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock/" + Constants.RESOURCE_QUERY + "/");
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        QueryEngineList queryEngineList = null;
+        try {
+            ModelAndView mav = testController.listQueryEngines(request, response);
+            queryEngineList = (QueryEngineList) mav.getModel().get("org.dataone.service.types.v1.QueryEngineList");
+
+        } catch (ServiceFailure ex) {
+            fail("Test misconfiguration " + ex);
+        }
+
+        assertNotNull(queryEngineList);
+        assertNotNull(queryEngineList.getQueryEngineList());
+        for (String engine : queryEngineList.getQueryEngineList()) {
+            log.debug(engine);
+        }
+        assertTrue(queryEngineList.getQueryEngineList().size() > 0);
+    }
 }

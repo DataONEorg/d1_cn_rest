@@ -50,13 +50,19 @@ import org.dataone.cn.rest.web.AbstractWebController;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
+import org.dataone.service.exceptions.*;
 import org.dataone.service.types.v1.ChecksumAlgorithmList;
+import org.dataone.service.types.v1.QueryEngineList;
 /**
  * This controller will provide a default xml serialization of the Node that is
  * represented by this CN. This functionality has not yet been defined in
  * an API or documentation but was suggested in July, 2011.
  *
- * The node also acts as a
+ * The controller also acts as a passthru mechanism for relatively static content
+ * that is provided by the node.properties file.
+ * Most content of the CN is provided by backend services, such as LDAP or metacat,
+ * but some trivial content can be read directly 
+ * from a properties file and easily exposed as xml
  *
  * @author waltz
  */
@@ -73,7 +79,7 @@ public class BaseController extends AbstractWebController implements ServletCont
     NodeReference nodeReference;
     private static final String RESOURCE_MONITOR_PING_V1 = "/v1/" + Constants.RESOURCE_MONITOR_PING;
     private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 = "/v1/" + Constants.RESOURCE_CHECKSUM;
-
+    private static final String RESOURCE_LIST_QUERY_V1 = "/v1/" + Constants.RESOURCE_QUERY;
     SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
     @PostConstruct
@@ -131,10 +137,41 @@ public class BaseController extends AbstractWebController implements ServletCont
         String[] checksums = Settings.getConfiguration().getStringArray("cn.checksumAlgorithmList");
 
         for (int i = 0; i < checksums.length; i++) {
-             logger.debug(checksums[i]);
+             logger.info(checksums[i]);
              checksumAlgorithmList.addAlgorithm(checksums[i]);
         }
         return new ModelAndView("xmlChecksumAlgorithmListViewResolver", "org.dataone.service.types.v1.ChecksumAlgorithmList", checksumAlgorithmList);
+
+    }
+    /*
+     * Returns a list of query engines, i.e. supported values for the queryEngine parameter of the getQueryEngineDescription and query operations.
+     * 
+     * The list of search engines available may be influenced by the authentication status of the request.
+     * (If authentication does become a requirement for retrieval of the query engines then a new
+     * persistence mechanism will need to be created, and this method will deserve its own 
+     * controller with class structure and service implementation to boot)
+     * 
+     * @author waltz
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @throws NotImplemented
+     * @throws ServiceFailure
+     * @return ModelAndView
+     */
+    @RequestMapping(value = {RESOURCE_LIST_QUERY_V1, RESOURCE_LIST_QUERY_V1 + "/" }, method = RequestMethod.GET)
+    public ModelAndView listQueryEngines(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidToken, NotAuthorized {
+        QueryEngineList queryEngineList = new QueryEngineList();
+        
+        String[] queryEngines = Settings.getConfiguration().getStringArray("cn.query.engines");
+  
+        if ((queryEngines == null) || (queryEngines.length == 0)) {
+            throw new NotImplemented("4420", "Query Engine List has not yet been configured");
+        }
+        for (int i = 0; i < queryEngines.length; i++) {
+             logger.debug(queryEngines[i]);
+             queryEngineList.addQueryEngine(queryEngines[i]);
+        }
+        return new ModelAndView("xmlQueryEngineListViewResolver", "org.dataone.service.types.v1.QueryEngineList", queryEngineList);
 
     }
     @Override
