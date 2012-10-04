@@ -13,19 +13,19 @@
 			<br></br>
 			<table>
 				<tr>
-					<td>Query Engine</td>
+					<td>Query Engine: </td>
 					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/name"/></td>
 				</tr>
 				<tr>
-					<td>Engine Version</td>
+					<td>Engine Version: </td>
 					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/queryEngineVersion"/></td>
 				</tr>
 				<tr>
-					<td>Schema Version</td>
+					<td>Schema Version: </td>
 					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/querySchemaVersion"/></td>
 				</tr>
 				<tr>
-					<td>Additional Info:</td>
+					<td>Additional Info: </td>
 					<td><xsl:value-of select="*[local-name()='queryEngineDescription']/additionalInfo"/></td>
 				</tr>
 			</table>
