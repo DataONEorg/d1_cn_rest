@@ -110,9 +110,5 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.QueryEngineList"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller" ref="stylesheetTypeMarshaller"/>
-<!--         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxQueryEngineListMarshallerResponse" target-class="org.dataone.service.types.v1.QueryEngineList"/>
-        </spring:property>
- -->
     </spring:bean>
 </spring:beans>
