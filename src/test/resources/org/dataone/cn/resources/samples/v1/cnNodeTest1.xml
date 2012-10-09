@@ -20,9 +20,12 @@
         <service name="CNAuthorization" version="v1" available="true"/>
         <service name="CNRegister" version="v1" available="true"/>
         <service name="CNReplication" version="v1" available="true" />
-        <service name="CNIdentity" version="v1" available="true" />
+        <service name="CNIdentity" version="v1" available="true">
+            <restriction methodName="mapIdentity">
+                    <subject>CN=Test1,O=Test,C=US,DC=dataone,DC=org</subject>
+            </restriction>
+        </service>
     </services>
-    <subject>cn=squ1rm-cntest-1,dc=dataone,dc=org</subject>
-    <contactSubject>CN=Dracula,DC=cilogon,DC=org</contactSubject>
+    <subject>CN=urn:node:squ1rm,DC=dataone,DC=org</subject>
+    <contactSubject>CN=Dracula,O=Test,C=US,DC=cilogon,DC=org</contactSubject>
 </d1:node>
-

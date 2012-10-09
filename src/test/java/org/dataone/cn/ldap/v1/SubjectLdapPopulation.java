@@ -31,6 +31,8 @@ import java.util.logging.Logger;
 import javax.naming.Name;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.x500.style.RFC4519Style;
+import org.dataone.configuration.Settings;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Subject;
@@ -81,6 +83,8 @@ public class SubjectLdapPopulation {
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn1 = new DistinguishedName();
         dn1.add("DC", "cilogon");
+        dn1.add("C", "US");
+        dn1.add("O", "Test");
         dn1.add("CN", testSubject1.getValue());
 
         DirContextAdapter context1 = new DirContextAdapter(dn1);
@@ -99,12 +103,18 @@ public class SubjectLdapPopulation {
         testPerson2.setVerified(Boolean.TRUE);
         DistinguishedName dn2 = new DistinguishedName();
         dn2.add("DC", "cilogon");
+        dn2.add("C", "US");
+        dn2.add("O", "Test");
         dn2.add("CN", testSubject2.getValue());
 
         DirContextAdapter context2 = new DirContextAdapter(dn2);
         mapPersonToContext(testPerson2, context2);
         ldapTemplate.bind(dn2, context2, null);
         testSubjectList.add(dn2.toCompactString());
+        testSubjectList.add(Settings.getConfiguration().getString("testIdentity.primarySubject"));
+        testSubjectList.add(Settings.getConfiguration().getString("testIdentity.secondarySubject"));
+        testSubjectList.add(Settings.getConfiguration().getString("testIdentity.tertiarySubject"));
+        testSubjectList.add(Settings.getConfiguration().getString("testIdentity.quartarySubject"));
     }
 
     protected void mapPersonToContext(Person person, DirContextOperations context) {

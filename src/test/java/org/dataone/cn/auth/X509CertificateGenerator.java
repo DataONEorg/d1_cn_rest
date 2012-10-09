@@ -56,6 +56,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
+import org.bouncycastle.asn1.x500.X500NameStyle;
 import org.bouncycastle.asn1.x500.style.RFC4519Style;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
@@ -89,6 +90,7 @@ public class X509CertificateGenerator {
 
     // the next two constants could be variables to the method below
     private static final int validityDays = 36525;
+    private String commonName = "Test1";
     SecureRandom sr = null;;
     public X509CertificateGenerator() {
         sr = new SecureRandom();
@@ -177,6 +179,9 @@ public class X509CertificateGenerator {
         return cert;
     }
     public void storeSelfSignedCertificate() throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, IOException, KeyStoreException {
+        storeSelfSignedCertificate(false);
+    }
+    public void storeSelfSignedCertificate(Boolean cilogon) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException, IOException, KeyStoreException {
         KeyPair caKeyPair = createKeys ();
         PublicKey caPublicKey = caKeyPair.getPublic();
         PrivateKey caPrivateKey = caKeyPair.getPrivate();
@@ -198,20 +203,12 @@ public class X509CertificateGenerator {
         //
         // distinguished name table.
         //
-        X500NameBuilder builder = new X500NameBuilder(RFC4519Style.INSTANCE);
-
-        builder.addRDN(RFC4519Style.dc, "org");
-        builder.addRDN(RFC4519Style.dc, "cilogon");
-        builder.addRDN(RFC4519Style.c, "US");
-        builder.addRDN(RFC4519Style.o, "Test");
-        builder.addRDN(RFC4519Style.cn, "Test1");
-
-//        builder.addRDN(RFC4519Style.cn, "Test1");
-//        builder.addRDN(RFC4519Style.o, "Test");
-//        builder.addRDN(RFC4519Style.c, "US");
-//        builder.addRDN(RFC4519Style.dc, "cilogon");
-//        builder.addRDN(RFC4519Style.dc, "org");
-
+        X500NameBuilder builder = null;
+        if (cilogon) {
+            builder = buildCilogonName();
+        } else {
+            builder = buildD1Name();
+        }
         X509Certificate cert = generateSelfSignedCertificate(publicKey, caPrivateKey, caCert, builder);
 
         storeCACert("dataoneCA", caPrivateKey, caCert);
@@ -314,4 +311,44 @@ public class X509CertificateGenerator {
          caFile.delete();
 
     }
+    /**
+     * Locate the default certificate location
+     * http://www.cilogon.org/cert-howto#TOC-Finding-CILogon-Certificates
+     * @return
+     * @throws FileNotFoundException
+     */
+    private X500NameBuilder buildD1Name() {
+    	
+        X500NameStyle template = RFC4519Style.INSTANCE;
+		X500NameBuilder nameBuilder = new X500NameBuilder(template);
+        nameBuilder.addRDN(RFC4519Style.dc, "org");
+        nameBuilder.addRDN(RFC4519Style.dc, "dataone");
+        nameBuilder.addRDN(RFC4519Style.c, "US");
+        nameBuilder.addRDN(RFC4519Style.o, "Test");
+        nameBuilder.addRDN(RFC4519Style.cn, commonName);       
+        
+        return nameBuilder;
+    }
+    /**
+     * Locate the default certificate location
+     * http://www.cilogon.org/cert-howto#TOC-Finding-CILogon-Certificates
+     * @return
+     * @throws FileNotFoundException
+     */
+    private X500NameBuilder buildCilogonName() {
+    	
+        X500NameStyle template = RFC4519Style.INSTANCE;
+		X500NameBuilder nameBuilder = new X500NameBuilder(template);
+        nameBuilder.addRDN(RFC4519Style.dc, "org");
+        nameBuilder.addRDN(RFC4519Style.dc, "cilogon");
+        nameBuilder.addRDN(RFC4519Style.c, "US");
+        nameBuilder.addRDN(RFC4519Style.o, "Test");
+        nameBuilder.addRDN(RFC4519Style.cn, commonName);       
+        
+        return nameBuilder;
+    }
+    public void setCommonName(String commonName) {
+        this.commonName = commonName;
+    }
+    
 }

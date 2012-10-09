@@ -135,7 +135,7 @@ public class IdentityTestCase {
     @Test
     public void getSubjectInfo() throws Exception {
         log.info("Test getSubjectInfo");
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock" + ACCOUNTS_PATH_V1 + "/CN=Dracula,DC=dataone,DC=org");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/Mock" + ACCOUNTS_PATH_V1 + "/CN=Dracula,O=Test,C=US,DC=cilogon,DC=org");
         MockHttpServletResponse response = new MockHttpServletResponse();
         SubjectInfo subjectInfo = null;
         try {
@@ -335,6 +335,7 @@ public class IdentityTestCase {
         x509CertificateGenerator.storeSelfSignedCertificate();
 
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+        log.debug("loaded certificate of " + certificate[0].getSubjectDN().getName());
         /*
         Subject subject1 = new Subject();
         subject1.setValue(primarySubject);
@@ -408,9 +409,8 @@ public class IdentityTestCase {
         groupSubject.setValue(groupName);
 
         Group group = new Group();
-        group.setGroupName(groupName);
         group.setSubject(groupSubject);
-
+        group.setGroupName(groupName);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(group, baos);
 
@@ -449,9 +449,8 @@ public class IdentityTestCase {
         groupSubject.setValue(groupName);
 
         Group group = new Group();
-        group.setGroupName(groupName);
         group.setSubject(groupSubject);
-
+        group.setGroupName(groupName);
         Subject newMember = new Subject();
         newMember.setValue(secondarySubject);
         SubjectList newMembers = new SubjectList();

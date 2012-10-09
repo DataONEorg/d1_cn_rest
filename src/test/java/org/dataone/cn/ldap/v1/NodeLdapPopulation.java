@@ -57,7 +57,6 @@ import org.springframework.stereotype.Component;
 public class NodeLdapPopulation {
 
     public static List<Node> testNodeList = new ArrayList<Node>();
-    public static List<Subject> testSubjectList = new ArrayList<Subject>();
     public static Log log = LogFactory.getLog(NodeLdapPopulation.class);
     private String primarySubject = Settings.getConfiguration().getString("testIdentity.primarySubject");
 
@@ -217,6 +216,19 @@ public class NodeLdapPopulation {
         context.setAttributeValue("d1NodeApproved", Boolean.toString(Boolean.TRUE).toUpperCase());
         if ((node.getSubjectList() != null) && !(node.getSubjectList().isEmpty())) {
             context.setAttributeValue("subject", node.getSubject(0).getValue());
+        }
+        if (node.getType().compareTo(NodeType.MN) == 0) {
+            if (node.isSynchronize() && node.getSynchronization() != null) {
+                context.setAttributeValue("d1NodeSynSchdSec", node.getSynchronization().getSchedule().getSec());
+                context.setAttributeValue("d1NodeSynSchdMin", node.getSynchronization().getSchedule().getMin());
+                context.setAttributeValue("d1NodeSynSchdHour", node.getSynchronization().getSchedule().getHour());
+                context.setAttributeValue("d1NodeSynSchdMday", node.getSynchronization().getSchedule().getMday());
+                context.setAttributeValue("d1NodeSynSchdMon", node.getSynchronization().getSchedule().getMon());
+                context.setAttributeValue("d1NodeSynSchdWday", node.getSynchronization().getSchedule().getWday());
+                context.setAttributeValue("d1NodeSynSchdYear", node.getSynchronization().getSchedule().getYear());
+                context.setAttributeValue("d1NodeLastHarvested", "1900-01-01T00:00:00Z");
+                context.setAttributeValue("d1NodeLastCompleteHarvest", "1900-01-01T00:00:00Z");
+            }
         }
         context.setAttributeValue("d1NodeContactSubject", node.getContactSubject(0).getValue());
     }

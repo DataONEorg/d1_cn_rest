@@ -9,11 +9,11 @@
 -->
 <d1:node xmlns:d1="http://ns.dataone.org/service/types/v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        replicate="false" synchronize="false" type="mn" state="down">
+        replicate="false" synchronize="true" type="mn" state="down">
     <identifier>urn:node:sq1sh</identifier>
     <name>sq1sh-mntest-1</name>
     <description>Nowhere Test Coordinating node</description>
-    <baseURL>https://rest.nowhere.com/mn</baseURL>
+    <baseURL>https://rest.nowhere.com/mn2</baseURL>
     <services>
         <service name="CNCore" version="v1" available="true"/>
         <service name="CNRead" version="v1" available="true"/>
@@ -22,7 +22,12 @@
         <service name="CNReplication" version="v1" available="true" />
         <service name="CNIdentity" version="v1" available="true" />
     </services>
-    <subject>cn=sq1sh-mntest-1,dc=dataone,dc=org</subject>
-    <contactSubject>CN=Frankenstein,DC=cilogon,DC=org</contactSubject>
+    <synchronization>
+        <schedule hour="*" mday="*" min="0,5,10,15,20,25,30,35,40,45,50,55" mon="11" sec="30" wday="?" year="2001"/>
+        <lastHarvested>1900-01-01T00:00:00.000+00:00</lastHarvested>
+        <lastCompleteHarvest>1900-01-01T00:00:00.000+00:00</lastCompleteHarvest>
+    </synchronization>
+    <subject>cn=test,dc=dataone,dc=org</subject>
+    <contactSubject>CN=Frankenstein,O=Test,C=US,DC=cilogon,DC=org</contactSubject>
 </d1:node>
 

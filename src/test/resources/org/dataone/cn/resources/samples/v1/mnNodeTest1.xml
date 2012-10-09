@@ -13,7 +13,7 @@
     <identifier>urn:node:sq1d</identifier>
     <name>sq1d-mntest-1</name>
     <description>Nowhere Test Coordinating node</description>
-    <baseURL>https://rest.nowhere.com/mn</baseURL>
+    <baseURL>https://rest.nowhere.com/mn2</baseURL>
     <services>
         <service name="CNCore" version="v1" available="true"/>
         <service name="CNRead" version="v1" available="true"/>
@@ -23,6 +23,6 @@
         <service name="CNIdentity" version="v1" available="true" />
     </services>
     <subject>cn=sq1d-mntest-1,dc=dataone,dc=org</subject>
-    <contactSubject>CN=Dracula,DC=cilogon,DC=org</contactSubject>
+    <contactSubject>CN=Dracula,O=Test,C=US,DC=cilogon,DC=org</contactSubject>
 </d1:node>
 

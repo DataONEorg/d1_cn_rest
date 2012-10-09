@@ -55,8 +55,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
 import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.List;
+import org.dataone.configuration.Settings;
+import org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
-import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.*;
 
 /**
  *
@@ -73,7 +77,7 @@ public class NodeRegistryTestCase {
     private NodeLdapPopulation cnLdapPopulation;
     private SubjectLdapPopulation subjectLdapPopulation;
     private X509CertificateGenerator x509CertificateGenerator;
-    private NodeRegistryService nodeRegistryService = new NodeRegistryService();
+
     private Config hzConfig;
     final static int SIZE = 16384;
     @Resource
@@ -95,6 +99,7 @@ public class NodeRegistryTestCase {
     @Before
     public void before() throws Exception {
         cnLdapPopulation.populateTestMNs();
+        cnLdapPopulation.populateTestCN();
         subjectLdapPopulation.populateTestIdentities();
     }
     @After
@@ -112,7 +117,12 @@ public class NodeRegistryTestCase {
     @Autowired
     @Qualifier("mnInvalidNodeResource")
     private ClassPathResource mnInvalidNodeResource;
-    
+    @Autowired
+    @Qualifier("cnNodeRegistry")
+    private NodeRegistryService nodeRegistryService;   
+    @Autowired
+    @Qualifier("cnIdentity")
+    private CNIdentityLDAPImpl  cnIdentity;    
     public void setInvalidMnNodeResource(ClassPathResource mnInvalidNodeResource) {
         this.mnInvalidNodeResource = mnInvalidNodeResource;
     }
@@ -250,7 +260,7 @@ public class NodeRegistryTestCase {
         sq1dNodeReference.setValue(sq1dId);
         Node sq1dNode = nodeRegistryService.getNode(sq1dNodeReference);
         Subject sqR1ContactSubject = new Subject();
-        sqR1ContactSubject.setValue("CN=Frankenstein,DC=cilogon,DC=org");
+        sqR1ContactSubject.setValue("CN=Frankenstein,O=Test,C=US,DC=cilogon,DC=org");
         sq1dNode.addContactSubject(sqR1ContactSubject);
         sq1dNode.addSubject(sqR1ContactSubject);
 
@@ -282,8 +292,12 @@ public class NodeRegistryTestCase {
             x509CertificateGenerator.cleanUpFiles();
         }
     }
+    /*
+     * Last Harvested should not be able to be updated via updateNodeCapabilities
+     * It is only updated by cn background system operations
+     */
     @Test
-    public void testUpdateNodeCapabilitiesNullSubjectList() throws Exception {
+    public void testUpdateNodeCapabilitiesIgnoreLastHarvested() throws Exception {
 
         x509CertificateGenerator.storeSelfSignedCertificate();
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
@@ -291,19 +305,19 @@ public class NodeRegistryTestCase {
         String sq1shId = "urn:node:sq1sh";
         NodeReference sq1shNodeReference = new NodeReference();
         sq1shNodeReference.setValue(sq1shId);
+        
         Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
-        Subject sq1shContactSubject = new Subject();
-        sq1shContactSubject.setValue("CN=Dracula,DC=cilogon,DC=org");
-        sq1shNode.addContactSubject(sq1shContactSubject);
-        sq1shNode.addSubject(sq1shContactSubject);
-
+        Date lastHarvested = sq1shNode.getSynchronization().getLastHarvested();
+        
+        
+        sq1shNode.getSynchronization().setLastHarvested(new Date());
         ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(sq1shNode, mnNodeOutput);
-
+        
         testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
 
         MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
-
+        log.debug(mnNodeOutput.toByteArray());
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         request.setMethod("PUT");
@@ -315,13 +329,201 @@ public class NodeRegistryTestCase {
         try {
             testController.updateNodeCapabilities(request, response, sq1shId);
             Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            Date notUpdatedLastHarvested = sq1shUpdatedNode.getSynchronization().getLastHarvested();
             log.info("sizeContactSubjectList " + sq1shUpdatedNode.sizeContactSubjectList());
-            assertTrue(sq1shUpdatedNode.sizeContactSubjectList() == 2);
+            assertTrue(notUpdatedLastHarvested.compareTo(lastHarvested) == 0);
         } catch (Exception ex) {
                 ex.printStackTrace();
                 fail("Test misconfiguration " + ex);
         } finally {
 
+            x509CertificateGenerator.cleanUpFiles();
+        }
+    }
+    
+    /* given an equivalent identity of an administrator, 
+     * can changes be made?
+     */
+    @Test
+    public void testUpdateNodeCapabilitiesWithEquivalentId() throws Exception {
+       
+        
+        // Set up the session with the subject 
+        // that is approved for registering and mapping accounts
+        
+        String dnPrime = Settings.getConfiguration().getString("testIdentity.primarySubject");
+        Subject subjectPrime = new Subject();
+        subjectPrime.setValue(dnPrime);
+        Session session = new Session();
+        session.setSubject(subjectPrime);
+        
+        // register first test subject
+        String dnEquivalent1 = Settings.getConfiguration().getString("testIdentity.tertiarySubject");
+        Subject subject1 = new Subject();
+        subject1.setValue(dnEquivalent1);
+        Person person1 = new Person();
+        person1.setSubject(subject1);
+        person1.setFamilyName("Lebowski");
+        person1.addGivenName("Jeff");
+        person1.addEmail("Jeff@dataone.org");
+        cnIdentity.registerAccount(session,person1);
+        
+        // register second test subject
+        String dnEquivalent2 = Settings.getConfiguration().getString("testIdentity.quartarySubject");
+        Subject subject2 = new Subject();
+        subject2.setValue(dnEquivalent2);
+        Person person2 = new Person();
+        person2.setSubject(subject2);
+        person2.setFamilyName("Dude");
+        person2.addGivenName("The");
+        person2.addEmail("TheDude@dataone.org");
+        cnIdentity.registerAccount(session,person2);
+
+        // map the identities together 
+        cnIdentity.mapIdentity(session, subject1, subject2);
+        
+        // Add the first subject to the administrators list
+        List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
+        nodeAdministrators.add(subject1.getValue());
+        Settings.getConfiguration().setProperty("cn.administrators", nodeAdministrators);
+        // Generate a certificate with the second subject
+        // The first subject is a member of the cn.administrators
+        // property in node.properties file
+        x509CertificateGenerator.setCommonName("TheDude");
+        x509CertificateGenerator.storeSelfSignedCertificate(true);
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+        // change a changable property, like descriptiong
+        String sq1shId = "urn:node:sq1sh";
+        NodeReference sq1shNodeReference = new NodeReference();
+        sq1shNodeReference.setValue(sq1shId);
+        
+        Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
+        String newDescription = "ThisNodeIsaTestNode";
+        sq1shNode.setDescription(newDescription);
+
+        ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(sq1shNode, mnNodeOutput);
+        
+        testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
+
+        MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
+        
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.setMethod("PUT");
+        request.setContextPath("/Mock/node/" + sq1shId);
+        request.addFile(mockNodeFile);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        NodeReference nodeReference = null;
+        try {
+            testController.updateNodeCapabilities(request, response, sq1shId);
+            Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            assertTrue(sq1shUpdatedNode.getDescription().compareTo(newDescription) == 0);
+        } catch (Exception ex) {
+                ex.printStackTrace();
+                fail("Test misconfiguration " + ex);
+        } finally {
+            x509CertificateGenerator.cleanUpFiles();
+        }
+    }
+    /* given a subject that is a member of an administrative group, 
+     * can changes be made?
+     */
+    @Test
+    public void testUpdateNodeCapabilitiesWithGroup() throws Exception {
+       
+        
+        // Set up the session with the subject 
+        // that is approved for registering and mapping accounts
+        
+        String dnPrime = Settings.getConfiguration().getString("testIdentity.primarySubject");
+        Subject subjectPrime = new Subject();
+        subjectPrime.setValue(dnPrime);
+        Session session = new Session();
+        session.setSubject(subjectPrime);
+        
+        // register first test subject
+        String dnEquivalent1 = Settings.getConfiguration().getString("testIdentity.tertiarySubject");
+        Subject subject1 = new Subject();
+        subject1.setValue(dnEquivalent1);
+        Person person1 = new Person();
+        person1.setSubject(subject1);
+        person1.setFamilyName("Lebowski");
+        person1.addGivenName("Jeff");
+        person1.addEmail("Jeff@dataone.org");
+        cnIdentity.registerAccount(session,person1);
+        
+        // register second test subject
+        String dnEquivalent2 = Settings.getConfiguration().getString("testIdentity.quartarySubject");
+        Subject subject2 = new Subject();
+        subject2.setValue(dnEquivalent2);
+        Person person2 = new Person();
+        person2.setSubject(subject2);
+        person2.setFamilyName("Dude");
+        person2.addGivenName("The");
+        person2.addEmail("TheDude@dataone.org");
+        cnIdentity.registerAccount(session,person2);
+
+        Group adminGroup = new Group();
+        Subject groupSubject = new Subject();
+        groupSubject.setValue(Settings.getConfiguration().getString("testIdentity.groupName"));
+
+        adminGroup.setSubject(groupSubject);
+        SubjectList newMembers = new SubjectList();
+        newMembers.addSubject(subject1);
+        newMembers.addSubject(subject2);
+
+        adminGroup.setHasMemberList(newMembers.getSubjectList());
+        // map the identities together 
+        cnIdentity.createGroup(session, adminGroup);
+        
+        // Add the first subject to the administrators list
+        List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
+        nodeAdministrators.add(groupSubject.getValue());
+        Settings.getConfiguration().setProperty("cn.administrators", nodeAdministrators);
+        // Generate a certificate with the second subject
+        // The first subject is a member of the cn.administrators
+        // property in node.properties file
+        x509CertificateGenerator.setCommonName("TheDude");
+        x509CertificateGenerator.storeSelfSignedCertificate(true);
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+        // change a changable property, like descriptiong
+        String sq1shId = "urn:node:sq1sh";
+        NodeReference sq1shNodeReference = new NodeReference();
+        sq1shNodeReference.setValue(sq1shId);
+        
+        Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
+        String newDescription = "ThisNodeIsaTestNode";
+        sq1shNode.setDescription(newDescription);
+
+        ByteArrayOutputStream mnNodeOutput= new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(sq1shNode, mnNodeOutput);
+        
+        testController.setServletContext(ProxyWebApplicationContextLoader.SERVLET_CONTEXT);
+
+        MockMultipartFile mockNodeFile = new MockMultipartFile("node", mnNodeOutput.toByteArray());
+        
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.setMethod("PUT");
+        request.setContextPath("/Mock/node/" + sq1shId);
+        request.addFile(mockNodeFile);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        NodeReference nodeReference = null;
+        try {
+            testController.updateNodeCapabilities(request, response, sq1shId);
+            Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            assertTrue(sq1shUpdatedNode.getDescription().compareTo(newDescription) == 0);
+        } catch (Exception ex) {
+                ex.printStackTrace();
+                fail("Test misconfiguration " + ex);
+        } finally {
+            subjectLdapPopulation.testSubjectList.add(Settings.getConfiguration().getString("testIdentity.groupName"));
+            
             x509CertificateGenerator.cleanUpFiles();
         }
     }

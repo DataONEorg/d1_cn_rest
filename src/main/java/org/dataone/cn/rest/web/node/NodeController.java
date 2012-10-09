@@ -70,6 +70,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.functors.EqualPredicate;
 import org.apache.commons.lang.StringUtils;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
@@ -267,22 +268,78 @@ public class NodeController extends AbstractWebController implements ServletCont
         Subject clientCertSubject = session.getSubject();
         logger.debug("Certificate has subject " + clientCertSubject.getValue());
         // is the subject equal to the value found in the subject list of the node?
-        // XXX this would be easy to manipuate, in order to subvert a node
-        if ((node.getSubjectList() != null) && !(node.getSubjectList().isEmpty())) {
-            for (Subject subject : node.getSubjectList()) {
+        
+        // the node subject must be retrieved from the current node information
+        // the node subjects may be changed if the calling subject is an approved administrator
+        Node currentNode = nodeRegistry.getNode(updateNodeReference);
+        
+        if ((currentNode.getSubjectList() != null) && !(currentNode.getSubjectList().isEmpty())) {
+            for (Subject subject : currentNode.getSubjectList()) {
                 if (subject.equals(clientCertSubject)) {
                     approvedAdmin = true;
                 }
             }
         }
+        
+        // the subject may be a member of an approved administrators list maintained 
+        // by the CN.  Currently, the list is in a node.properties file, but
+        // it may reside elsewhere in the future
+        
         if (!approvedAdmin && (nodeAdminSubjects != null)) {
             for (Subject subject : nodeAdminSubjects) {
-                logger.debug("Administrative subject is " + subject.getValue());
+
                 if (subject.equals(clientCertSubject)) {
                     approvedAdmin = true;
+                    logger.debug("Approved Administrative subject is " + subject.getValue());
                 }
             }
+            if (!approvedAdmin) {
+                logger.debug("Not approved yet");
+                try {
+                    SubjectInfo clientSubjectInfo = cnIdentity.getSubjectInfo(session,clientCertSubject);
+                    // check to see if an equivalent identity of the administrative subject
+                    if (clientSubjectInfo.getPersonList() != null) {
+                        List<Person> clientPersonList = clientSubjectInfo.getPersonList();
+                        logger.debug("how many persons on my list?" + clientPersonList.size());
+                        for (Person person : clientPersonList) {
+                            logger.debug("Person List :" + person.getSubject().getValue() + " for subject " + person.getSubject().getValue());
+                            // check if the person listed is a part of the node administrators list
+                            EqualPredicate equalPredicate = new EqualPredicate(person.getSubject());
+                            if (CollectionUtils.exists(nodeAdminSubjects, equalPredicate)) {
+                                 logger.debug("Admin Approved");
+                                approvedAdmin = true;
+                                break;
+                            }
+                            // check if any equivalent identities listed are a part of the node administrators list
+                            for (Subject equivSubject : person.getEquivalentIdentityList()) {
+                                logger.debug("Equiv Subject List :" + equivSubject.getValue());
+                            }
+                            if (CollectionUtils.containsAny(nodeAdminSubjects,person.getEquivalentIdentityList())) {
+                                approvedAdmin = true;
+                                logger.debug("Equiv Subject Approved");
+                                break;
+                            }
+                            // check if any group memberships are a part of the node administrators list
+                            if (CollectionUtils.containsAny(nodeAdminSubjects,person.getIsMemberOfList())) {
+                                approvedAdmin = true;
+                                logger.debug("Group Member Subject Approved");
+                                break;
+                            }
+                        }
+                    } else {
+                         logger.debug("Person LIst is null");
+                    }
+                } catch (NotFound ex){
+                    approvedAdmin = false;
+                    logger.warn(clientCertSubject.getValue() + " in is not entered in LDAP");
+                } catch (Exception ex) {
+                    approvedAdmin = false;
+                    logger.warn(ex.getMessage());
+                }
+            }
+            
         }
+        
         if (!approvedAdmin) {
            throw new NotAuthorized("4821", "Certificate should be an administrative subject before request can be processed");
         }
@@ -321,13 +378,13 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw new NotAuthorized("4821", errorMessage.toString());
         }
         if (hzclient == null) {
-        nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
+            nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
         } else {
-        IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
+            IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
 
-        NodeReference nodeReference = node.getIdentifier();
+            NodeReference nodeReference = node.getIdentifier();
 
-        hzNodes.put(updateNodeReference, node);
+            hzNodes.put(updateNodeReference, node);
         }
         return;
 
