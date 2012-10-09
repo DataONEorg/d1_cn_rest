@@ -38,6 +38,7 @@ import org.dataone.service.types.v1.Person;
 import org.dataone.service.types.v1.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.ContextMapper;
 import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
@@ -71,6 +72,7 @@ public class SubjectLdapPopulation {
     private LdapTemplate ldapTemplate;
 
     public void populateTestIdentities() {
+        populateDataONEOrganization();
         String testSubject1Value = "Frankenstein";
         Subject testSubject1 = new Subject();
         testSubject1.setValue(testSubject1Value);
@@ -174,6 +176,37 @@ public class SubjectLdapPopulation {
             DistinguishedName dn = new DistinguishedName(context.getDn());
 
             return dn;
+        }
+    }
+    private void populateDataONEOrganization() {
+        DistinguishedName dataOneCdn = new DistinguishedName();
+        dataOneCdn.add("DC", "dataone");
+        dataOneCdn.add("C", "US");
+        try {
+            ldapTemplate.lookup(dataOneCdn);
+        } catch (NameNotFoundException ex) {
+            DirContextAdapter context = new DirContextAdapter(dataOneCdn);
+
+            context.setAttributeValue("objectclass", "country");
+            context.setAttributeValue("C", "US");
+            ldapTemplate.bind(dataOneCdn, context, null);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        DistinguishedName dnOrgTest = new DistinguishedName();
+        dnOrgTest.add("DC", "dataone");
+        dnOrgTest.add("C", "US");
+        dnOrgTest.add("O", "Test");
+        try {
+            ldapTemplate.lookup(dnOrgTest);
+        } catch (NameNotFoundException ex) {
+            DirContextAdapter context = new DirContextAdapter(dnOrgTest);
+
+            context.setAttributeValue("objectclass", "organization");
+            context.setAttributeValue("O", "Test");
+            ldapTemplate.bind(dnOrgTest, context, null);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }
