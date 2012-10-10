@@ -444,6 +444,7 @@ public class IdentityTestCase {
     @Test
     public void updateGroupMembers() throws Exception {
         log.info("Test updateGroupMembers");
+        this.registerSecondAccount();
         this.createGroup();
         x509CertificateGenerator.storeSelfSignedCertificate();
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
