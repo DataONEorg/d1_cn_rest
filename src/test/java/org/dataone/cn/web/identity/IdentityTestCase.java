@@ -59,6 +59,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
 import java.security.cert.X509Certificate;
 import org.dataone.cn.ldap.v1.NodeLdapPopulation;
+import org.dataone.service.types.v1.*;
 
 /**
  *
@@ -402,7 +403,7 @@ public class IdentityTestCase {
     
     @Test
     public void createGroup() throws Exception {
-
+        log.info("Test createGroup");
         x509CertificateGenerator.storeSelfSignedCertificate();
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
         Subject groupSubject = new Subject();
@@ -425,23 +426,24 @@ public class IdentityTestCase {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        boolean result = false;
+        Subject result = null;
         try {
-            testController.createGroup(request, response);
-            result = true;
+            ModelAndView mav = testController.createGroup(request, response);
+            
+            result = (Subject) mav.getModel().get("org.dataone.service.types.v1.Subject");
         } catch (Exception ex) {
             fail("Test fail" + ex);
         }
         subjectLdapPopulation.testSubjectList.add(groupName);
         x509CertificateGenerator.cleanUpFiles();
-        assertTrue(result);
-
+        assertNotNull(result);
+        assertTrue(result.getValue().equals(groupName));
     }
 
 
     @Test
     public void updateGroupMembers() throws Exception {
-
+        log.info("Test updateGroupMembers");
         this.createGroup();
         x509CertificateGenerator.storeSelfSignedCertificate();
         X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
