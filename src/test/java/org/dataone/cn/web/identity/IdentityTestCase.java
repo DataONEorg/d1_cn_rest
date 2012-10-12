@@ -59,7 +59,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
 import java.security.cert.X509Certificate;
 import org.dataone.cn.ldap.v1.NodeLdapPopulation;
+import org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl;
 import org.dataone.service.types.v1.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  *
@@ -109,6 +113,10 @@ public class IdentityTestCase {
         //subjectLdapPopulation.deleteAllSubjects();
         subjectLdapPopulation.deletePopulatedSubjects();
     }
+    @Autowired
+    @Qualifier("cnIdentity")
+    private CNIdentityLDAPImpl  cnIdentity;    
+
     @Test
     public void listSubjects() throws Exception {
         log.info("Test listSubjects");
@@ -444,20 +452,53 @@ public class IdentityTestCase {
     @Test
     public void updateGroupMembers() throws Exception {
         log.info("Test updateGroupMembers");
-        this.registerSecondAccount();
-        this.createGroup();
-        x509CertificateGenerator.storeSelfSignedCertificate();
-        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+        Subject subjectPrime = new Subject();
+        subjectPrime.setValue(primarySubject);
+        Session session = new Session();
+        session.setSubject(subjectPrime);
+        
+        // register first test subject
+        String dnTertiary = Settings.getConfiguration().getString("testIdentity.tertiarySubject");
+        Subject tertiarySubject = new Subject();
+        tertiarySubject.setValue(dnTertiary);
+        Person tertiaryPerson = new Person();
+        tertiaryPerson.setSubject(tertiarySubject);
+        tertiaryPerson.setFamilyName("Lebowski");
+        tertiaryPerson.addGivenName("Jeff");
+        tertiaryPerson.addEmail("Jeff@dataone.org");
+        cnIdentity.registerAccount(session,tertiaryPerson);
+        
+        
         Subject groupSubject = new Subject();
         groupSubject.setValue(groupName);
-
+        Subject firstMember = new Subject();
+        firstMember.setValue(Settings.getConfiguration().getString("testIdentity.tertiarySubject"));
+        
+        
+        SubjectList newMembers = new SubjectList();
+        newMembers.addSubject(firstMember);
         Group group = new Group();
         group.setSubject(groupSubject);
         group.setGroupName(groupName);
-        Subject newMember = new Subject();
-        newMember.setValue(secondarySubject);
-        SubjectList newMembers = new SubjectList();
-        newMembers.addSubject(newMember);
+        cnIdentity.createGroup(session, group);
+
+        x509CertificateGenerator.storeSelfSignedCertificate();
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+        groupSubject.setValue(groupName);
+
+  
+        String dnQuartary = Settings.getConfiguration().getString("testIdentity.quartarySubject");
+        Subject quartarySubject = new Subject();
+        quartarySubject.setValue(dnQuartary);
+        Person personQuartary = new Person();
+        personQuartary.setSubject(quartarySubject);
+        personQuartary.setFamilyName("Dude");
+        personQuartary.addGivenName("The");
+        personQuartary.addEmail("TheDude@dataone.org");
+        cnIdentity.registerAccount(session,personQuartary);
+        
+        newMembers.addSubject(quartarySubject);
 
         group.setHasMemberList(newMembers.getSubjectList());
 
@@ -480,6 +521,9 @@ public class IdentityTestCase {
         } catch (Exception ex) {
             fail("Test fail" + ex);
         }
+        subjectLdapPopulation.testSubjectList.add(dnTertiary);
+        subjectLdapPopulation.testSubjectList.add(dnQuartary);
+        subjectLdapPopulation.testSubjectList.add(groupName);
         x509CertificateGenerator.cleanUpFiles();
         assertTrue(result);
         
