@@ -8,8 +8,8 @@
 	<xsl:import href="nodeList.v1.xsl"/>
 	<xsl:import href="objectList.v1.xsl"/>
 	<xsl:import href="objectFormatList.v1.xsl"/>
-	<xsl:import href="queryEngineDescription.v1.xsl"/>
-	<xsl:import href="queryEngineList.v1.xsl"/>
+	<xsl:import href="queryEngineDescription.v1_1.xsl"/>
+	<xsl:import href="queryEngineList.v1_1.xsl"/>
 
 	<xsl:output method="html" encoding="UTF-8" indent="yes" />
 	

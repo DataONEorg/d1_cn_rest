@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
 import org.dataone.service.exceptions.*;
 import org.dataone.service.types.v1.ChecksumAlgorithmList;
-import org.dataone.service.types.v1.QueryEngineList;
+import org.dataone.service.types.v1_1.QueryEngineList;
 /**
  * This controller will provide a default xml serialization of the Node that is
  * represented by this CN. This functionality has not yet been defined in
@@ -171,7 +171,7 @@ public class BaseController extends AbstractWebController implements ServletCont
              logger.debug(queryEngines[i]);
              queryEngineList.addQueryEngine(queryEngines[i]);
         }
-        return new ModelAndView("xmlQueryEngineListViewResolver", "org.dataone.service.types.v1.QueryEngineList", queryEngineList);
+        return new ModelAndView("xmlQueryEngineListViewResolver", "org.dataone.service.types.v1_1.QueryEngineList", queryEngineList);
 
     }
     @Override
