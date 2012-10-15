@@ -13,7 +13,7 @@ import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Checksum;
 import org.dataone.service.types.v1.ChecksumAlgorithmList;
 import org.dataone.service.types.v1.NodeList;
-import org.dataone.service.types.v1.QueryEngineList;
+import org.dataone.service.types.v1_1.QueryEngineList;
 import org.dataone.service.util.Constants;
 import org.junit.Test;
 
