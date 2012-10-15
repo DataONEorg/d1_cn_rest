@@ -76,7 +76,7 @@ public class BaseControllerTestCase {
         QueryEngineList queryEngineList = null;
         try {
             ModelAndView mav = testController.listQueryEngines(request, response);
-            queryEngineList = (QueryEngineList) mav.getModel().get("org.dataone.service.types.v1.QueryEngineList");
+            queryEngineList = (QueryEngineList) mav.getModel().get("org.dataone.service.types.v1d_1.QueryEngineList");
 
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration " + ex);
