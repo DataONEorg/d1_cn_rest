@@ -447,9 +447,92 @@ public class IdentityTestCase {
         assertTrue(result.getValue().equals(groupName));
     }
 
-
     @Test
     public void updateGroupMembers() throws Exception {
+        cnLdapPopulation.populateTestCN();
+        log.info("Test updateGroupMembers");
+        
+        // register first test subject
+        String dnTertiary = Settings.getConfiguration().getString("testIdentity.tertiarySubject");
+        Subject tertiarySubject = new Subject();
+        tertiarySubject.setValue(dnTertiary);
+        Person tertiaryPerson = new Person();
+        tertiaryPerson.setSubject(tertiarySubject);
+        tertiaryPerson.setFamilyName("Lebowski");
+        tertiaryPerson.addGivenName("Jeff");
+        tertiaryPerson.addEmail("Jeff@dataone.org");
+        
+        Session session = new Session();
+        session.setSubject(tertiarySubject);
+        cnIdentity.registerAccount(session,tertiaryPerson);
+        
+        Subject groupSubject = new Subject();
+        groupSubject.setValue(groupName);
+        Subject firstMember = new Subject();
+        firstMember.setValue(Settings.getConfiguration().getString("testIdentity.tertiarySubject"));
+        
+        
+        SubjectList newMembers = new SubjectList();
+        newMembers.addSubject(firstMember);
+        Group group = new Group();
+        group.setSubject(groupSubject);
+        group.setGroupName(groupName);
+        group.getRightsHolderList().add(firstMember);
+        cnIdentity.createGroup(session, group);
+
+        x509CertificateGenerator.setCommonName("Lebowski");
+        x509CertificateGenerator.storeSelfSignedCertificate(true);
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+        groupSubject.setValue(groupName);
+
+  
+        String dnQuartary = Settings.getConfiguration().getString("testIdentity.quartarySubject");
+        Subject quartarySubject = new Subject();
+        quartarySubject.setValue(dnQuartary);
+        Person personQuartary = new Person();
+        personQuartary.setSubject(quartarySubject);
+        personQuartary.setFamilyName("Dude");
+        personQuartary.addGivenName("The");
+        personQuartary.addEmail("TheDude@dataone.org");
+        cnIdentity.registerAccount(session,personQuartary);
+        
+        newMembers.addSubject(quartarySubject);
+
+        group.setHasMemberList(newMembers.getSubjectList());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(group, baos);
+        MockMultipartFile mockGroupFile = new MockMultipartFile("group",baos.toByteArray());
+        log.info(new String(baos.toByteArray()));
+
+        MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+        request.setMethod("PUT");
+        request.setContextPath("/Mock" + GROUPS_PATH_V1);
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
+        request.addFile(mockGroupFile);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        boolean result = false;
+        try {
+            testController.updateGroup(request, response);
+            result = true;
+        } catch (Exception ex) {
+            fail("Test fail" + ex);
+        }
+        subjectLdapPopulation.testSubjectList.add(dnTertiary);
+        subjectLdapPopulation.testSubjectList.add(dnQuartary);
+        subjectLdapPopulation.testSubjectList.add(groupName);
+        x509CertificateGenerator.cleanUpFiles();
+        cnLdapPopulation.deletePopulatedNodes();
+        assertTrue(result);
+        
+    }
+
+
+//    @Test
+    public void updateGroupMembersWithCNSubject() throws Exception {
+        cnLdapPopulation.populateTestCN();
         log.info("Test updateGroupMembers");
         Subject subjectPrime = new Subject();
         subjectPrime.setValue(primarySubject);
@@ -479,6 +562,7 @@ public class IdentityTestCase {
         Group group = new Group();
         group.setSubject(groupSubject);
         group.setGroupName(groupName);
+        group.getRightsHolderList().add(firstMember);
         cnIdentity.createGroup(session, group);
 
         x509CertificateGenerator.storeSelfSignedCertificate();
@@ -504,7 +588,7 @@ public class IdentityTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(group, baos);
         MockMultipartFile mockGroupFile = new MockMultipartFile("group",baos.toByteArray());
-
+        log.info(new String(baos.toByteArray()));
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("PUT");
@@ -524,8 +608,9 @@ public class IdentityTestCase {
         subjectLdapPopulation.testSubjectList.add(dnQuartary);
         subjectLdapPopulation.testSubjectList.add(groupName);
         x509CertificateGenerator.cleanUpFiles();
+        cnLdapPopulation.deletePopulatedNodes();
         assertTrue(result);
         
     }
-
+    
 }

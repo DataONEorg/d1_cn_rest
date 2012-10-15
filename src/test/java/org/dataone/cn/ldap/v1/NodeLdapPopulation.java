@@ -155,7 +155,9 @@ public class NodeLdapPopulation {
         try {
         Node sqrmCNNode =  buildTestNode("/org/dataone/cn/resources/samples/v1/cnNodeTest1.xml");
         searchAndDestroyNode(sqrmCNNode.getIdentifier().getValue());
-
+                Subject primeSubject = new Subject();
+                primeSubject.setValue(primarySubject);
+        sqrmCNNode.addSubject(primeSubject);
         // because we use a base DN, only need to supply the RDN
         DistinguishedName dn = new DistinguishedName();
         dn.add("dc", "dataone");
@@ -178,9 +180,7 @@ public class NodeLdapPopulation {
             if (service.getName().equalsIgnoreCase("CNIdentity")) {
                 ServiceMethodRestriction restrict = new ServiceMethodRestriction();
                 restrict.setMethodName("mapIdentity");
-                Subject restrictToSubject = new Subject();
-                restrictToSubject.setValue(primarySubject);
-                restrict.addSubject(restrictToSubject);
+                restrict.addSubject(primeSubject);
                 DistinguishedName dnServiceRestriction = new DistinguishedName();
                 dnServiceRestriction.add("dc", "dataone");
                 dnServiceRestriction.add("cn", sqrmCNNode.getIdentifier().getValue());
