@@ -50,6 +50,8 @@ import org.springframework.ldap.core.ParseException;
 import org.springframework.ldap.core.support.AbstractContextMapper;
 import org.springframework.ldap.filter.AndFilter;
 import org.springframework.ldap.filter.EqualsFilter;
+import org.springframework.ldap.filter.LikeFilter;
+import org.springframework.ldap.filter.OrFilter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -128,17 +130,36 @@ public class SubjectLdapPopulation {
         context.setAttributeValue("isVerified", Boolean.toString(person.getVerified()).toUpperCase());
 
     }
-
-    public void deletePopulatedSubjects() {
-        for (String subject : testSubjectList) {
-            try {
-                deleteSubject(subject);
-            } catch (ParseException ex) {
-                log.error("Deleting Subject failed: " + ex.getMessage() + " for " + subject);
+    public void searchAndDestroyIdentity() {
+        DistinguishedName testCilogonOrg = new DistinguishedName();
+        testCilogonOrg.add("DC", "cilogon");
+        testCilogonOrg.add("C", "US");
+        testCilogonOrg.add("O", "Test");
+        log.info("start searchAndDestroyIdentity for Cilogon");
+        searchAndDestroyIdentity(testCilogonOrg);
+        DistinguishedName testDataONEOrg = new DistinguishedName();
+        testCilogonOrg.add("DC", "dataone");
+        testCilogonOrg.add("C", "US");
+        testCilogonOrg.add("O", "Test");
+        searchAndDestroyIdentity(testDataONEOrg);
+    }
+    private void searchAndDestroyIdentity(DistinguishedName dn) {
+        DnContextMapper dnContextMapper = new DnContextMapper();
+        OrFilter classFilter = new OrFilter();
+        classFilter.or(new EqualsFilter("objectclass", "d1Principal"));
+        classFilter.or(new EqualsFilter("objectclass", "groupOfUniqueNames"));
+        
+        
+        List identityDnList = ldapTemplate.search(dn, classFilter.encode(), dnContextMapper);
+        if ((identityDnList != null) && !(identityDnList.isEmpty())) {
+            for (Object identityDnInstance : identityDnList) {
+                DistinguishedName identityDn = (DistinguishedName) identityDnInstance;
+                log.info("deleting: " + identityDn.encode());
+                ldapTemplate.unbind(identityDn);
             }
         }
-        testSubjectList.clear();
     }
+
 
     private void deleteSubject(String subject) throws ParseException {
         ByteArrayInputStream subjectBytes = new ByteArrayInputStream(subject.getBytes());

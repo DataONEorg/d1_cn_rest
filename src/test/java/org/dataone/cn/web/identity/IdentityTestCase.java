@@ -105,13 +105,12 @@ public class IdentityTestCase {
     }
     @Before
     public void before() throws Exception {
-
+        subjectLdapPopulation.searchAndDestroyIdentity();
         subjectLdapPopulation.populateTestIdentities();
     }
     @After
     public void after() throws Exception {
-        //subjectLdapPopulation.deleteAllSubjects();
-        subjectLdapPopulation.deletePopulatedSubjects();
+        subjectLdapPopulation.searchAndDestroyIdentity();
     }
     @Autowired
     @Qualifier("cnIdentity")

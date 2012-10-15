@@ -98,6 +98,7 @@ public class NodeRegistryTestCase {
     }
     @Before
     public void before() throws Exception {
+        subjectLdapPopulation.searchAndDestroyIdentity();
         cnLdapPopulation.populateTestMNs();
         cnLdapPopulation.populateTestCN();
         subjectLdapPopulation.populateTestIdentities();
@@ -105,7 +106,7 @@ public class NodeRegistryTestCase {
     @After
     public void after() throws Exception {
         cnLdapPopulation.deletePopulatedNodes();
-        subjectLdapPopulation.deletePopulatedSubjects();
+        subjectLdapPopulation.searchAndDestroyIdentity();
     }
     @Autowired
     @Qualifier("mnNodeResource")
