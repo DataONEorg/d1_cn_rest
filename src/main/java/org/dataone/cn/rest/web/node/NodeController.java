@@ -22,39 +22,46 @@
 
 package org.dataone.cn.rest.web.node;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.core.IMap;
-
 import java.io.IOException;
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.functors.EqualPredicate;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.ClientConfiguration;
+import org.dataone.cn.rest.web.AbstractWebController;
+import org.dataone.configuration.Settings;
 import org.dataone.mimemultipart.MultipartRequestResolver;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.cn.v1.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
-import org.dataone.service.exceptions.NotAuthorized;
-import org.dataone.service.exceptions.NotFound;
-import org.dataone.service.util.Constants;
 import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.InvalidToken;
+import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Group;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeList;
 import org.dataone.service.types.v1.NodeReference;
+import org.dataone.service.types.v1.NodeState;
+import org.dataone.service.types.v1.NodeType;
 import org.dataone.service.types.v1.Person;
+import org.dataone.service.types.v1.Service;
+import org.dataone.service.types.v1.ServiceMethodRestriction;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
+import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,13 +75,11 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.functors.EqualPredicate;
-import org.apache.commons.lang.StringUtils;
-import org.dataone.cn.rest.web.AbstractWebController;
-import org.dataone.configuration.Settings;
-import org.dataone.service.types.v1.*;
+
+import com.hazelcast.client.ClientConfig;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 
 /**
  *
@@ -222,8 +227,11 @@ public class NodeController extends AbstractWebController implements ServletCont
             // try to work around 
             try {
                 // TODO: try to connect to each hzClusterMember (localhost being the first one) should a connection fail
-            hzclient = HazelcastClient.newHazelcastClient(clientConfiguration.getGroup(), clientConfiguration.getPassword(),
-                    clientConfiguration.getLocalhost());
+                ClientConfig cc = new ClientConfig();
+                cc.getGroupConfig().setName(clientConfiguration.getGroup());
+                cc.getGroupConfig().setPassword(clientConfiguration.getPassword());
+                cc.addAddress(clientConfiguration.getLocalhost());
+                hzclient = HazelcastClient.newHazelcastClient(cc);
             } catch (Exception e) {
                 logger.error("hzclient is not able to connect to cluster");
                 hzclient = null;
