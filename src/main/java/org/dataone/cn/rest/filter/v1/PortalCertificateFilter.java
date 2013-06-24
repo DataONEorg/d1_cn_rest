@@ -73,6 +73,9 @@ public class PortalCertificateFilter implements Filter {
                     + httpRequest.getRequestURI() + " for triage");
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+        	// do something different?
+            e.printStackTrace();
         }
 
         // continue the request
