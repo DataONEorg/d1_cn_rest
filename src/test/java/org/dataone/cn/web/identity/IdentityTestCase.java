@@ -272,6 +272,12 @@ public class IdentityTestCase {
     @Test
     public void updateAccount() throws Exception {
         log.info("Test updateAccount");
+        x509CertificateGenerator.setCommonName("Test1");
+        x509CertificateGenerator.storeSelfSignedCertificate();
+
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
+  
     	// register
     	registerAccount();
     	
@@ -289,6 +295,7 @@ public class IdentityTestCase {
 
         MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
         request.setMethod("PUT");
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         request.setContextPath("/Mock" + ACCOUNTS_PATH_V1);
         request.addFile(mockPersonFile);
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -311,18 +318,23 @@ public class IdentityTestCase {
          log.info("Test verifyAccount");
     	// create the account first
     	registerAccount();
-    	
+        x509CertificateGenerator.setCommonName("Test1");
+        x509CertificateGenerator.storeSelfSignedCertificate();
+
+        X509Certificate certificate[] = {CertificateManager.getInstance().loadCertificate()};
+
         Subject subject = new Subject();
         subject.setValue(primarySubject);
         
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/Mock"  + ACCOUNT_VERIFICATION_PATH_V1 + "/"+ primarySubject);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        
+        request.setAttribute("javax.servlet.request.X509Certificate", certificate);
         boolean success = false;
         try {
             testController.verifyAccount(request, response);
             success = true;
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail("Test fail" + ex);
         }
 
