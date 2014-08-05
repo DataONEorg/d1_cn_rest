@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.filter.v1;
+package org.dataone.cn.rest.filter;
 
 import java.io.IOException;
 
