@@ -23,36 +23,37 @@
 package org.dataone.cn.rest.web.base;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataone.cn.rest.web.AbstractWebController;
+import org.dataone.configuration.Settings;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.exceptions.InvalidToken;
+import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.v1.ChecksumAlgorithmList;
 import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeReference;
+import org.dataone.service.types.v1_1.QueryEngineList;
 import org.dataone.service.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.io.OutputStream;
-import org.dataone.cn.rest.web.AbstractWebController;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dataone.configuration.Settings;
-import org.dataone.service.exceptions.*;
-import org.dataone.service.types.v1.ChecksumAlgorithmList;
-import org.dataone.service.types.v1_1.QueryEngineList;
 /**
  * This controller will provide a default xml serialization of the Node that is
  * represented by this CN. This functionality has not yet been defined in
