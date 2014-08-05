@@ -59,11 +59,11 @@
     </filter-mapping>
     
     <filter>
-        <filter-name>PortalCertificateFilterV1</filter-name>
-        <filter-class>org.dataone.cn.rest.filter.v1.PortalCertificateFilter</filter-class>
+        <filter-name>PortalCertificateFilter</filter-name>
+        <filter-class>org.dataone.cn.rest.filter.PortalCertificateFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>PortalCertificateFilterV1</filter-name>
+        <filter-name>PortalCertificateFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
