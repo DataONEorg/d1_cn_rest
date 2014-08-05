@@ -26,14 +26,14 @@ package org.dataone.cn.rest.filter.v1;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -42,36 +42,36 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import javax.xml.xpath.XPathFactory;
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
-import org.dataone.service.util.ExceptionHandler;
-import org.dataone.service.util.EncodingUtilities;
-import org.dataone.service.exceptions.*;
-import org.dataone.service.types.v1.ObjectLocationList;
+import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.exceptions.BaseException;
+import org.dataone.service.exceptions.InvalidRequest;
+import org.dataone.service.exceptions.InvalidToken;
+import org.dataone.service.exceptions.NotAuthorized;
+import org.dataone.service.exceptions.NotFound;
+import org.dataone.service.exceptions.NotImplemented;
+import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.Node;
 import org.dataone.service.types.v1.NodeList;
 import org.dataone.service.types.v1.NodeReference;
+import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.ObjectLocation;
+import org.dataone.service.types.v1.ObjectLocationList;
 import org.dataone.service.types.v1.Replica;
 import org.dataone.service.types.v1.ReplicationStatus;
-import org.dataone.service.types.v1.SystemMetadata;
-import org.dataone.service.cn.impl.v1.NodeRegistryService;
-import org.dataone.service.types.v1.Node;
-import org.dataone.service.types.v1.NodeState;
-import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v1.Service;
+import org.dataone.service.types.v1.Services;
+import org.dataone.service.types.v1.SystemMetadata;
 import org.dataone.service.types.v1.util.NodelistUtil;
+import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import org.xml.sax.SAXException;
 
 /**
  * ResolveFilter interoperates with UrlRewriteFilter to handle cn/resolve calls.
@@ -333,11 +333,11 @@ public class ResolveFilter implements Filter {
                 BaseException d1be = responseWrapper.getD1Exception();
                 /*
                  * Check for these exceptions from getSystemMetadata and re-raise them as resolve exceptions
-                 * Exceptions.InvalidToken – (errorCode=401, detailCode=1050)
-                 * Exceptions.NotImplemented – (errorCode=501, detailCode=1041)
-                 * Exceptions.ServiceFailure – (errorCode=500, detailCode=1090)
-                 * Exceptions.NotAuthorized – (errorCode=401, detailCode=1040)
-                 * Exceptions.NotFound – (errorCode=404, detailCode=1060)
+                 * Exceptions.InvalidToken (errorCode=401, detailCode=1050)
+                 * Exceptions.NotImplemented (errorCode=501, detailCode=1041)
+                 * Exceptions.ServiceFailure (errorCode=500, detailCode=1090)
+                 * Exceptions.NotAuthorized (errorCode=401, detailCode=1040)
+                 * Exceptions.NotFound (errorCode=404, detailCode=1060)
                  */
 
                 for (String key : d1be.getTraceKeySet()) {
