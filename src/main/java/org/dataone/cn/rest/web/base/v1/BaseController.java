@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.base;
+package org.dataone.cn.rest.web.base.v1;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.web.node;
+package org.dataone.cn.web.node.v1;
 
 import com.hazelcast.config.Config;
 import java.io.BufferedInputStream;
@@ -33,7 +33,7 @@ import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.auth.X509CertificateGenerator;
 import org.dataone.cn.ldap.v1.NodeLdapPopulation;
 import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
-import org.dataone.cn.rest.web.node.NodeController;
+import org.dataone.cn.rest.web.node.v1.NodeController;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.service.exceptions.InvalidRequest;

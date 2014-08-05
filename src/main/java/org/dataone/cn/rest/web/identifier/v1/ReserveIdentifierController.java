@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.identifier;
+package org.dataone.cn.rest.web.identifier.v1;
 
 import java.io.UnsupportedEncodingException;
 

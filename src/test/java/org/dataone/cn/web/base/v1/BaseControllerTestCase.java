@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.dataone.cn.web.base;
+package org.dataone.cn.web.base.v1;
 
 import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.cn.rest.web.base.BaseController;
+import org.dataone.cn.rest.web.base.v1.BaseController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Checksum;

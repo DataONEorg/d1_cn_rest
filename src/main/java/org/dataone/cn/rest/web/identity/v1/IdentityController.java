@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.identity;
+package org.dataone.cn.rest.web.identity.v1;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;

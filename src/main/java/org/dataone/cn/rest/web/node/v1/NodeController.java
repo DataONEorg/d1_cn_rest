@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.node;
+package org.dataone.cn.rest.web.node.v1;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.web.identity;
+package org.dataone.cn.web.identity.v1;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -35,7 +35,7 @@ import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.auth.X509CertificateGenerator;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
-import org.dataone.cn.rest.web.identity.IdentityController;
+import org.dataone.cn.rest.web.identity.v1.IdentityController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.configuration.Settings;
 import org.dataone.service.exceptions.ServiceFailure;

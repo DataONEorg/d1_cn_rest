@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.web.identifier;
+package org.dataone.cn.web.identifier.v1;
 
 import com.hazelcast.core.HazelcastInstance;
 import java.io.ByteArrayOutputStream;
@@ -39,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
 import org.dataone.cn.rest.proxy.service.impl.mock.ProxyCNReadServiceImpl;
-import org.dataone.cn.rest.web.identifier.ReserveIdentifierController;
+import org.dataone.cn.rest.web.identifier.v1.ReserveIdentifierController;
 import org.dataone.cn.auth.X509CertificateGenerator;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.configuration.Settings;
