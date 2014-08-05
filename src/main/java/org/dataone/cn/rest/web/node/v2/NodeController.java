@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.node.v1;
+package org.dataone.cn.rest.web.node.v2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,8 +40,8 @@ import org.dataone.cn.hazelcast.ClientConfiguration;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
 import org.dataone.mimemultipart.MultipartRequestResolver;
-import org.dataone.service.cn.impl.v1.NodeRegistryService;
-import org.dataone.service.cn.v1.CNIdentity;
+import org.dataone.service.cn.impl.v2.NodeRegistryService;
+import org.dataone.service.cn.v2.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.InvalidToken;
@@ -50,8 +50,8 @@ import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Group;
-import org.dataone.service.types.v1.Node;
-import org.dataone.service.types.v1.NodeList;
+import org.dataone.service.types.v2.Node;
+import org.dataone.service.types.v2.NodeList;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.NodeType;
@@ -88,12 +88,12 @@ import com.hazelcast.core.IMap;
  * @author waltz
  * 
  */
-@Controller("nodeControllerV1")
+@Controller("nodeControllerV2")
 public class NodeController extends AbstractWebController implements ServletContextAware {
 
     Logger logger = Logger.getLogger(NodeController.class.getName());
-    private static final String NODE_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE + "/";
-    private static final String NODELIST_PATH_V1 = "/v1/" + Constants.RESOURCE_NODE;
+    private static final String NODE_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE + "/";
+    private static final String NODELIST_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE;
     private ServletContext servletContext;
     CertificateManager certificateManager = CertificateManager.getInstance();
     MultipartRequestResolver multipartRequestResolver = new MultipartRequestResolver("/tmp", 1000000000, 0);
@@ -104,14 +104,14 @@ public class NodeController extends AbstractWebController implements ServletCont
     // do not want an entry that makes the CN a sychronization target as an MN node
     // or rather we do not want an MN node to point to a CN end-point
     @Autowired
-    @Qualifier("cnNodeRegistryV1")
+    @Qualifier("cnNodeRegistryV2")
     NodeRegistryService nodeRegistry;
     @Autowired
     @Qualifier("hzClientConfiguration")
     ClientConfiguration clientConfiguration;
     HazelcastInstance hzclient = null;
     @Autowired
-    @Qualifier("cnIdentityV1")
+    @Qualifier("cnIdentityV2")
     CNIdentity cnIdentity;
 
     @Value("${cn.nodeId}")
@@ -150,7 +150,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @throws ServiceFailure
      * @return ModelAndView
      */
-    @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
+    @RequestMapping(value = {NODELIST_PATH_V2, NODE_PATH_V2}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented {
 
         //NodeList nodeList = nodeListRetrieval.retrieveNodeList(request, response, servletContext);
@@ -177,7 +177,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @throws ServiceFailure
      * @return ModelAndView
      */
-    @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.GET)
+    @RequestMapping(value = NODE_PATH_V2 + "{nodeId}", method = RequestMethod.GET)
     public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response, @PathVariable String nodeId) throws ServiceFailure, NotFound {
         NodeReference reference = new NodeReference();
         reference.setValue(nodeId);
@@ -209,7 +209,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @throws ServiceFailure
      * @return ModelAndView
      */
-    @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
+    @RequestMapping(value = NODE_PATH_V2 + "{nodeId}", method = RequestMethod.PUT)
     public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
         Session session = CertificateManager.getInstance().getSession(fileRequest);
         if (session == null) {
@@ -413,7 +413,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @return ModelAndView
      * 
      */
-    @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
+    @RequestMapping(value = {NODELIST_PATH_V2, NODE_PATH_V2}, method = RequestMethod.POST)
     public ModelAndView register(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidRequest, NotAuthorized, IdentifierNotUnique, InvalidToken {
         Session session = CertificateManager.getInstance().getSession(fileRequest);
         if (session == null) {

@@ -47,7 +47,12 @@
     </spring:bean>
         
     <!-- configure to match the LDAP server configuration -->
-    <spring:bean name="reserveIdentifierService" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
+    <spring:bean name="reserveIdentifierServiceV1" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
+        <spring:property name="server" value="ldap://localhost:389"/>
+        <spring:property name="password" value="password"/>
+    </spring:bean>
+    
+    <spring:bean name="reserveIdentifierServiceV2" class="org.dataone.service.cn.impl.v2.ReserveIdentifierService">
         <spring:property name="server" value="ldap://localhost:389"/>
         <spring:property name="password" value="password"/>
     </spring:bean>

@@ -119,7 +119,7 @@ public class NodeRegistryTestCase {
     @Qualifier("mnInvalidNodeResource")
     private ClassPathResource mnInvalidNodeResource;
     @Autowired
-    @Qualifier("cnNodeRegistry")
+    @Qualifier("cnNodeRegistryV1")
     private NodeRegistryService nodeRegistryService;   
     @Autowired
     @Qualifier("cnIdentity")

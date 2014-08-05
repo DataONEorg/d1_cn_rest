@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.base.v1;
+package org.dataone.cn.rest.web.base.v2;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,14 +36,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
-import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.cn.impl.v2.NodeRegistryService;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.ChecksumAlgorithmList;
-import org.dataone.service.types.v1.Node;
+import org.dataone.service.types.v2.Node;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1_1.QueryEngineList;
 import org.dataone.service.util.Constants;
@@ -67,12 +67,12 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author waltz
  */
-@Controller("baseControllerV1")
+@Controller("baseControllerV2")
 public class BaseController extends AbstractWebController implements ServletContextAware{
 
     public static Log logger = LogFactory.getLog(BaseController.class);
     @Autowired
-    @Qualifier("cnNodeRegistryV1")
+    @Qualifier("cnNodeRegistryV2")
     NodeRegistryService  nodeRetrieval;
     private ServletContext servletContext;
 

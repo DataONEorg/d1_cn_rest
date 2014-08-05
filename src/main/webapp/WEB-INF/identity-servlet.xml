@@ -24,8 +24,12 @@
     </spring:bean>
     
     <!-- configure to match the LDAP server configuration -->
-    <spring:bean name="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
-        <spring:qualifier value="cnIdentity" />
+    <spring:bean name="cnIdentityV1" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
+        <spring:qualifier value="cnIdentityV1" />
+    </spring:bean>
+    
+    <spring:bean name="cnIdentityV2" class="org.dataone.service.cn.impl.v2.CNIdentityLDAPImpl">
+        <spring:qualifier value="cnIdentityV2" />
     </spring:bean>
     
     <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">

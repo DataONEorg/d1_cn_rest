@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.identity.v1;
+package org.dataone.cn.rest.web.identity.v2;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ import org.dataone.client.auth.CertificateManager;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.service.util.Constants;
-import org.dataone.service.cn.v1.CNIdentity;
+import org.dataone.service.cn.v2.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -61,18 +61,18 @@ import org.apache.log4j.Logger;
  *
  * @author leinfelder
  */
-@Controller("identityController")
+@Controller("identityControllerV2")
 public class IdentityController extends AbstractWebController implements ServletContextAware {
     Logger logger = Logger.getLogger(IdentityController.class.getName());
     /*
      * hard coded paths that this controller will proxy out.
      * easier to modify in future releases to keep them all at the top
      */
-    private static final String ACCOUNT_MAPPING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING;
-    private static final String ACCOUNT_MAPPING_PENDING_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
-    private static final String ACCOUNT_VERIFICATION_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNT_VERIFICATION;
-    private static final String ACCOUNTS_PATH_V1 = "/v1/" + Constants.RESOURCE_ACCOUNTS;
-    private static final String GROUPS_PATH_V1 = "/v1/" + Constants.RESOURCE_GROUPS;
+    private static final String ACCOUNT_MAPPING_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNT_MAPPING;
+    private static final String ACCOUNT_MAPPING_PENDING_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNT_MAPPING_PENDING;
+    private static final String ACCOUNT_VERIFICATION_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNT_VERIFICATION;
+    private static final String ACCOUNTS_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNTS;
+    private static final String GROUPS_PATH_V2 = "/v2/" + Constants.RESOURCE_GROUPS;
 
 
     private ServletContext servletContext;
@@ -80,7 +80,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 	private URLCodec urlDecoder = new URLCodec();
 
     @Autowired
-    @Qualifier("cnIdentityV1")
+    @Qualifier("cnIdentityV2")
     CNIdentity  cnIdentity;
     public IdentityController() {}
     /**
@@ -91,7 +91,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      *
      * @author leinfelder
      */
-    @RequestMapping(value = {ACCOUNT_MAPPING_PATH_V1, ACCOUNT_MAPPING_PATH_V1 + "/" }, method = RequestMethod.POST)
+    @RequestMapping(value = {ACCOUNT_MAPPING_PATH_V2, ACCOUNT_MAPPING_PATH_V2 + "/" }, method = RequestMethod.POST)
     public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -119,14 +119,14 @@ public class IdentityController extends AbstractWebController implements Servlet
      *
      * @author leinfelder
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    @RequestMapping(value = ACCOUNT_MAPPING_PATH_V2 + "/*", method = RequestMethod.DELETE)
     public void removeMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PATH_V1 + "/";
+    	String path = ACCOUNT_MAPPING_PATH_V2 + "/";
     	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
         logger.info("Removing Identity " + subjectString);
     	try {
@@ -149,7 +149,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      *
      * @author leinfelder
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.GET)
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/*", method = RequestMethod.GET)
     public ModelAndView getPendingMapIdentity(HttpServletRequest request, HttpServletResponse response) 
     	throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
 
@@ -157,7 +157,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/";
     	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
@@ -187,7 +187,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      * 
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1, method = RequestMethod.POST)
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V2, method = RequestMethod.POST)
     public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -214,14 +214,14 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.PUT)
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/*", method = RequestMethod.PUT)
     public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/";
     	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
@@ -246,14 +246,14 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.DELETE)
+    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/*", method = RequestMethod.DELETE)
     public void denyMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/";
+    	String path = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/";
     	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
@@ -276,7 +276,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.GET)
+    @RequestMapping(value = {ACCOUNTS_PATH_V2, ACCOUNTS_PATH_V2 + "/"}, method = RequestMethod.GET)
     public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -310,14 +310,14 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.GET)
+    @RequestMapping(value = ACCOUNTS_PATH_V2 + "/*", method = RequestMethod.GET)
     public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
-    	String path = ACCOUNTS_PATH_V1 + "/";
+    	String path = ACCOUNTS_PATH_V2 + "/";
     	String subjectString = requesUri.substring(requesUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
@@ -343,7 +343,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.POST)
+    @RequestMapping(value = {ACCOUNTS_PATH_V2, ACCOUNTS_PATH_V2 + "/"}, method = RequestMethod.POST)
     public ModelAndView registerAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
@@ -374,7 +374,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNTS_PATH_V1 + "/**", method = RequestMethod.PUT)
+    @RequestMapping(value = ACCOUNTS_PATH_V2 + "/**", method = RequestMethod.PUT)
     public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -407,7 +407,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = ACCOUNT_VERIFICATION_PATH_V1 + "/*", method = RequestMethod.PUT)
+    @RequestMapping(value = ACCOUNT_VERIFICATION_PATH_V2 + "/*", method = RequestMethod.PUT)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	
@@ -415,7 +415,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     	Session session = CertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
-    	String path = ACCOUNT_VERIFICATION_PATH_V1 + "/";
+    	String path = ACCOUNT_VERIFICATION_PATH_V2 + "/";
     	String subjectString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
@@ -443,7 +443,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = {GROUPS_PATH_V1, GROUPS_PATH_V1 + "/"}, method = RequestMethod.POST)
+    @RequestMapping(value = {GROUPS_PATH_V2, GROUPS_PATH_V2 + "/"}, method = RequestMethod.POST)
     public ModelAndView createGroup(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
@@ -479,7 +479,7 @@ public class IdentityController extends AbstractWebController implements Servlet
      * @author leinfelder
      *
      */
-    @RequestMapping(value = {GROUPS_PATH_V1, GROUPS_PATH_V1 + "/"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {GROUPS_PATH_V2, GROUPS_PATH_V2 + "/"}, method = RequestMethod.PUT)
     public void updateGroup(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request

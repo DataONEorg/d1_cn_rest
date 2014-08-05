@@ -31,11 +31,17 @@
     </spring:bean>
 
 
-    <spring:bean id="cnNodeRegistry" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
-        <spring:qualifier value="cnNodeRegistry"/>
+    <spring:bean id="cnNodeRegistryV1" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
+        <spring:qualifier value="cnNodeRegistryV1"/>
+    </spring:bean>
+    
+    <spring:bean id="cnNodeRegistryV2" class="org.dataone.service.cn.impl.v2.NodeRegistryService">
+        <spring:qualifier value="cnNodeRegistryV2"/>
     </spring:bean>
 
     <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
+
+    <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v2"  />
     
     <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" />
 

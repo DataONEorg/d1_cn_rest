@@ -23,8 +23,12 @@
     </spring:bean>
 
     <!-- configure to match the LDAP server configuration -->
-    <spring:bean name="reserveIdentifierService" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
-        <spring:qualifier value="reserveIdentifierService" />
+    <spring:bean name="reserveIdentifierServiceV1" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
+        <spring:qualifier value="reserveIdentifierServiceV1" />
+    </spring:bean>
+    
+    <spring:bean name="reserveIdentifierServiceV2" class="org.dataone.service.cn.impl.v2.ReserveIdentifierService">
+        <spring:qualifier value="reserveIdentifierServiceV2" />
     </spring:bean>
     
     <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">

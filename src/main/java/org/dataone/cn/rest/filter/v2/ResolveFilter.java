@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.filter.v1;
+package org.dataone.cn.rest.filter.v2;
 
 // TODO: refactor to split out nodelist logic into separate class - CachedNodeList
 import java.io.ByteArrayInputStream;
@@ -46,7 +46,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
-import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.cn.impl.v2.NodeRegistryService;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.InvalidToken;
@@ -55,8 +55,8 @@ import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
-import org.dataone.service.types.v1.Node;
-import org.dataone.service.types.v1.NodeList;
+import org.dataone.service.types.v2.Node;
+import org.dataone.service.types.v2.NodeList;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.ObjectLocation;
@@ -65,8 +65,8 @@ import org.dataone.service.types.v1.Replica;
 import org.dataone.service.types.v1.ReplicationStatus;
 import org.dataone.service.types.v1.Service;
 import org.dataone.service.types.v1.Services;
-import org.dataone.service.types.v1.SystemMetadata;
-import org.dataone.service.types.v1.util.NodelistUtil;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.types.v2.util.NodelistUtil;
 import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
@@ -111,7 +111,7 @@ public class ResolveFilter implements Filter {
     // if you are changing this, you better look at the procedure to 
     // create the objectLocationList
     @Autowired
-    @Qualifier("cnNodeRegistryV1")
+    @Qualifier("cnNodeRegistryV2")
     NodeRegistryService nodeListRetrieval;
 
     /**

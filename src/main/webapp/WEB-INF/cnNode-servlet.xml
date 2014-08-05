@@ -27,9 +27,14 @@
          <spring:value>file:/etc/dataone/node.properties</spring:value>
       </spring:property>
    </spring:bean>
-    <spring:bean name="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
-        <spring:qualifier value="cnIdentity" />
+    
+    <spring:bean name="cnIdentityV1" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
+        <spring:qualifier value="cnIdentityV1" />
     </spring:bean>
+    <spring:bean name="cnIdentityV2" class="org.dataone.service.cn.impl.v2.CNIdentityLDAPImpl">
+        <spring:qualifier value="cnIdentityV2" />
+    </spring:bean>
+    
     <context:component-scan base-package="org.dataone.cn.rest.web.node"  />
     
     <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">

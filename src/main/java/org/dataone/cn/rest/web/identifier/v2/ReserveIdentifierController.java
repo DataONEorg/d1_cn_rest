@@ -20,7 +20,7 @@
  * $Id$
  */
 
-package org.dataone.cn.rest.web.identifier.v1;
+package org.dataone.cn.rest.web.identifier.v2;
 
 import java.io.UnsupportedEncodingException;
 
@@ -33,7 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.web.AbstractWebController;
-import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
+import org.dataone.service.cn.impl.v2.ReserveIdentifierService;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -61,16 +61,16 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author leinfelder
  */
-@Controller("reserveIdentifierControllerV1")
+@Controller("reserveIdentifierControllerV2")
 public class ReserveIdentifierController extends AbstractWebController implements ServletContextAware {
     public static Log log = LogFactory.getLog(ReserveIdentifierController.class);
 
-    private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
-    private static final String RESOURCE_GENERATE_PATH_V1 = "/v1/" + Constants.RESOURCE_GENERATE;
+    private static final String RESOURCE_RESERVE_PATH_V2 = "/v2/" + Constants.RESOURCE_RESERVE;
+    private static final String RESOURCE_GENERATE_PATH_V2 = "/v2/" + Constants.RESOURCE_GENERATE;
 
     private ServletContext servletContext;
     @Autowired
-    @Qualifier("reserveIdentifierServiceV1")
+    @Qualifier("reserveIdentifierServiceV2")
     ReserveIdentifierService reserveIdentifierService;
 
     private URLCodec urlCodec = new URLCodec();
@@ -93,7 +93,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidCredentials
      * @throws InvalidRequest
      */
-    @RequestMapping(value = {RESOURCE_RESERVE_PATH_V1, RESOURCE_RESERVE_PATH_V1 }, method = RequestMethod.POST)
+    @RequestMapping(value = {RESOURCE_RESERVE_PATH_V2, RESOURCE_RESERVE_PATH_V2 }, method = RequestMethod.POST)
     public ModelAndView reserveIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
         // get the Session object from certificate in request
@@ -135,7 +135,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidCredentials
      * @throws InvalidRequest when the scheme is not recognized, or missing
      */
-    @RequestMapping(value = {RESOURCE_GENERATE_PATH_V1, RESOURCE_GENERATE_PATH_V1 + "/" }, method = RequestMethod.POST)
+    @RequestMapping(value = {RESOURCE_GENERATE_PATH_V2, RESOURCE_GENERATE_PATH_V2 + "/" }, method = RequestMethod.POST)
     public ModelAndView generateIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
         // get the Session object from certificate in request
@@ -187,7 +187,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws InvalidRequest
      * @throws NotFound
      */
-    @RequestMapping(value = RESOURCE_RESERVE_PATH_V1 + "/**", method = RequestMethod.GET)
+    @RequestMapping(value = RESOURCE_RESERVE_PATH_V2 + "/**", method = RequestMethod.GET)
     public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
@@ -198,7 +198,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
         try {
         	String requestUri = request.getRequestURI();
                 
-        	String path = RESOURCE_RESERVE_PATH_V1 + "/";
+        	String path = RESOURCE_RESERVE_PATH_V2 + "/";
                 log.info(requestUri + " last index of " + requestUri.lastIndexOf(path) + " path length " + path.length());
         	String pidString = requestUri.substring(requestUri.lastIndexOf(path) + path.length());
         	pidString = EncodingUtilities.decodeString(pidString);
