@@ -25,25 +25,19 @@ package org.dataone.cn.rest.filter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.security.cert.X509Certificate;
-import java.util.logging.Level;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
-import org.dataone.client.auth.CertificateManager;
 import org.dataone.configuration.Settings;
-import org.dataone.portal.PortalCertificateManager;
 import org.dataone.service.exceptions.BaseException;
-import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.v1.Session;
-import org.dataone.service.util.TypeMarshaller;
 
 /**
  * Short-circuits the request to return a ServiceFailure  
