@@ -71,6 +71,16 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
             throw new NotFound("1020", ex.getMessage());
         }
     }
+    
+    @Override
+    public void view(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    @Override
+    public void listViews(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType) throws ServiceFailure, InvalidRequest {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     @Override
     public void getSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
@@ -151,6 +161,11 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
 
     @Override
     public void registerSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    @Override
+    public void updateSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
