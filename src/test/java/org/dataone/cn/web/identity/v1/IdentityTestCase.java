@@ -113,7 +113,7 @@ public class IdentityTestCase {
         subjectLdapPopulation.searchAndDestroyIdentity();
     }
     @Autowired
-    @Qualifier("cnIdentity")
+    @Qualifier("cnIdentityV1")
     private CNIdentityLDAPImpl  cnIdentity;    
 
     @Test

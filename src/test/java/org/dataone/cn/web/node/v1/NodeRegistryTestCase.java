@@ -122,7 +122,7 @@ public class NodeRegistryTestCase {
     @Qualifier("cnNodeRegistryV1")
     private NodeRegistryService nodeRegistryService;   
     @Autowired
-    @Qualifier("cnIdentity")
+    @Qualifier("cnIdentityV1")
     private CNIdentityLDAPImpl  cnIdentity;    
     public void setInvalidMnNodeResource(ClassPathResource mnInvalidNodeResource) {
         this.mnInvalidNodeResource = mnInvalidNodeResource;
