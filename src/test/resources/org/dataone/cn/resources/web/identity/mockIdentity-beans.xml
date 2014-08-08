@@ -34,13 +34,18 @@
             <spring:constructor-arg ref="contextSource" />
         </spring:bean>
 
-	<spring:bean id="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
+	<spring:bean id="cnIdentityV1" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
             <spring:property name="server" value="ldap://localhost:389"/>
-            <spring:qualifier value="cnIdentity" />
+            <spring:qualifier value="cnIdentityV1" />
+   	</spring:bean>
+   	
+   	<spring:bean id="cnIdentityV2" class="org.dataone.service.cn.impl.v2.CNIdentityLDAPImpl">
+            <spring:property name="server" value="ldap://localhost:389"/>
+            <spring:qualifier value="cnIdentityV2" />
    	</spring:bean>
         
         <context:annotation-config/>
 	<context:component-scan base-package="org.dataone.cn.rest.web.identity" />
-	<context:component-scan base-package="org.dataone.cn.ldap.v1" />
+	<context:component-scan base-package="org.dataone.cn.ldap" />
         <context:component-scan base-package="org.dataone.cn.auth" />
 </spring:beans>

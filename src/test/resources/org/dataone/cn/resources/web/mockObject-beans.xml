@@ -74,14 +74,19 @@
         <spring:qualifier value="cnNodeRegistryV2"/>
     </spring:bean>
     
-    <spring:bean id="cnIdentity" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
+    <spring:bean id="cnIdentityV1" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
         <spring:property name="server" value="ldap://localhost:389"/>
-        <spring:qualifier value="cnIdentity" />
+        <spring:qualifier value="cnIdentityV1" />
+    </spring:bean>
+    
+    <spring:bean id="cnIdentityV2" class="org.dataone.service.cn.impl.v2.CNIdentityLDAPImpl">
+        <spring:property name="server" value="ldap://localhost:389"/>
+        <spring:qualifier value="cnIdentityV2" />
     </spring:bean>
     
     <context:component-scan base-package="org.dataone.cn.web.proxy.service" />
-    <context:component-scan base-package="org.dataone.cn.rest.web.node.v1" />
-    <context:component-scan base-package="org.dataone.cn.rest.web.base.v1" />
-    <context:component-scan base-package="org.dataone.cn.ldap.v1" />
+    <context:component-scan base-package="org.dataone.cn.rest.web.node" />
+    <context:component-scan base-package="org.dataone.cn.rest.web.base" />
+    <context:component-scan base-package="org.dataone.cn.ldap" />
     <context:component-scan base-package="org.dataone.cn.auth" />
 </spring:beans>
