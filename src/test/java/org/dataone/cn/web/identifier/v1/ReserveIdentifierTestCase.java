@@ -22,38 +22,34 @@
 
 package org.dataone.cn.web.identifier.v1;
 
-import com.hazelcast.core.HazelcastInstance;
-import java.io.ByteArrayOutputStream;
-import java.security.cert.X509Certificate;
-import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
+import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
-import org.dataone.cn.rest.proxy.service.impl.mock.ProxyCNReadServiceImpl;
-import org.dataone.cn.rest.web.identifier.v1.ReserveIdentifierController;
 import org.dataone.cn.auth.X509CertificateGenerator;
+import org.dataone.cn.ldap.v1.SubjectLdapPopulation;
+import org.dataone.cn.rest.web.identifier.v1.ReserveIdentifierController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.configuration.Settings;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Subject;
-import org.dataone.service.types.v1.SystemMetadata;
+import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.Constants;
-import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
@@ -61,6 +57,8 @@ import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.hazelcast.core.HazelcastInstance;
 
 /**
  *
