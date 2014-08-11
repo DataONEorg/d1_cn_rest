@@ -388,11 +388,15 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (hzclient == null) {
             nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
         } else {
-            IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
+            IMap<NodeReference, org.dataone.service.types.v2.Node> hzNodes = hzclient.getMap("hzNodes");
 
             NodeReference nodeReference = node.getIdentifier();
 
-            hzNodes.put(updateNodeReference, node);
+            try {
+				hzNodes.put(updateNodeReference, TypeMarshaller.convertTypeFromType(node,  org.dataone.service.types.v2.Node.class));
+			} catch (Exception e) {
+                throw new ServiceFailure("4842", e.getMessage());
+			}
         }
         return;
 
