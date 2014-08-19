@@ -342,6 +342,12 @@
             <groupId>org.dataone</groupId>
             <artifactId>d1_portal</artifactId>
             <version>${d1_portal_version}</version>
+            <exclusions>
+        		<exclusion>  <!-- declare the exclusion here -->
+          			<groupId>org.bouncycastle</groupId>
+          			<artifactId>bcprov-jdk16</artifactId>
+        		</exclusion>
+      		</exclusions> 
             <type>jar</type>
         </dependency>
         <dependency>
