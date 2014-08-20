@@ -361,6 +361,12 @@
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_noderegistry</artifactId>
             <version>${d1_cn_noderegistry_version}</version>
+            <exclusions>
+        		<exclusion>
+        		  	<groupId>org.apache.directory.server</groupId>
+             		<artifactId>apacheds-all</artifactId>
+        		</exclusion>
+      		</exclusions> 
             <type>jar</type>
         </dependency>
         <dependency>
