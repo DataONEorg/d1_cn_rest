@@ -78,9 +78,9 @@ public class BaseController extends AbstractWebController implements ServletCont
 
     String nodeIdentifier = Settings.getConfiguration().getString("cn.nodeId");
     NodeReference nodeReference;
-    private static final String RESOURCE_MONITOR_PING_V1 = "/v1/" + Constants.RESOURCE_MONITOR_PING;
-    private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 = "/v1/" + Constants.RESOURCE_CHECKSUM;
-    private static final String RESOURCE_LIST_QUERY_V1 = "/v1/" + Constants.RESOURCE_QUERY;
+    private static final String RESOURCE_MONITOR_PING_V1 = "/v2/" + Constants.RESOURCE_MONITOR_PING;
+    private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 = "/v2/" + Constants.RESOURCE_CHECKSUM;
+    private static final String RESOURCE_LIST_QUERY_V1 = "/v2/" + Constants.RESOURCE_QUERY;
     SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
     @PostConstruct
