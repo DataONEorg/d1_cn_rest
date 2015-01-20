@@ -23,7 +23,10 @@
         <spring:property name="alwaysUseFullPath" value="true"/>
     <!-- other properties -->
     </spring:bean>
-    <context:component-scan base-package="org.dataone.cn.rest.proxy.controller" use-default-filters="false">
+    <context:component-scan base-package="org.dataone.cn.rest.proxy.controller.v1" use-default-filters="false">
+        <context:include-filter type="regex" expression=".*CNReadController"/>
+    </context:component-scan>
+    <context:component-scan base-package="org.dataone.cn.rest.proxy.controller.v2" use-default-filters="false">
         <context:include-filter type="regex" expression=".*CNReadController"/>
     </context:component-scan>
 </spring:beans>
