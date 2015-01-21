@@ -106,6 +106,27 @@
         <servlet-name>metacatCNCore</servlet-name>
         <url-pattern>/v1/archive/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v2/formats/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v2/formats/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v2/formats</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v2/obsoletedBy/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNCore</servlet-name>
+        <url-pattern>/v2/archive/*</url-pattern>
+    </servlet-mapping>
 
 	<servlet>
         <servlet-name>metacatCNRead</servlet-name>
@@ -181,6 +202,19 @@
         <servlet-name>metacatCNAuthorization</servlet-name>
         <url-pattern>/v1/accessRules/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <url-pattern>/v2/owner/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <url-pattern>/v2/isAuthorized/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNAuthorization</servlet-name>
+        <url-pattern>/v2/accessRules/*</url-pattern>
+    </servlet-mapping>
 
 
     <servlet>
@@ -208,6 +242,27 @@
         <servlet-name>metacatCNReplication</servlet-name>
         <url-pattern>/v1/removeReplicaMetadata/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v2/replicaNotifications/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v2/replicaMetadata/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v2/replicaPolicies/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v2/replicaAuthorizations/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNReplication</servlet-name>
+        <url-pattern>/v2/removeReplicaMetadata/*</url-pattern>
+    </servlet-mapping>
 
 
     <servlet>
@@ -228,6 +283,18 @@
         <url-pattern>/v1/node/*</url-pattern>
     </servlet-mapping>
 
+	<servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/node</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/node/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/node/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>identity</servlet-name>
@@ -253,6 +320,27 @@
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
         <url-pattern>/v1/groups/</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>identity</servlet-name>
+        <url-pattern>/v2/accounts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identity</servlet-name>
+        <url-pattern>/v2/accounts/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identity</servlet-name>
+        <url-pattern>/v2/accounts/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identity</servlet-name>
+        <url-pattern>/v2/groups</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identity</servlet-name>
+        <url-pattern>/v2/groups/</url-pattern>
     </servlet-mapping>
 
 
@@ -280,6 +368,27 @@
     <servlet-mapping>
         <servlet-name>identifier</servlet-name>
         <url-pattern>/v1/generate/</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v2/reserve</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v2/reserve/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v2/reserve/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v2/generate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>identifier</servlet-name>
+        <url-pattern>/v2/generate/</url-pattern>
     </servlet-mapping>
 
 
