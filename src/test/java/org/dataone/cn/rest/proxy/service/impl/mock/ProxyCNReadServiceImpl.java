@@ -63,7 +63,7 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     private Resource readScienceMetadataResource;
 
     @Override
-    public void get(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void get(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         try {
             this.writeToResponse(readScienceMetadataResource.getInputStream(), response.getOutputStream());
         } catch (IOException ex) {
@@ -73,17 +73,17 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     }
     
     @Override
-    public void view(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void view(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override
-    public void listViews(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType) throws ServiceFailure, InvalidRequest {
+    public void listViews(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType, String version) throws ServiceFailure, InvalidRequest {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void getSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void getSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         log.info("Mock Proxy getSystemMetadata");
         try {
             this.writeToResponse(readSystemMetadataResource.getInputStream(), response.getOutputStream());
@@ -95,12 +95,12 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     }
 
     @Override
-    public void resolve(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void resolve(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void getChecksum(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void getChecksum(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -126,11 +126,11 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     }
 
     @Override
-    public void assertRelation(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void assertRelation(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     @Override
-    public void listObjects(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType) throws ServiceFailure, InvalidRequest {
+    public void listObjects(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType, String version) throws ServiceFailure, InvalidRequest {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     public Resource getNodeScienceMetadataResource() {
@@ -150,27 +150,27 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     }
 
     @Override
-    public void describe(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure, NotFound {
+    public void describe(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void create(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
+    public void create(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void registerSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
+    public void registerSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override
-    public void updateSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
+    public void updateSystemMetadata(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void delete(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType) throws ServiceFailure {
+    public void delete(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
