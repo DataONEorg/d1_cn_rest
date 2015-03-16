@@ -452,6 +452,15 @@
         <url-pattern>/</url-pattern>
     </servlet-mapping>
     
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
+        <url-pattern>/v2/query</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
+        <url-pattern>/v2/query/</url-pattern>
+    </servlet-mapping>
+    
     
     <error-page>
         <error-code>400</error-code>
