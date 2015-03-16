@@ -78,9 +78,9 @@ public class BaseController extends AbstractWebController implements ServletCont
 
     String nodeIdentifier = Settings.getConfiguration().getString("cn.nodeId");
     NodeReference nodeReference;
-    private static final String RESOURCE_MONITOR_PING_V1 = "/v2/" + Constants.RESOURCE_MONITOR_PING;
-    private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 = "/v2/" + Constants.RESOURCE_CHECKSUM;
-    private static final String RESOURCE_LIST_QUERY_V1 = "/v2/" + Constants.RESOURCE_QUERY;
+    private static final String RESOURCE_MONITOR_PING_V2 = "/v2/" + Constants.RESOURCE_MONITOR_PING;
+    private static final String RESOURCE_LIST_CHECKSUM_ALGORITHM_V2 = "/v2/" + Constants.RESOURCE_CHECKSUM;
+    private static final String RESOURCE_LIST_QUERY_V2 = "/v2/" + Constants.RESOURCE_QUERY;
     SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
     @PostConstruct
@@ -99,7 +99,7 @@ public class BaseController extends AbstractWebController implements ServletCont
         return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
 
     }
-    @RequestMapping(value = {RESOURCE_MONITOR_PING_V1, RESOURCE_MONITOR_PING_V1 + "/" }, method = RequestMethod.GET)
+    @RequestMapping(value = {RESOURCE_MONITOR_PING_V2, RESOURCE_MONITOR_PING_V2 + "/" }, method = RequestMethod.GET)
     public void ping(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
         OutputStream responseStream = null;
         boolean throwFailure = false;
@@ -130,7 +130,7 @@ public class BaseController extends AbstractWebController implements ServletCont
 
     }
 
-    @RequestMapping(value = {RESOURCE_LIST_CHECKSUM_ALGORITHM_V1, RESOURCE_LIST_CHECKSUM_ALGORITHM_V1 + "/" }, method = RequestMethod.GET)
+    @RequestMapping(value = {RESOURCE_LIST_CHECKSUM_ALGORITHM_V2, RESOURCE_LIST_CHECKSUM_ALGORITHM_V2 + "/" }, method = RequestMethod.GET)
     public ModelAndView listChecksumAlgorithms(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
         ChecksumAlgorithmList checksumAlgorithmList = new ChecksumAlgorithmList();
 
@@ -159,7 +159,7 @@ public class BaseController extends AbstractWebController implements ServletCont
      * @throws ServiceFailure
      * @return ModelAndView
      */
-    @RequestMapping(value = {RESOURCE_LIST_QUERY_V1, RESOURCE_LIST_QUERY_V1 + "/" }, method = RequestMethod.GET)
+    @RequestMapping(value = {RESOURCE_LIST_QUERY_V2, RESOURCE_LIST_QUERY_V2 + "/" }, method = RequestMethod.GET)
     public ModelAndView listQueryEngines(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidToken, NotAuthorized {
         QueryEngineList queryEngineList = new QueryEngineList();
         
