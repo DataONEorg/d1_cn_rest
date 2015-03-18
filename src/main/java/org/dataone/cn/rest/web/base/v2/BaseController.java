@@ -96,7 +96,7 @@ public class BaseController extends AbstractWebController implements ServletCont
 
         node = nodeRetrieval.getNode(nodeReference);
 
-        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
+        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v2.Node", node);
 
     }
     @RequestMapping(value = {RESOURCE_MONITOR_PING_V2, RESOURCE_MONITOR_PING_V2 + "/" }, method = RequestMethod.GET)
