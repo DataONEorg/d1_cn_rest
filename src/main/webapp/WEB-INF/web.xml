@@ -183,6 +183,19 @@
         <servlet-name>metacatCNRead</servlet-name>
         <url-pattern>/v2/checksum/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>metacatCNRead</servlet-name>
+        <url-pattern>/v2/views</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNRead</servlet-name>
+        <url-pattern>/v2/views/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>metacatCNRead</servlet-name>
+        <url-pattern>/v2/views/*</url-pattern>
+    </servlet-mapping>
 
 
     <servlet>
