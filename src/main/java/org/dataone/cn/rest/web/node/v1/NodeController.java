@@ -40,6 +40,7 @@ import org.dataone.cn.hazelcast.ClientConfiguration;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
 import org.dataone.mimemultipart.MultipartRequestResolver;
+import org.dataone.portal.PortalCertificateManager;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.cn.v1.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -211,7 +212,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      */
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
     public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
-        Session session = CertificateManager.getInstance().getSession(fileRequest);
+        Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
         if (session == null) {
             throw new NotAuthorized("4821", "Need a valid certificate before request can be processed");
         }
@@ -419,7 +420,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      */
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
     public ModelAndView register(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, NotImplemented, InvalidRequest, NotAuthorized, IdentifierNotUnique, InvalidToken {
-        Session session = CertificateManager.getInstance().getSession(fileRequest);
+        Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
         if (session == null) {
             throw new NotAuthorized("4841", "Need a valid certificate before request can be processed");
         }

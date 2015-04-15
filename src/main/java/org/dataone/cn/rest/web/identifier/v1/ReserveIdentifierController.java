@@ -31,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.web.AbstractWebController;
+import org.dataone.portal.PortalCertificateManager;
 import org.dataone.service.cn.impl.v1.ReserveIdentifierService;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidCredentials;
@@ -97,7 +97,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
     public ModelAndView reserveIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
         // get the Session object from certificate in request
-        Session session = CertificateManager.getInstance().getSession(request);
+        Session session = PortalCertificateManager.getInstance().getSession(request);
         
         // get params from request
         Identifier pid = null;
@@ -139,7 +139,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
     public ModelAndView generateIdentifier(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
         // get the Session object from certificate in request
-        Session session = CertificateManager.getInstance().getSession(request);
+        Session session = PortalCertificateManager.getInstance().getSession(request);
         
         // get params from request
         String scheme = request.getParameter("scheme");
@@ -191,7 +191,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
     public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
-        Session session = CertificateManager.getInstance().getSession(request);
+        Session session = PortalCertificateManager.getInstance().getSession(request);
         
         // get params from request
         Identifier pid = null;

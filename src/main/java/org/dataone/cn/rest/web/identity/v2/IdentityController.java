@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.net.URLCodec;
-import org.dataone.client.auth.CertificateManager;
+import org.dataone.portal.PortalCertificateManager;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.service.util.Constants;
@@ -95,7 +95,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
 
     	// get params from request
         Subject primarySubject = new Subject();
@@ -123,7 +123,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public void removeMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
     	String path = ACCOUNT_MAPPING_PATH_V2 + "/";
@@ -154,7 +154,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     	throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
     	String path = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/";
@@ -191,7 +191,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String subjectString = request.getParameter("subject");
 
@@ -218,7 +218,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public void confirmMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
     	String path = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/";
@@ -250,7 +250,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public void denyMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
     	String path = ACCOUNT_MAPPING_PENDING_PATH_V2 + "/";
@@ -280,7 +280,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public ModelAndView listSubjects(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String query = request.getParameter("query");
     	String status = request.getParameter("status");
@@ -314,7 +314,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requesUri = request.getRequestURI();
     	String path = ACCOUNTS_PATH_V2 + "/";
@@ -347,7 +347,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public ModelAndView registerAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Person person = null;
     	MultipartFile personPart = fileRequest.getFile("person");
@@ -378,7 +378,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public ModelAndView updateAccount(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
         Person person = null;
     	MultipartFile personPart = fileRequest.getFile("person");
@@ -412,7 +412,7 @@ public class IdentityController extends AbstractWebController implements Servlet
 
     	
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	String requestUri = request.getRequestURI();
     	String path = ACCOUNT_VERIFICATION_PATH_V2 + "/";
@@ -447,7 +447,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public ModelAndView createGroup(MultipartHttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(request);
+    	Session session = PortalCertificateManager.getInstance().getSession(request);
     	// get params from request
     	Group group = null;
     	MultipartFile groupPart = request.getFile("group");
@@ -483,7 +483,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     public void updateGroup(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
-    	Session session = CertificateManager.getInstance().getSession(fileRequest);
+    	Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
     	// get params from request
 		Group group = null;
     	MultipartFile groupPart = fileRequest.getFile("group");
