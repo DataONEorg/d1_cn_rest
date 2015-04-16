@@ -73,6 +73,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     private static final String ACCOUNT_VERIFICATION_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNT_VERIFICATION;
     private static final String ACCOUNTS_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V2 = "/v2/" + Constants.RESOURCE_GROUPS;
+    private static final String WHOAMI_PATH_V2 = "/v2/" + "whoami";
 
 
     private ServletContext servletContext;
@@ -298,6 +299,29 @@ public class IdentityController extends AbstractWebController implements Servlet
         return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
 
     }
+    
+    /**
+    *
+    * Find out who is calling the service
+    *
+    * GET /whoami
+    * Note: Not defined in the DataONE API
+    *
+    * @author leinfelder
+    *
+    */
+   @RequestMapping(value = {WHOAMI_PATH_V2, WHOAMI_PATH_V2 + "/"}, method = RequestMethod.GET)
+   public ModelAndView whoAmI(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+
+   	// get the Session object from the request
+   	Session session = PortalCertificateManager.getInstance().getSession(request);
+   	
+   	// serialize it back
+   	SubjectInfo subjectInfo = session.getSubjectInfo();
+   	
+   	return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+
+   }
 
     /**
      *
