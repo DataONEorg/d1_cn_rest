@@ -315,6 +315,9 @@ public class IdentityController extends AbstractWebController implements Servlet
 
    	// get the Session object from the request
    	Session session = PortalCertificateManager.getInstance().getSession(request);
+   	if (session == null) {
+   		throw new InvalidToken("0000", "Could not look up session info for this request.");
+   	}
    	
    	// serialize it back
    	SubjectInfo subjectInfo = session.getSubjectInfo();
