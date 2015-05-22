@@ -147,7 +147,8 @@ public class IdentityTestCase {
         MockHttpServletResponse response = new MockHttpServletResponse();
         SubjectInfo subjectInfo = null;
         try {
-            ModelAndView mav = testController.listSubjects(request, response);
+            //ModelAndView mav = testController.listSubjects(request, response);
+            ModelAndView mav = testController.getSubjectInfo(request, response);
             subjectInfo = (SubjectInfo) mav.getModel().get("org.dataone.service.types.v1.SubjectInfo");
         } catch (ServiceFailure ex) {
             fail("Test misconfiguration" + ex);
