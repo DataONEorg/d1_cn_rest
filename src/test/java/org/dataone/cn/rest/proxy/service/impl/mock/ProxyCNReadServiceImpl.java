@@ -73,9 +73,11 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     }
     
     @Override
-    public void view(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
+    public void view(ServletContext servletContext, HttpServletRequest request, 
+            HttpServletResponse response, String theme, String pid, AcceptType acceptType, String version) throws ServiceFailure, NotFound {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
     
     @Override
     public void listViews(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, AcceptType acceptType, String version) throws ServiceFailure, InvalidRequest {
@@ -173,6 +175,8 @@ public class ProxyCNReadServiceImpl implements ProxyCNReadService {
     public void delete(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, String pid, AcceptType acceptType, String version) throws ServiceFailure {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+
 
 
 
