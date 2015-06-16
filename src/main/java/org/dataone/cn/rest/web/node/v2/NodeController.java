@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -33,11 +34,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.functors.EqualPredicate;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.ClientConfiguration;
+import org.dataone.cn.hazelcast.HazelcastInstanceFactory;
+import org.dataone.cn.ldap.NodeAccess;
 import org.dataone.cn.rest.web.AbstractWebController;
+import org.dataone.cn.synchronization.types.SyncObject;
 import org.dataone.configuration.Settings;
 import org.dataone.mimemultipart.MultipartRequestResolver;
 import org.dataone.portal.PortalCertificateManager;
@@ -53,6 +58,9 @@ import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Group;
 import org.dataone.service.types.v2.Node;
 import org.dataone.service.types.v2.NodeList;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.types.v2.util.NodelistUtil;
+import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1.NodeState;
 import org.dataone.service.types.v1.NodeType;
@@ -95,6 +103,8 @@ public class NodeController extends AbstractWebController implements ServletCont
     Logger logger = Logger.getLogger(NodeController.class.getName());
     private static final String NODE_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE + "/";
     private static final String NODELIST_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE;
+    private static final String RESOURCE_SYNCHRONIZE_V2 = "/v2/" + Constants.RESOURCE_SYNCHRONIZE;
+
     private ServletContext servletContext;
     CertificateManager certificateManager = CertificateManager.getInstance();
     MultipartRequestResolver multipartRequestResolver = new MultipartRequestResolver("/tmp", 1000000000, 0);
@@ -495,6 +505,74 @@ public class NodeController extends AbstractWebController implements ServletCont
 
         NodeReference nodeReference = nodeRegistry.register(node);
         return new ModelAndView("xmlNodeReferenceViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
+    }
+    
+    
+    
+    
+    @RequestMapping(value = {RESOURCE_SYNCHRONIZE_V2, RESOURCE_SYNCHRONIZE_V2 + "/" }, method = RequestMethod.POST)
+    public void synchronize(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotAuthorized { // throws ServiceFailure, NotImplemented, InvalidToken, NotAuthorized {
+
+        try {
+            // get the NodeID from the subject via xref to the nodeList
+            Session session = PortalCertificateManager.getInstance().getSession(request);
+            final Subject clientSubject = session.getSubject();
+            NodeAccess na = nodeRegistry.getNodeAccess();
+            List<Node> nodes = na.getApprovedNodeList();
+            Node firstFoundNode = (Node) CollectionUtils.find(nodes,
+                    new Predicate() {
+                        public boolean evaluate(Object o) {
+                            Node node = (Node) o;
+                            return node.getSubjectList().contains(clientSubject);
+                        }
+                    }
+                    );
+            if (firstFoundNode == null) {
+                throw new NotAuthorized("4962","The client certificate does not find an approved Member Node");
+            }
+            NodeReference nodeId = firstFoundNode.getIdentifier();
+            
+            // get the pid parameter from the request object directly
+            String pidString = request.getParameter("pid");
+            Identifier pid = new Identifier();
+            pid.setValue(pidString);
+            
+            // check locally to see if the calling node is the authoritative one.
+            HazelcastInstance hazelcast = HazelcastInstanceFactory.getProcessingInstance();
+            
+            String hzSystemMetaMapName = 
+                    Settings.getConfiguration().getString("dataone.hazelcast.systemMetadata");
+
+            
+            // if this is a synchronized object and the recorded authoritativeMN conflicts, 
+            // we need to throw a NotAuthorized
+            SystemMetadata sysmeta = (SystemMetadata)hazelcast.getMap(hzSystemMetaMapName).get(pid);
+            if (sysmeta != null && !sysmeta.getAuthoritativeMemberNode().equals(nodeId)) {
+                String message = String.format(
+                        "The requesting MemberNode (%s) is not the Authoritative MN for this object (%s).", 
+                        nodeId.getValue(), pid.getValue());
+                logger.info(message);
+                throw new NotAuthorized("4692", message);
+            }
+
+            // process the request and add to the queue
+            String synchronizationObjectQueue = 
+                    Settings.getConfiguration().getString("dataone.hazelcast.synchronizationObjectQueue");
+            BlockingQueue<SyncObject> hzSyncObjectQueue = hazelcast.getQueue(synchronizationObjectQueue);
+            
+
+            // check that the item isn't already in the queue
+            // TODO: comparator for SyncObjects
+            SyncObject so = new SyncObject(nodeId.getValue(), pid.getValue());
+            if (!hzSyncObjectQueue.contains(so)) {
+                hzSyncObjectQueue.add(so);
+            }
+        } catch (ServiceFailure e) {
+            e.setDetail_code("4961");
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceFailure("4961","Unexpected Exception:: " + e.toString());
+        }
     }
     
     /*
