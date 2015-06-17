@@ -296,7 +296,7 @@
         <url-pattern>/v1/node/*</url-pattern>
     </servlet-mapping>
 
-	<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>cnNode</servlet-name>
         <url-pattern>/v2/node</url-pattern>
     </servlet-mapping>
@@ -307,6 +307,19 @@
     <servlet-mapping>
         <servlet-name>cnNode</servlet-name>
         <url-pattern>/v2/node/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/synchronize</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/synchronize/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/synchronize/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
