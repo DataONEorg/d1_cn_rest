@@ -594,14 +594,10 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (sysMetaMultipart != null) {
             try {
                 sysMeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysMetaMultipart.getInputStream());
-            } catch (IOException ex) {
-                throw new ServiceFailure("4971", ex.getMessage());
-            } catch (InstantiationException ex) {
-                throw new ServiceFailure("4971", ex.getMessage());
-            } catch (IllegalAccessException ex) {
-                throw new ServiceFailure("4971", ex.getMessage());
             } catch (JiBXException ex) {
-                throw new ServiceFailure("4971", ex.getMessage());
+                throw new InvalidSystemMetadata("4976", ex.getMessage());
+            } catch (Exception e) {
+                throw new ServiceFailure("4971", e.getMessage());
             }
             
             // now we have systemMetadata, what do we check?
