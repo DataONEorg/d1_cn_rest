@@ -32,6 +32,14 @@
             <oxm:jibx-marshaller id="jibxMarshallerSystemMetadataResponse" target-class="org.dataone.service.types.v1.SystemMetadata"/>
         </spring:property>
     </spring:bean>
+    
+    <spring:bean id="xmlV2MetaViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v2.SystemMetadata"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller">
+            <oxm:jibx-marshaller id="jibxMarshallerSystemMetadataResponse" target-class="org.dataone.service.types.v2.SystemMetadata"/>
+        </spring:property>
+    </spring:bean>
 
     <spring:bean id="xmlObjectListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <spring:property name="modelKey" value="org.dataone.service.types.v1.ObjectList"/>

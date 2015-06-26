@@ -50,6 +50,7 @@ import org.dataone.service.cn.impl.v2.NodeRegistryService;
 import org.dataone.service.cn.v2.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidRequest;
+import org.dataone.service.exceptions.InvalidSystemMetadata;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
@@ -104,6 +105,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     private static final String NODE_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE + "/";
     private static final String NODELIST_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE;
     private static final String RESOURCE_SYNCHRONIZE_V2 = "/v2/" + Constants.RESOURCE_SYNCHRONIZE;
+    private static final String RESOURCE_DIAG_SYSMETA_V2 = "/v2/" + Constants.RESOURCE_DIAG_SYSMETA;
 
     private ServletContext servletContext;
     CertificateManager certificateManager = CertificateManager.getInstance();
@@ -572,6 +574,42 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw e;
         } catch (Exception e) {
             throw new ServiceFailure("4961","Unexpected Exception:: " + e.toString());
+        }
+    }
+    
+    
+    @RequestMapping(value = {RESOURCE_DIAG_SYSMETA_V2, RESOURCE_DIAG_SYSMETA_V2 + "/" }, method = RequestMethod.POST)
+    public ModelAndView echoSystemMetadata(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws 
+    	ServiceFailure, NotImplemented, InvalidToken, NotAuthorized, InvalidRequest, InvalidSystemMetadata, IdentifierNotUnique {
+
+    	SystemMetadata sysMeta = null;
+        MultipartFile sysMetaMultipart = null;
+        Set<String> keys = fileRequest.getFileMap().keySet();
+        for (String key : keys) {
+            logger.info("Found filepart " + key);
+            if (key.equalsIgnoreCase("sysMeta")) {
+            	sysMetaMultipart = fileRequest.getFileMap().get(key);
+            }
+        }
+        if (sysMetaMultipart != null) {
+            try {
+                sysMeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysMetaMultipart.getInputStream());
+            } catch (IOException ex) {
+                throw new ServiceFailure("4971", ex.getMessage());
+            } catch (InstantiationException ex) {
+                throw new ServiceFailure("4971", ex.getMessage());
+            } catch (IllegalAccessException ex) {
+                throw new ServiceFailure("4971", ex.getMessage());
+            } catch (JiBXException ex) {
+                throw new ServiceFailure("4971", ex.getMessage());
+            }
+            
+            // now we have systemMetadata, what do we check?
+           	return new ModelAndView("xmlV2MetaViewResolver", SystemMetadata.class.getName(), sysMeta);
+
+
+        } else {
+            throw new InvalidRequest("4974", "SystemMetadata not found in MultiPart request");
         }
     }
     
