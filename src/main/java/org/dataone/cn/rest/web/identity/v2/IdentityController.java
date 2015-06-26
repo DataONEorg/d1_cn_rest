@@ -73,7 +73,7 @@ public class IdentityController extends AbstractWebController implements Servlet
     private static final String ACCOUNT_VERIFICATION_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNT_VERIFICATION;
     private static final String ACCOUNTS_PATH_V2 = "/v2/" + Constants.RESOURCE_ACCOUNTS;
     private static final String GROUPS_PATH_V2 = "/v2/" + Constants.RESOURCE_GROUPS;
-    private static final String WHOAMI_PATH_V2 = "/v2/" + "whoami";
+    private static final String CREDENTIALS_PATH_V2 = "/v2/" + Constants.RESOURCE_DIAG_SUBJECT;
 
 
     private ServletContext servletContext;
@@ -304,14 +304,13 @@ public class IdentityController extends AbstractWebController implements Servlet
     *
     * Find out who is calling the service
     *
-    * GET /whoami
-    * Note: Not defined in the DataONE API
+    * GET /diag/subject
     *
     * @author leinfelder
     *
     */
-   @RequestMapping(value = {WHOAMI_PATH_V2, WHOAMI_PATH_V2 + "/"}, method = RequestMethod.GET)
-   public ModelAndView whoAmI(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+   @RequestMapping(value = {CREDENTIALS_PATH_V2, CREDENTIALS_PATH_V2 + "/"}, method = RequestMethod.GET)
+   public ModelAndView echoCredentials(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
 
    	// get the Session object from the request
    	Session session = PortalCertificateManager.getInstance().getSession(request);
