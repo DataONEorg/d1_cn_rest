@@ -321,6 +321,15 @@
         <servlet-name>cnNode</servlet-name>
         <url-pattern>/v2/synchronize/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/diag/sysmeta</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnNode</servlet-name>
+        <url-pattern>/v2/diag/sysmeta/</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>identity</servlet-name>
