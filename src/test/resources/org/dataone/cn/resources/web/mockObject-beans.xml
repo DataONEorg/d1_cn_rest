@@ -40,6 +40,12 @@
     <spring:bean id="mnInvalidNodeResource" class="org.springframework.core.io.ClassPathResource" >
         <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v1/mnBadNodeBad.xml"/>
     </spring:bean>
+    <spring:bean id="sysMetaResource" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v2/systemMetadata-valid.xml"/>
+    </spring:bean>
+    <spring:bean id="invalidSysMetaResource" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/resources/samples/v2/systemMetadata-invalid.xml"/>
+    </spring:bean>
     <spring:bean id="contextSourceConfiguration" class="org.dataone.cn.ldap.v1.ContextSourceConfiguration" />
 
     <spring:bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource"
