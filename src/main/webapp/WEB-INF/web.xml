@@ -370,11 +370,11 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
-        <url-pattern>/v2/whoami</url-pattern>
+        <url-pattern>/v2/diag/subject</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>identity</servlet-name>
-        <url-pattern>/v2/whoami/</url-pattern>
+        <url-pattern>/v2/diag/subject/</url-pattern>
     </servlet-mapping>
 
 
