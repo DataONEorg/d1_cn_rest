@@ -22,7 +22,9 @@
 
 package org.dataone.cn.rest.web.node.v2;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +42,8 @@ import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.ClientConfiguration;
 import org.dataone.cn.hazelcast.HazelcastInstanceFactory;
+import org.dataone.cn.indexer.SolrIndexService;
+import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
 import org.dataone.cn.ldap.NodeAccess;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.cn.synchronization.types.SyncObject;
@@ -106,6 +110,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     private static final String NODELIST_PATH_V2 = "/v2/" + Constants.RESOURCE_NODE;
     private static final String RESOURCE_SYNCHRONIZE_V2 = "/v2/" + Constants.RESOURCE_SYNCHRONIZE;
     private static final String RESOURCE_DIAG_SYSMETA_V2 = "/v2/" + Constants.RESOURCE_DIAG_SYSMETA;
+    private static final String RESOURCE_DIAG_INDEX_V2 = "/v2/" + Constants.RESOURCE_DIAG_OBJECT;
 
     private ServletContext servletContext;
     CertificateManager certificateManager = CertificateManager.getInstance();
@@ -607,6 +612,61 @@ public class NodeController extends AbstractWebController implements ServletCont
         } else {
             throw new InvalidRequest("4974", "SystemMetadata not found in MultiPart request");
         }
+    }
+    
+    @RequestMapping(value = {RESOURCE_DIAG_INDEX_V2, RESOURCE_DIAG_INDEX_V2 + "/" }, method = RequestMethod.POST)
+    public void echoIndexedObject(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws 
+    	ServiceFailure, NotImplemented, InvalidToken, NotAuthorized, InvalidRequest, InvalidSystemMetadata, IdentifierNotUnique {
+
+    	String id = null;
+    	SystemMetadata sysMeta = null;
+    	String queryEngine = null;
+    	MultipartFile object = null;
+        MultipartFile sysMetaMultipart = null;
+        Set<String> keys = fileRequest.getFileMap().keySet();
+        for (String key : keys) {
+            logger.info("Found filepart " + key);
+            if (key.equalsIgnoreCase("sysMeta")) {
+            	sysMetaMultipart = fileRequest.getFileMap().get(key);
+            	try {
+                    sysMeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysMetaMultipart.getInputStream());
+                    id = sysMeta.getIdentifier().getValue();
+                } catch (JiBXException ex) {
+                    throw new InvalidSystemMetadata("4985", ex.getMessage());
+                } catch (Exception e) {
+                    throw new ServiceFailure("4981", e.getMessage());
+                }
+            }
+            if (key.equalsIgnoreCase("object")) {
+            	object = fileRequest.getFileMap().get(key);
+            }
+
+        }
+        
+        if (object == null) {
+            throw new InvalidRequest("4984", "Object not found in MultiPart request");
+        }
+        try {
+        	
+        	// save the object locally for index processor
+	        File objectFile = File.createTempFile("dia_object", ".tmp");
+	        object.transferTo(objectFile);
+	        
+	        // process the object
+	        SolrIndexService sis = new SolrIndexService();
+			SolrElementAdd addCommand = sis.processObject(id, sysMetaMultipart.getInputStream(), objectFile.getAbsolutePath());
+			
+			// remove temp file
+			objectFile.delete();
+			
+			// send result to response output stream
+			addCommand.serialize(response.getOutputStream(), "UTF-8");
+			
+			
+        } catch (Exception e) {
+            throw new ServiceFailure("4981", e.getMessage());
+        }
+        
     }
     
     /*
