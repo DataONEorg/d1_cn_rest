@@ -13,7 +13,7 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 	<!-- import the index processor bean definitions for diagnostic API -->	
-	<spring:import resource="file:config/index-context.xml"/>
+	<spring:import resource="classpath*:/config/index-context.xml"/>
 
     <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver" p:order="1" />
 <!--    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver" p:order="2" p:defaultErrorView="uncaughtException"> -->
