@@ -136,6 +136,8 @@ public class NodeController extends AbstractWebController implements ServletCont
     String nodeIdentifier;
     NodeReference nodeReference;
 
+    @Autowired
+    SolrIndexService solrIndexService;
 
     List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
     List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
@@ -653,8 +655,7 @@ public class NodeController extends AbstractWebController implements ServletCont
 	        object.transferTo(objectFile);
 	        
 	        // process the object
-	        SolrIndexService sis = new SolrIndexService();
-			SolrElementAdd addCommand = sis.processObject(id, sysMetaMultipart.getInputStream(), objectFile.getAbsolutePath());
+			SolrElementAdd addCommand = solrIndexService.processObject(id, sysMetaMultipart.getInputStream(), objectFile.getAbsolutePath());
 			
 			// remove temp file
 			objectFile.delete();
