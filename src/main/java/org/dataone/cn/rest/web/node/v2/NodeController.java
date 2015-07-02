@@ -137,7 +137,6 @@ public class NodeController extends AbstractWebController implements ServletCont
     NodeReference nodeReference;
 
     @Autowired
-    @Qualifier("solrIndexService")
     SolrIndexService solrIndexService;
 
     List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");

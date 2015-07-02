@@ -41,7 +41,7 @@
     
     <import resource="file:/etc/dataone/index/index-generation-context/application-context-annotator.xml" />    
     
-	<import resource="classpath*:/config/index-parser-context.xml"/>
+	<import resource="file:/etc/dataone/index/index-generation-context/index-parser-context.xml"/>
 	
 	<bean id="log4jInitialization"
      class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -54,4 +54,7 @@
             </list>
         </property>
     </bean>
+    
+    <context:annotation-config />
+    
 </beans>
