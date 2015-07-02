@@ -56,6 +56,6 @@
     </spring:bean>
     
     <!-- import the index processor bean definitions for diagnostic API -->	
-	<spring:import resource="classpath*:index-context.xml"/>
+	<spring:import resource="file:**/**/WEB-INF/config/index-context.xml"/>
 
 </spring:beans>
