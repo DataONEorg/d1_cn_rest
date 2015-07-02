@@ -54,5 +54,8 @@
         <spring:property name="order" value="1"/>
         <spring:property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
     </spring:bean>
+    
+    <!-- import the index processor bean definitions for diagnostic API -->	
+	<spring:import resource="classpath*:index-context.xml"/>
 
 </spring:beans>
