@@ -8,7 +8,7 @@
  http://www.springframework.org/schema/context  
  http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-	<bean id="solrIndexService" class="org.dataone.cn.indexer.SolrIndexService">
+	<bean id="solrIndexService" name="solrIndexService" class="org.dataone.cn.indexer.SolrIndexService">
         <qualifier value="solrIndexService" />
      	<property name="systemMetadataProcessor" ref="systemMetadata200Subprocessor" />
      	<property name="subprocessors">
