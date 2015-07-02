@@ -35,6 +35,9 @@
         <spring:qualifier value="cnIdentityV2" />
     </spring:bean>
     
+    <!-- import the index processor bean definitions for diagnostic API -->	
+	<spring:import resource="classpath*:/config/index-context.xml"/>
+    
     <context:component-scan base-package="org.dataone.cn.rest.web.node"  />
     
     <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
