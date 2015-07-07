@@ -636,6 +636,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                 } catch (JiBXException ex) {
                     throw new InvalidSystemMetadata("4985", ex.getMessage());
                 } catch (Exception e) {
+                	e.printStackTrace();
                     throw new ServiceFailure("4981", e.getMessage());
                 }
             }
@@ -665,6 +666,7 @@ public class NodeController extends AbstractWebController implements ServletCont
 			
 			
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new ServiceFailure("4981", e.getMessage());
         }
         
