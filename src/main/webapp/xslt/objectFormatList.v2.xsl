@@ -60,8 +60,9 @@
 	<xsl:template name="mediaType">
 			<table>
 				<tr>
-					<td>Name: </td>
-					<td><xsl:value-of select="@name"/></td>
+					<td colspan="2">
+						<xsl:value-of select="@name"/>
+					</td>
 				</tr>
 				<xsl:for-each select="property">
 					<tr>
