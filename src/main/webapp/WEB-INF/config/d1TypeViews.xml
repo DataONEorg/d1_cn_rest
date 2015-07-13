@@ -61,6 +61,11 @@
         </property>
          -->
     </spring:bean>
+    <spring:bean id="xmlV2NodeListViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v2.NodeList"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller" ref="stylesheetTypeMarshaller"/>
+    </spring:bean>
     <spring:bean id="xmlNodeViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <spring:property name="modelKey" value="org.dataone.service.types.v1.Node"/>
         <spring:property name="contentType" value="text/xml" />
@@ -70,6 +75,11 @@
             <oxm:jibx-marshaller id="jibxNodeMarshallerResponse" target-class="org.dataone.service.types.v1.Node"/>
         </property>
         -->
+    </spring:bean>
+    <spring:bean id="xmlV2NodeViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
+        <spring:property name="modelKey" value="org.dataone.service.types.v2.Node"/>
+        <spring:property name="contentType" value="text/xml" />
+        <spring:property name="marshaller" ref="stylesheetTypeMarshaller"/>
     </spring:bean>
     <spring:bean id="xmlNodeReferenceViewResolver" class="org.springframework.web.servlet.view.xml.MarshallingView">
         <spring:property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
