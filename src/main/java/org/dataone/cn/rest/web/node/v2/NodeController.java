@@ -182,7 +182,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw ex;
         }
 
-        return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.v1.NodeList", nodeList);
+        return new ModelAndView("xmlNodeListViewResolver", "org.dataone.service.types.v2.NodeList", nodeList);
 
     }
 
@@ -203,7 +203,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         reference.setValue(nodeId);
         Node node = nodeRegistry.getNode(reference);
 
-        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v1.Node", node);
+        return new ModelAndView("xmlNodeViewResolver", "org.dataone.service.types.v2.Node", node);
 
     }
     /*
