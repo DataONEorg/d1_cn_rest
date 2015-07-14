@@ -64,7 +64,6 @@ import org.dataone.service.types.v1.Group;
 import org.dataone.service.types.v2.Node;
 import org.dataone.service.types.v2.NodeList;
 import org.dataone.service.types.v2.SystemMetadata;
-import org.dataone.service.types.v2.util.NodelistUtil;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v1.NodeState;
@@ -139,6 +138,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     @Autowired
     SolrIndexService solrIndexService;
 
+    @SuppressWarnings("unchecked")
     List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
     List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
 
@@ -571,7 +571,6 @@ public class NodeController extends AbstractWebController implements ServletCont
             
 
             // check that the item isn't already in the queue
-            // TODO: comparator for SyncObjects
             SyncObject so = new SyncObject(nodeId.getValue(), pid.getValue());
             if (!hzSyncObjectQueue.contains(so)) {
                 hzSyncObjectQueue.add(so);
@@ -579,6 +578,9 @@ public class NodeController extends AbstractWebController implements ServletCont
         } catch (ServiceFailure e) {
             e.setDetail_code("4961");
             throw e;
+        } catch (NotAuthorized e) {
+            throw e; // catching and rethrowing to avoid being recast as a service failure 
+                     // in the following catch Exception block
         } catch (Exception e) {
             throw new ServiceFailure("4961","Unexpected Exception:: " + e.toString());
         }
