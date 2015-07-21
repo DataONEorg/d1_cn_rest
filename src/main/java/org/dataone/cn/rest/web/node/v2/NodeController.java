@@ -520,8 +520,9 @@ public class NodeController extends AbstractWebController implements ServletCont
     
     
     @RequestMapping(value = {RESOURCE_SYNCHRONIZE_V2, RESOURCE_SYNCHRONIZE_V2 + "/" }, method = RequestMethod.POST)
-    public void synchronize(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotAuthorized { // throws ServiceFailure, NotImplemented, InvalidToken, NotAuthorized {
+    public void synchronize(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotAuthorized {
 
+        String progress = null;
         try {
             // get the NodeID from the subject via xref to the nodeList
             Session session = PortalCertificateManager.getInstance().getSession(request);
@@ -541,21 +542,28 @@ public class NodeController extends AbstractWebController implements ServletCont
             }
             NodeReference nodeId = firstFoundNode.getIdentifier();
             
+            progress = "(a) found an approved MN: " + nodeId.getValue();
+            
             // get the pid parameter from the request object directly
             String pidString = request.getParameter("pid");
             Identifier pid = new Identifier();
             pid.setValue(pidString);
             
+            progress = "(b) got pid from request: " + pidString;
+
             // check locally to see if the calling node is the authoritative one.
             HazelcastInstance hazelcast = HazelcastInstanceFactory.getProcessingInstance();
             
             String hzSystemMetaMapName = 
                     Settings.getConfiguration().getString("dataone.hazelcast.systemMetadata");
 
-            
             // if this is a synchronized object and the recorded authoritativeMN conflicts, 
             // we need to throw a NotAuthorized
-            SystemMetadata sysmeta = (SystemMetadata)hazelcast.getMap(hzSystemMetaMapName).get(pid);
+            IMap<Identifier, SystemMetadata> sysMetaMap = hazelcast.getMap(hzSystemMetaMapName);
+            if (sysMetaMap == null)
+                throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSysMetaMap named " + hzSystemMetaMapName);
+            
+            SystemMetadata sysmeta = sysMetaMap.get(pid);
             if (sysmeta != null && !sysmeta.getAuthoritativeMemberNode().equals(nodeId)) {
                 String message = String.format(
                         "The requesting MemberNode (%s) is not the Authoritative MN for this object (%s).", 
@@ -564,11 +572,17 @@ public class NodeController extends AbstractWebController implements ServletCont
                 throw new NotAuthorized("4692", message);
             }
 
+            progress = "(c) got sysMeta from the CN map...";
+            
             // process the request and add to the queue
             String synchronizationObjectQueue = 
                     Settings.getConfiguration().getString("dataone.hazelcast.synchronizationObjectQueue");
-            BlockingQueue<SyncObject> hzSyncObjectQueue = hazelcast.getQueue(synchronizationObjectQueue);
+            progress = "(d) got HzSyncObjectQueue: " + synchronizationObjectQueue;
             
+            BlockingQueue<SyncObject> hzSyncObjectQueue = hazelcast.getQueue(synchronizationObjectQueue);
+            if (hzSyncObjectQueue == null)
+                throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSyncObjectQueue named " 
+                        + synchronizationObjectQueue);
 
             // check that the item isn't already in the queue
             SyncObject so = new SyncObject(nodeId.getValue(), pid.getValue());
@@ -582,7 +596,8 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw e; // catching and rethrowing to avoid being recast as a service failure 
                      // in the following catch Exception block
         } catch (Exception e) {
-            throw new ServiceFailure("4961","Unexpected Exception:: " + e.toString());
+            throw new ServiceFailure("4961","Unexpected Exception in CN.synchronize: progress: " + 
+                    progress + ":: " + e.toString());
         }
     }
     
