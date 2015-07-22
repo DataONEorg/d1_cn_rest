@@ -596,8 +596,10 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw e; // catching and rethrowing to avoid being recast as a service failure 
                      // in the following catch Exception block
         } catch (Exception e) {
-            throw new ServiceFailure("4961","Unexpected Exception in CN.synchronize: progress: " + 
-                    progress + ":: " + e.toString());
+            String message = "Unexpected Exception in CN.synchronize: progress: " + 
+                    progress + ":: " + e.toString();
+            logger.error(message, e);
+            throw new ServiceFailure("4961", message);
         }
     }
     
