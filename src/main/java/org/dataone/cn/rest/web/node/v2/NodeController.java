@@ -24,7 +24,6 @@ package org.dataone.cn.rest.web.node.v2;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +40,7 @@ import org.apache.commons.collections.functors.EqualPredicate;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.ClientConfiguration;
-import org.dataone.cn.hazelcast.HazelcastInstanceFactory;
+import org.dataone.cn.hazelcast.HazelcastClientFactory;
 import org.dataone.cn.indexer.SolrIndexService;
 import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
 import org.dataone.cn.ldap.NodeAccess;
@@ -550,20 +549,9 @@ public class NodeController extends AbstractWebController implements ServletCont
             pid.setValue(pidString);
             
             progress = "(b) got pid from request: " + pidString;
-
-            // check locally to see if the calling node is the authoritative one.
-            HazelcastInstance hazelcast = HazelcastInstanceFactory.getProcessingInstance();
             
-            String hzSystemMetaMapName = 
-                    Settings.getConfiguration().getString("dataone.hazelcast.systemMetadata");
-
             // if this is a synchronized object and the recorded authoritativeMN conflicts, 
-            // we need to throw a NotAuthorized
-            IMap<Identifier, SystemMetadata> sysMetaMap = hazelcast.getMap(hzSystemMetaMapName);
-            if (sysMetaMap == null)
-                throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSysMetaMap named " + hzSystemMetaMapName);
-            
-            SystemMetadata sysmeta = sysMetaMap.get(pid);
+            SystemMetadata sysmeta = HazelcastClientFactory.getSystemMetadataMap().get(pid);
             if (sysmeta != null && !sysmeta.getAuthoritativeMemberNode().equals(nodeId)) {
                 String message = String.format(
                         "The requesting MemberNode (%s) is not the Authoritative MN for this object (%s).", 
@@ -579,7 +567,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                     Settings.getConfiguration().getString("dataone.hazelcast.synchronizationObjectQueue");
             progress = "(d) got HzSyncObjectQueue: " + synchronizationObjectQueue;
             
-            BlockingQueue<SyncObject> hzSyncObjectQueue = hazelcast.getQueue(synchronizationObjectQueue);
+            BlockingQueue<SyncObject> hzSyncObjectQueue = HazelcastClientFactory.getProcessingClient().getQueue(synchronizationObjectQueue);
             if (hzSyncObjectQueue == null)
                 throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSyncObjectQueue named " 
                         + synchronizationObjectQueue);
