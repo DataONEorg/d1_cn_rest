@@ -48,7 +48,10 @@
     <spring:bean id="ResolveFilterV1" class="org.dataone.cn.rest.filter.v1.ResolveFilter">
         <spring:property name="nodelistRefreshIntervalSeconds" value="180" />
     </spring:bean>
-
+    
+    <spring:bean id="ResolveFilterV2" class="org.dataone.cn.rest.filter.v2.ResolveFilter">
+        <spring:property name="nodelistRefreshIntervalSeconds" value="180" />
+    </spring:bean>
 
     <spring:bean id="xmlViewResolverIdentity" class="org.springframework.web.servlet.view.XmlViewResolver">
         <spring:property name="order" value="1"/>
