@@ -310,19 +310,29 @@ public class IdentityController extends AbstractWebController implements Servlet
     *
     */
    @RequestMapping(value = {CREDENTIALS_PATH_V2, CREDENTIALS_PATH_V2 + "/"}, method = RequestMethod.GET)
-   public ModelAndView echoCredentials(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest {
+   public ModelAndView echoCredentials(HttpServletRequest request, HttpServletResponse response) 
+           throws ServiceFailure, InvalidToken, NotImplemented {
 
-   	// get the Session object from the request
-   	Session session = PortalCertificateManager.getInstance().getSession(request);
-   	if (session == null) {
-   		throw new InvalidToken("0000", "Could not look up session info for this request.");
-   	}
-   	
-   	// serialize it back
-   	SubjectInfo subjectInfo = session.getSubjectInfo();
-   	
-   	return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+       try {
+           // get the Session object from the request
+           Session session = PortalCertificateManager.getInstance().getSession(request);
+           if (session == null) {
+               throw new InvalidToken("4967", "No credentials were received in the request. (Session was null)");
+           }
 
+           // serialize it back
+           SubjectInfo subjectInfo = session.getSubjectInfo();
+
+           return new ModelAndView("xmlSubjectInfoViewResolver", "org.dataone.service.types.v1.SubjectInfo", subjectInfo);
+       } catch (InvalidToken e) {
+           throw e;
+       }
+       catch (Exception e) {
+           ServiceFailure sf =  new ServiceFailure("4966", 
+                   "Unexpected exception while processing the request:: " + e.toString());
+           sf.initCause(e);
+           throw sf;
+       }
    }
 
     /**
