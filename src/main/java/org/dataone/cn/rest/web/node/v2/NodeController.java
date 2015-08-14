@@ -256,6 +256,8 @@ public class NodeController extends AbstractWebController implements ServletCont
                 hzclient = null;
             }
         }
+        
+        logger.debug("(a) before finding node in request");
 
         // retrieve the node structure being updated
         Node node = null;
@@ -270,6 +272,8 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (nodeDataMultipart != null) {
             try {
                 node = TypeMarshaller.unmarshalTypeFromStream(Node.class, nodeDataMultipart.getInputStream());
+                logger.debug("(b) found node in request: " + node.getIdentifier().getValue());
+
             } catch (IOException ex) {
                 throw new ServiceFailure("4842", ex.getMessage());
             } catch (InstantiationException ex) {
@@ -290,6 +294,9 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (this.hasNodeAdministratorsChanged()) {
              this.constructNodeAdministrators();
         }
+        
+        logger.debug("(c) checking for session");
+
         // decide if the subject requesting an update has permission to update
         Boolean approvedAdmin = false;
         Subject clientCertSubject = session.getSubject();
@@ -300,6 +307,8 @@ public class NodeController extends AbstractWebController implements ServletCont
         // the node subjects may be changed if the calling subject is an approved administrator
         Node currentNode = nodeRegistry.getNode(updateNodeReference);
         
+        logger.debug("(d) got current node");
+
         if ((currentNode.getSubjectList() != null) && !(currentNode.getSubjectList().isEmpty())) {
             for (Subject subject : currentNode.getSubjectList()) {
                 if (subject.equals(clientCertSubject)) {
@@ -312,6 +321,8 @@ public class NodeController extends AbstractWebController implements ServletCont
         // by the CN.  Currently, the list is in a node.properties file, but
         // it may reside elsewhere in the future
         
+        logger.debug("(e) checking for node admin");
+
         if (!approvedAdmin && (nodeAdminSubjects != null)) {
             for (Subject subject : nodeAdminSubjects) {
 
@@ -367,9 +378,14 @@ public class NodeController extends AbstractWebController implements ServletCont
             
         }
         
+        logger.debug("(f) done checking node admin: approvedAdmin=" + approvedAdmin);
+        
         if (!approvedAdmin) {
            throw new NotAuthorized("4821", "Certificate should be an administrative subject before request can be processed");
         }
+        
+        logger.debug("(g) checking contactSubjectList");
+
         // the contactSubject must be a registered and verified user or group
         List<Subject> contactSubjectList = node.getContactSubjectList();
         Boolean unVerifiedRegistration = false;
@@ -401,12 +417,20 @@ public class NodeController extends AbstractWebController implements ServletCont
                 }
             }
         }
+        logger.debug("(h) unVerifiedRegistration=" + unVerifiedRegistration);
+
         if (unVerifiedRegistration) {
             throw new NotAuthorized("4821", errorMessage.toString());
         }
+        
+        logger.debug("(i) registering node updateNodeReference=" + updateNodeReference.getValue());
+
         if (hzclient == null) {
+            logger.debug("(j) calling nodeRegistry.updateNodeCapabilities");
             nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
         } else {
+            logger.debug("(j) adding to hzNodes directly");
+
             IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
 
             NodeReference nodeReference = node.getIdentifier();
