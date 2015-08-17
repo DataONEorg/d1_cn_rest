@@ -246,11 +246,14 @@ public class NodeController extends AbstractWebController implements ServletCont
             // try to work around 
             try {
                 // TODO: try to connect to each hzClusterMember (localhost being the first one) should a connection fail
+            	logger.debug("Initializing HZ client");
                 ClientConfig cc = new ClientConfig();
                 cc.getGroupConfig().setName(clientConfiguration.getGroup());
                 cc.getGroupConfig().setPassword(clientConfiguration.getPassword());
                 cc.addAddress(clientConfiguration.getLocalhost());
                 hzclient = HazelcastClient.newHazelcastClient(cc);
+            	logger.debug("Initialized HZ client: " + hzclient.getName());
+
             } catch (Exception e) {
                 logger.error("hzclient is not able to connect to cluster");
                 hzclient = null;
@@ -433,14 +436,20 @@ public class NodeController extends AbstractWebController implements ServletCont
             
             logger.debug("(k) hzNodes hzclient: " + hzclient);
             logger.debug("(k) hzNodes hzclient.name: " + hzclient.getName());
-            logger.debug("(k) hzNodes configfile: " + hzclient.getConfig().getConfigurationUrl().toString());
+            
+            try {
+            	logger.debug("(k) hzNodes configfile: " + hzclient.getConfig().getConfigurationUrl().toString());
 
-            IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
+                IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
 
-            logger.debug("(k) hzNodes size: " + hzNodes.size());
-            logger.debug("(l) current node desc: " + hzNodes.get(updateNodeReference).getDescription());
+                logger.debug("(k) hzNodes size: " + hzNodes.size());
+                logger.debug("(l) current node desc: " + hzNodes.get(updateNodeReference).getDescription());
 
-            hzNodes.put(updateNodeReference, node);
+                hzNodes.put(updateNodeReference, node);
+            } catch (Throwable t) {
+            	logger.error("could not save to hzNodes: " + t.getMessage(), t);
+            }
+            
         }
         return;
 
