@@ -431,9 +431,10 @@ public class NodeController extends AbstractWebController implements ServletCont
         } else {
             logger.debug("(j) adding to hzNodes directly");
 
+            logger.debug("(k) hzNodes configfile: " + hzclient.getConfig().getConfigurationUrl().toString());
+
             IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
 
-            logger.debug("(k) hzNodes configfile: " + hzclient.getConfig().getConfigurationUrl().toString());
             logger.debug("(k) hzNodes size: " + hzNodes.size());
             logger.debug("(l) current node desc: " + hzNodes.get(updateNodeReference).getDescription());
 
