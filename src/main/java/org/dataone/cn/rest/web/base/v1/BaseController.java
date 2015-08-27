@@ -89,7 +89,8 @@ public class BaseController extends AbstractWebController implements ServletCont
         nodeReference.setValue(nodeIdentifier);
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    //@RequestMapping(value = "/", method = RequestMethod.GET)
+    // default behavior will now use v2 return
     public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound{
 
         Node node;
