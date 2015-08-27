@@ -62,6 +62,7 @@ import org.dataone.service.types.v1.ServiceMethodRestriction;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
+import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
@@ -394,7 +395,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             NodeReference nodeReference = node.getIdentifier();
 
             try {
-				hzNodes.put(updateNodeReference, TypeMarshaller.convertTypeFromType(node,  org.dataone.service.types.v2.Node.class));
+				hzNodes.put(updateNodeReference, TypeFactory.convertTypeFromType(node,  org.dataone.service.types.v2.Node.class));
 			} catch (Exception e) {
                 throw new ServiceFailure("4842", e.getMessage());
 			}
