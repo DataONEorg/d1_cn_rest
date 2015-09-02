@@ -506,6 +506,14 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>cnBase</servlet-name>
+        <url-pattern>/v2/checksum</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
+        <url-pattern>/v2/checksum/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>cnBase</servlet-name>
         <url-pattern>/v1/query</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
