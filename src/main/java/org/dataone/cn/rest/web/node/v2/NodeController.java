@@ -624,9 +624,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             String message = "Unexpected Exception in CN.synchronize: progress: " + 
                     progress + ":: " + e.toString();
             logger.error(message, e);
-            ServiceFailure serviceFailure = new ServiceFailure("4961", message);
-            serviceFailure.initCause(e);
-            throw serviceFailure;
+            throw new ServiceFailure("4961", message);
         }
     }
     
