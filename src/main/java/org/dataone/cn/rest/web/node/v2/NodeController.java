@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
@@ -588,7 +589,11 @@ public class NodeController extends AbstractWebController implements ServletCont
             progress = "(b) got pid from request: " + pidString;
             
             // if this is a synchronized object and the recorded authoritativeMN conflicts, 
-            SystemMetadata sysmeta = HazelcastClientFactory.getSystemMetadataMap().get(pid);
+            Map<Identifier,SystemMetadata> smm = HazelcastClientFactory.getSystemMetadataMap();
+            if (smm == null) 
+                throw new ServiceFailure("4691", "Unexpected Error! The CN could not get the SystemMetadata map!");
+            
+            SystemMetadata sysmeta = smm.get(pid);
             if (sysmeta != null && !sysmeta.getAuthoritativeMemberNode().equals(nodeId)) {
                 String message = String.format(
                         "The requesting MemberNode (%s) is not the Authoritative MN for this object (%s).", 
@@ -604,7 +609,11 @@ public class NodeController extends AbstractWebController implements ServletCont
                     Settings.getConfiguration().getString("dataone.hazelcast.synchronizationObjectQueue");
             progress = "(d) got HzSyncObjectQueue: " + synchronizationObjectQueue;
             
-            BlockingQueue<SyncObject> hzSyncObjectQueue = HazelcastClientFactory.getProcessingClient().getQueue(synchronizationObjectQueue);
+            HazelcastClient hc = HazelcastClientFactory.getProcessingClient();
+            if (hc == null)
+                throw new ServiceFailure("4691", "Unexpected Error! The CN could not get an Hz processing Client");
+            
+            BlockingQueue<SyncObject> hzSyncObjectQueue = hc.getQueue(synchronizationObjectQueue);
             if (hzSyncObjectQueue == null)
                 throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSyncObjectQueue named " 
                         + synchronizationObjectQueue);
