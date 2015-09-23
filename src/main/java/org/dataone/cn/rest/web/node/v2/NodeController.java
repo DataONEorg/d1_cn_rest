@@ -279,13 +279,13 @@ public class NodeController extends AbstractWebController implements ServletCont
                 logger.debug("(b) found node in request: " + node.getIdentifier().getValue());
 
             } catch (IOException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (InstantiationException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (IllegalAccessException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (JiBXException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             }
 
         } else {
@@ -490,13 +490,13 @@ public class NodeController extends AbstractWebController implements ServletCont
             try {
                 node = TypeMarshaller.unmarshalTypeFromStream(Node.class, nodeDataMultipart.getInputStream());
             } catch (IOException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (InstantiationException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (IllegalAccessException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (JiBXException ex) {
-                throw new ServiceFailure("4842", ex.getMessage());
+                throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             }
 
         } else {
