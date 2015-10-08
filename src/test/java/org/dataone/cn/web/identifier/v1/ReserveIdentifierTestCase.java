@@ -75,7 +75,7 @@ public class ReserveIdentifierTestCase {
     private SubjectLdapPopulation cnLdapPopulation;
     private X509CertificateGenerator x509CertificateGenerator;
     private static final String RESOURCE_RESERVE_PATH_V1 = "/v1/" + Constants.RESOURCE_RESERVE;
-    private HazelcastInstance hzInstance;
+    private HazelcastInstance hazelcastInstance;
     @Resource
     public void setCNLdapPopulation(SubjectLdapPopulation ldapPopulation) {
         this.cnLdapPopulation = ldapPopulation;
@@ -87,8 +87,8 @@ public class ReserveIdentifierTestCase {
         this.testController = testController;
     }
     @Resource
-    public void setHzInstance(HazelcastInstance hzInstance) {
-        this.hzInstance = hzInstance;
+    public void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
+        this.hazelcastInstance = hazelcastInstance;
     }
     @Resource
     public void setX509CertificateGenerator(X509CertificateGenerator x509CertificateGenerator) {
@@ -124,7 +124,7 @@ public class ReserveIdentifierTestCase {
 
         Identifier result = null;
         SystemMetadata bogusSysMeta = new SystemMetadata();
-        Map hzMap = hzInstance.getMap(Settings.getConfiguration().getString("dataone.hazelcast.systemMetadata"));
+        Map hzMap = hazelcastInstance.getMap(Settings.getConfiguration().getString("dataone.hazelcast.systemMetadata"));
         hzMap.put(pid, bogusSysMeta);
         
         try {

@@ -11,7 +11,7 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
-    <spring:bean id="hzInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" />
+    <spring:bean id="hazelcastInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" />
     <spring:bean id="mylog"
     class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
         <spring:property name="logName" value="log"/>

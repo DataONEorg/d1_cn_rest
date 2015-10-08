@@ -30,23 +30,9 @@ basic.xsd"
     <keep-alive-seconds>60</keep-alive-seconds>
   </executor-service>
 
-  <map name="hzNodes">
+  <topic name="hzNodes">
 
-    <backup-count>0</backup-count>
-
-    <eviction-policy>NONE</eviction-policy>
-
-    <max-size policy="cluster_wide_map_size">0</max-size>
-
-    <eviction-percentage>25</eviction-percentage>
-
-    <merge-policy>hz.LATEST_UPDATE</merge-policy>
-
-    <map-store enabled="true">
-      <class-name>org.dataone.cn.hazelcast.HazelcastLdapStore</class-name>
-      <write-delay-seconds>0</write-delay-seconds>
-    </map-store>
-  </map>
+  </topic>
     <map name="hzSystemMetadata">
     <!--
       Number of backups. If 1 is set as the backup-count for example,

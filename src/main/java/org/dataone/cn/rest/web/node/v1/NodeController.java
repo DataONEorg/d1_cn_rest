@@ -1,25 +1,20 @@
 /**
- * This work was created by participants in the DataONE project, and is
- * jointly copyrighted by participating institutions in DataONE. For 
- * more information on DataONE, see our web site at http://dataone.org.
+ * This work was created by participants in the DataONE project, and is jointly copyrighted by participating
+ * institutions in DataONE. For more information on DataONE, see our web site at http://dataone.org.
  *
- *   Copyright ${year}
+ * Copyright ${year}
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and 
- * limitations under the License.
- * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
  * $Id$
  */
-
 package org.dataone.cn.rest.web.node.v1;
 
 import java.io.IOException;
@@ -62,7 +57,6 @@ import org.dataone.service.types.v1.ServiceMethodRestriction;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
-import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
 import org.jibx.runtime.JiBXException;
@@ -78,17 +72,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.hazelcast.client.ClientConfig;
-import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.core.ITopic;
 
 /**
  *
  * This package will expose endpoints to handle manipulation of the Node Registry structure.
- * 
+ *
  * @author waltz
- * 
+ *
  */
 @Controller("nodeControllerV1")
 public class NodeController extends AbstractWebController implements ServletContextAware {
@@ -111,7 +103,9 @@ public class NodeController extends AbstractWebController implements ServletCont
     @Autowired
     @Qualifier("hzClientConfiguration")
     ClientConfiguration clientConfiguration;
-    HazelcastInstance hzclient = null;
+    HazelcastInstance hazelcastInstance = null;
+    ITopic<NodeReference> hzNodeTopic = null;
+    static final String hzNodeTopicName = Settings.getConfiguration().getString("dataone.hazelcast.nodeTopic");
     @Autowired
     @Qualifier("cnIdentityV1")
     CNIdentity cnIdentity;
@@ -119,7 +113,6 @@ public class NodeController extends AbstractWebController implements ServletCont
     @Value("${cn.nodeId}")
     String nodeIdentifier;
     NodeReference nodeReference;
-
 
     List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
     List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
@@ -135,12 +128,12 @@ public class NodeController extends AbstractWebController implements ServletCont
     public void init() {
         nodeReference = new NodeReference();
         nodeReference.setValue(nodeIdentifier);
-        
+        hzNodeTopic = hazelcastInstance.getTopic(hzNodeTopicName);
         // during intialization, construct the NodeAdminSubjects regardless
         // of whether nodeAdministrators have changed
         this.hasNodeAdministratorsChanged();
         this.constructNodeAdministrators();
-        
+
     }
     /* 
      * Returns a list of nodes that have been registered with and approved by the DataONE infrastructure.
@@ -152,6 +145,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @throws ServiceFailure
      * @return ModelAndView
      */
+
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.GET)
     public ModelAndView getNodeList(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented {
 
@@ -211,6 +205,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @throws ServiceFailure
      * @return ModelAndView
      */
+
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
     public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
         Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
@@ -218,27 +213,12 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw new NotAuthorized("4821", "Need a valid certificate before request can be processed");
         }
 
-
         NodeReference updateNodeReference = new NodeReference();
         updateNodeReference.setValue(nodeId);
         // don't think lazy init will not work in this case since this is the controller for a servlet
         // so lazy init the client here. the hz cluster  should be up before
         // calls to update node capabilities is called (or write to LDAP will reflect the changes  )
         logger.info("group " + clientConfiguration.getGroup() + " pwd " + clientConfiguration.getPassword() + " addresses " + clientConfiguration.getLocalhost());
-        if (hzclient == null) {
-            // try to work around 
-            try {
-                // TODO: try to connect to each hzClusterMember (localhost being the first one) should a connection fail
-                ClientConfig cc = new ClientConfig();
-                cc.getGroupConfig().setName(clientConfiguration.getGroup());
-                cc.getGroupConfig().setPassword(clientConfiguration.getPassword());
-                cc.addAddress(clientConfiguration.getLocalhost());
-                hzclient = HazelcastClient.newHazelcastClient(cc);
-            } catch (Exception e) {
-                logger.error("hzclient is not able to connect to cluster");
-                hzclient = null;
-            }
-        }
 
         // retrieve the node structure being updated
         Node node = null;
@@ -271,18 +251,18 @@ public class NodeController extends AbstractWebController implements ServletCont
                     + " does not equal path node identifier " + node.getIdentifier().getValue());
         }
         if (this.hasNodeAdministratorsChanged()) {
-             this.constructNodeAdministrators();
+            this.constructNodeAdministrators();
         }
         // decide if the subject requesting an update has permission to update
         Boolean approvedAdmin = false;
         Subject clientCertSubject = session.getSubject();
         logger.debug("Certificate has subject " + clientCertSubject.getValue());
         // is the subject equal to the value found in the subject list of the node?
-        
+
         // the node subject must be retrieved from the current node information
         // the node subjects may be changed if the calling subject is an approved administrator
         Node currentNode = nodeRegistry.getNode(updateNodeReference);
-        
+
         if ((currentNode.getSubjectList() != null) && !(currentNode.getSubjectList().isEmpty())) {
             for (Subject subject : currentNode.getSubjectList()) {
                 if (subject.equals(clientCertSubject)) {
@@ -290,11 +270,10 @@ public class NodeController extends AbstractWebController implements ServletCont
                 }
             }
         }
-        
+
         // the subject may be a member of an approved administrators list maintained 
         // by the CN.  Currently, the list is in a node.properties file, but
         // it may reside elsewhere in the future
-        
         if (!approvedAdmin && (nodeAdminSubjects != null)) {
             for (Subject subject : nodeAdminSubjects) {
 
@@ -306,7 +285,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             if (!approvedAdmin) {
                 logger.debug("Not approved yet");
                 try {
-                    SubjectInfo clientSubjectInfo = cnIdentity.getSubjectInfo(session,clientCertSubject);
+                    SubjectInfo clientSubjectInfo = cnIdentity.getSubjectInfo(session, clientCertSubject);
                     // check to see if an equivalent identity of the administrative subject
                     if (clientSubjectInfo.getPersonList() != null) {
                         List<Person> clientPersonList = clientSubjectInfo.getPersonList();
@@ -316,7 +295,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                             // check if the person listed is a part of the node administrators list
                             EqualPredicate equalPredicate = new EqualPredicate(person.getSubject());
                             if (CollectionUtils.exists(nodeAdminSubjects, equalPredicate)) {
-                                 logger.debug("Admin Approved");
+                                logger.debug("Admin Approved");
                                 approvedAdmin = true;
                                 break;
                             }
@@ -324,22 +303,22 @@ public class NodeController extends AbstractWebController implements ServletCont
                             for (Subject equivSubject : person.getEquivalentIdentityList()) {
                                 logger.debug("Equiv Subject List :" + equivSubject.getValue());
                             }
-                            if (CollectionUtils.containsAny(nodeAdminSubjects,person.getEquivalentIdentityList())) {
+                            if (CollectionUtils.containsAny(nodeAdminSubjects, person.getEquivalentIdentityList())) {
                                 approvedAdmin = true;
                                 logger.debug("Equiv Subject Approved");
                                 break;
                             }
                             // check if any group memberships are a part of the node administrators list
-                            if (CollectionUtils.containsAny(nodeAdminSubjects,person.getIsMemberOfList())) {
+                            if (CollectionUtils.containsAny(nodeAdminSubjects, person.getIsMemberOfList())) {
                                 approvedAdmin = true;
                                 logger.debug("Group Member Subject Approved");
                                 break;
                             }
                         }
                     } else {
-                         logger.debug("Person LIst is null");
+                        logger.debug("Person LIst is null");
                     }
-                } catch (NotFound ex){
+                } catch (NotFound ex) {
                     approvedAdmin = false;
                     logger.warn(clientCertSubject.getValue() + " in is not entered in LDAP");
                 } catch (Exception ex) {
@@ -347,17 +326,17 @@ public class NodeController extends AbstractWebController implements ServletCont
                     logger.warn(ex.getMessage());
                 }
             }
-            
+
         }
-        
+
         if (!approvedAdmin) {
-           throw new NotAuthorized("4821", "Certificate should be an administrative subject before request can be processed");
+            throw new NotAuthorized("4821", "Certificate should be an administrative subject before request can be processed");
         }
         // the contactSubject must be a registered and verified user or group
         List<Subject> contactSubjectList = node.getContactSubjectList();
         Boolean unVerifiedRegistration = false;
         StringBuilder errorMessage = new StringBuilder();
-        if ( (contactSubjectList != null) && !(contactSubjectList.isEmpty())) {
+        if ((contactSubjectList != null) && !(contactSubjectList.isEmpty())) {
             for (Subject contactSubject : contactSubjectList) {
                 if (!(isVerifiedSubject(session, contactSubject))) {
                     errorMessage.append("Node Contact Subject: " + contactSubject.getValue() + " is not verified! \n");
@@ -387,23 +366,17 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (unVerifiedRegistration) {
             throw new NotAuthorized("4821", errorMessage.toString());
         }
-        if (hzclient == null) {
-            nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
+
+        nodeRegistry.updateNodeCapabilities(updateNodeReference, node);
+        if (hzNodeTopic != null) {
+            hzNodeTopic.publish(updateNodeReference);
         } else {
-            IMap<NodeReference, org.dataone.service.types.v2.Node> hzNodes = hzclient.getMap("hzNodes");
-
-            NodeReference nodeReference = node.getIdentifier();
-
-            try {
-				hzNodes.put(updateNodeReference, TypeFactory.convertTypeFromType(node,  org.dataone.service.types.v2.Node.class));
-			} catch (Exception e) {
-                throw new ServiceFailure("4842", e.getMessage());
-			}
+            logger.error(hzNodeTopicName + " is null. Synchronization will not receive notification of updateNodeCapabilities event");
         }
         return;
 
     }
-    
+
     /*
      * Register a new node in the system. If the node already exists, then a IdentifierNotUnique exception MUST be returned.
      * 
@@ -452,7 +425,6 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw new InvalidRequest("4843", "New Node Xml not found in MultiPart request");
         }
 
-
         // Contact Subject must be registered and verified users
         List<Subject> contactSubjectList = node.getContactSubjectList();
         Boolean unVerifiedRegistration = false;
@@ -486,7 +458,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             throw new NotAuthorized("4841", errorMessage.toString());
         }
 
-        //IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
+        //IMap<NodeReference, Node> hzNodes = hazelcastInstance.getMap("hzNodes");
         //for (NodeReference noderef : hzNodes.keySet()) {
         //    logger.info(noderef.getValue());
         //}
@@ -497,11 +469,10 @@ public class NodeController extends AbstractWebController implements ServletCont
         // XXX need to generate new Node Reference before putting it in the map
         //       NodeReference nodeReference = nodeRegistry.generateNodeIdentifier();
         //       node.setIdentifier(nodeReference);
-
         NodeReference nodeReference = nodeRegistry.register(node);
         return new ModelAndView("xmlNodeReferenceViewResolver", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
-    
+
     /*
      * determine if the passed in subject has been verified in the Identity service
      * 
@@ -538,7 +509,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         }
         return verifiedRegistration;
     }
-    
+
     /*
      * determine if any changes have occurred either on the NodeList or 
      * in the properties file to CN administrative subjects
@@ -546,14 +517,14 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @author waltz
      * @return boolean
      */
-    private boolean hasNodeAdministratorsChanged()  {
+    private boolean hasNodeAdministratorsChanged() {
         try {
-        List<String> tmpNodeAdministrators = buildUpdateNodeCapabilitiesAdministrativeList();
-        
-        if (!CollectionUtils.isEqualCollection(nodeAdministrators, tmpNodeAdministrators)) {
-            nodeAdministrators =  tmpNodeAdministrators;
-            return true;
-        }
+            List<String> tmpNodeAdministrators = buildUpdateNodeCapabilitiesAdministrativeList();
+
+            if (!CollectionUtils.isEqualCollection(nodeAdministrators, tmpNodeAdministrators)) {
+                nodeAdministrators = tmpNodeAdministrators;
+                return true;
+            }
         } catch (NotImplemented ex) {
             ex.printStackTrace();
         } catch (ServiceFailure ex) {
@@ -561,7 +532,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         }
         return false;
     }
-    
+
     /*
      * from nodeAdministrators list, build a list of Administrator subjects
      * 
@@ -569,7 +540,7 @@ public class NodeController extends AbstractWebController implements ServletCont
      * @return void
      */
     private void constructNodeAdministrators() {
-        nodeAdminSubjects  = new ArrayList<Subject>();
+        nodeAdminSubjects = new ArrayList<Subject>();
         for (String administrator : nodeAdministrators) {
             logger.info("AdminList entry " + administrator);
             Subject adminSubject = new Subject();
@@ -577,7 +548,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             nodeAdminSubjects.add(adminSubject);
         }
     }
-    
+
     /*
      * refreshes an array of subjects listed as CN's in the nodelist or in a properties file.
      * If the ServiceMethodRestriction list of updateNodeCapabilities is set, 
@@ -607,7 +578,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         for (Node node : nodeList) {
             if (node.getType().equals(NodeType.CN) && node.getState().equals(NodeState.UP)) {
                 for (Subject adminstrativeSubject : node.getSubjectList()) {
-                     administrators.add(adminstrativeSubject.getValue());
+                    administrators.add(adminstrativeSubject.getValue());
                 }
                 List<Service> cnServices = node.getServices().getServiceList();
                 for (Service service : cnServices) {
@@ -620,10 +591,10 @@ public class NodeController extends AbstractWebController implements ServletCont
                                 if (serviceMethodRestriction.getMethodName().equalsIgnoreCase(
                                         "updateNodeCapabilities")) {
                                     if (serviceMethodRestriction.getSubjectList() != null) {
-                                           for (Subject administrator : serviceMethodRestriction.getSubjectList()) {
-                                                logger.debug("updateNodeCapabilities ServiceMethodRestriction entry " + administrator);
-                                                administrators.add(administrator.getValue());
-                                            }
+                                        for (Subject administrator : serviceMethodRestriction.getSubjectList()) {
+                                            logger.debug("updateNodeCapabilities ServiceMethodRestriction entry " + administrator);
+                                            administrators.add(administrator.getValue());
+                                        }
                                     }
                                 }
                             }
@@ -634,16 +605,17 @@ public class NodeController extends AbstractWebController implements ServletCont
         }
         return administrators;
     }
+
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;
     }
 
-    public HazelcastInstance getHzclient() {
-        return hzclient;
+    public HazelcastInstance getHazelcastInstance() {
+        return hazelcastInstance;
     }
 
-    public void setHzclient(HazelcastInstance hzclient) {
-        this.hzclient = hzclient;
+    public void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
+        this.hazelcastInstance = hazelcastInstance;
     }
 }

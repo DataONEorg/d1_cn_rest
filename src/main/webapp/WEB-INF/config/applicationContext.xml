@@ -20,15 +20,8 @@
     class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
         <spring:property name="logName" value="log"/>
     </spring:bean>
-
-    <spring:bean id="hzClientConfiguration" class="org.dataone.cn.hazelcast.ClientConfiguration">
-        <spring:constructor-arg ref="hzConfig" />
-        <spring:qualifier value="hzClientConfiguration" />
-    </spring:bean>
-    <spring:bean id="hzConfig" class="com.hazelcast.config.ClasspathXmlConfig">
-        <spring:constructor-arg value="org/dataone/cn/rest/resources/hazelcastClientConf.xml" />
-        <spring:qualifier value="hzConfig" />
-    </spring:bean>
+    
+    <import resource="hazelcast.xml"/>
 
 
     <spring:bean id="cnNodeRegistryV1" class="org.dataone.service.cn.impl.v1.NodeRegistryService">
@@ -60,5 +53,6 @@
     
     <!-- import the index processor bean definitions for diagnostic API -->	
 	<spring:import resource="file:**/**/WEB-INF/config/index-context.xml"/>
+        
 
 </spring:beans>

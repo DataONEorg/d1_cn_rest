@@ -25,7 +25,7 @@
             </spring:list>
         </spring:property>
     </spring:bean>
-    <spring:bean id="hzInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" factory-method="getHazelcast"/>
+    <spring:bean id="hazelcastInstance" class="org.dataone.cn.hazelcast.HazelcastInstanceInvokingBean" factory-method="getHazelcast"/>
 
 <!--
     <spring:bean id="readSystemMetadataResource" class="org.springframework.core.io.ClassPathResource" >
