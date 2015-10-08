@@ -13,5 +13,5 @@
     <properties fileName="identity.properties"/>
     <properties fileName="reserveIdentifier.properties"/>
     <properties fileName="portal.properties"/>
-    <properties fileName="file:/etc/dataone/process/dataoneHazelcast.properties"/>    
+    <properties fileName="file:/etc/dataone/cn/dataoneHazelcast.properties"/>    
 </configuration>
