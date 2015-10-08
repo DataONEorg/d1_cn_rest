@@ -21,7 +21,7 @@
         <spring:property name="logName" value="log"/>
     </spring:bean>
     
-    <import resource="hazelcast.xml"/>
+    <spring:import resource="hazelcast.xml"/>
 
 
     <spring:bean id="cnNodeRegistryV1" class="org.dataone.service.cn.impl.v1.NodeRegistryService">

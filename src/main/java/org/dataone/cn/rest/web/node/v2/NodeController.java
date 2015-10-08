@@ -35,7 +35,6 @@ import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.functors.EqualPredicate;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.hazelcast.ClientConfiguration;
 import org.dataone.cn.hazelcast.HazelcastClientFactory;
 import org.dataone.cn.indexer.SolrIndexService;
 import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
@@ -116,9 +115,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     @Autowired
     @Qualifier("cnNodeRegistryV2")
     NodeRegistryService nodeRegistry;
-    @Autowired
-    @Qualifier("hzClientConfiguration")
-    ClientConfiguration clientConfiguration;
+
     HazelcastInstance hazelcastInstance = null;
     ITopic<NodeReference> hzNodeTopic = null;
     BlockingQueue<SyncObject> hzSyncObjectQueue = null;
