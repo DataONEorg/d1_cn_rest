@@ -115,12 +115,16 @@ public class NodeController extends AbstractWebController implements ServletCont
     @Autowired
     @Qualifier("cnNodeRegistryV2")
     NodeRegistryService nodeRegistry;
-
-    HazelcastInstance hazelcastInstance = null;
+    
+    @Autowired
+    @Qualifier("hazelcastInstance")
+    HazelcastInstance hazelcastInstance;
+    
     ITopic<NodeReference> hzNodeTopic = null;
     BlockingQueue<SyncObject> hzSyncObjectQueue = null;
     
-    
+    static final String hzNodeTopicName = Settings.getConfiguration().getString("dataone.hazelcast.nodeTopic");
+    static final String synchronizationObjectQueueName = Settings.getConfiguration().getString("dataone.hazelcast.synchronizationObjectQueue");
     @Autowired
     @Qualifier("cnIdentityV2")
     CNIdentity cnIdentity;
@@ -148,10 +152,8 @@ public class NodeController extends AbstractWebController implements ServletCont
         nodeReference = new NodeReference();
         nodeReference.setValue(nodeIdentifier);
         
-        String hzNodeTopicName = Settings.getConfiguration().getString("dataone.hazelcast.nodeTopic");
         hzNodeTopic = hazelcastInstance.getTopic(hzNodeTopicName);
         
-        String synchronizationObjectQueueName  = Settings.getConfiguration().getString("dataone.hazelcast.synchronizationObjectQueue");
         hzSyncObjectQueue = hazelcastInstance.getQueue(synchronizationObjectQueueName);
         
         // during intialization, construct the NodeAdminSubjects regardless
@@ -417,7 +419,7 @@ public class NodeController extends AbstractWebController implements ServletCont
             logger.debug("(j) publish updateNodeReference=" + updateNodeReference.getValue());
             hzNodeTopic.publish(updateNodeReference);
         } else {
-            logger.error("hzNodeTopic  is null. Synchronization will not receive notification of updateNodeCapabilities event");
+            logger.error(hzNodeTopicName + " is null. Synchronization will not receive notification of updateNodeCapabilities event");
         }
 
         return;
@@ -571,9 +573,10 @@ public class NodeController extends AbstractWebController implements ServletCont
 
 
             if (hzSyncObjectQueue == null) {
-                throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSyncObjectQueue");
+                throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSyncObjectQueue named "
+                        + synchronizationObjectQueueName);
             }
-            progress = "(d) got HzSyncObjectQueue" ;
+            progress = "(d) got HzSyncObjectQueue: " + synchronizationObjectQueueName;
             // check that the item isn't already in the queue
             SyncObject so = new SyncObject(nodeId.getValue(), pid.getValue());
             if (!hzSyncObjectQueue.contains(so)) {

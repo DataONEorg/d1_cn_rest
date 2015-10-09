@@ -31,7 +31,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.functors.EqualPredicate;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
-import org.dataone.cn.hazelcast.ClientConfiguration;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
 import org.dataone.mimemultipart.MultipartRequestResolver;
@@ -100,9 +99,9 @@ public class NodeController extends AbstractWebController implements ServletCont
     @Autowired
     @Qualifier("cnNodeRegistryV1")
     NodeRegistryService nodeRegistry;
+    
     @Autowired
-    @Qualifier("hzClientConfiguration")
-    ClientConfiguration clientConfiguration;
+    @Qualifier("hazelcastInstance")
     HazelcastInstance hazelcastInstance = null;
     ITopic<NodeReference> hzNodeTopic = null;
     static final String hzNodeTopicName = Settings.getConfiguration().getString("dataone.hazelcast.nodeTopic");
@@ -218,7 +217,6 @@ public class NodeController extends AbstractWebController implements ServletCont
         // don't think lazy init will not work in this case since this is the controller for a servlet
         // so lazy init the client here. the hz cluster  should be up before
         // calls to update node capabilities is called (or write to LDAP will reflect the changes  )
-        logger.info("group " + clientConfiguration.getGroup() + " pwd " + clientConfiguration.getPassword() + " addresses " + clientConfiguration.getLocalhost());
 
         // retrieve the node structure being updated
         Node node = null;
