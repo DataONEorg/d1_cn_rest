@@ -189,7 +189,7 @@ public class ReserveIdentifierController extends AbstractWebController implement
      * @throws NotFound
      */
     @RequestMapping(value = RESOURCE_RESERVE_PATH_V2 + "/**", method = RequestMethod.GET)
-    public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
+    public void hasReservation(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidCredentials, InvalidRequest, NotFound {
 
         // get the Session object from certificate in request
         Session session = PortalCertificateManager.getInstance().getSession(request);
