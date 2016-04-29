@@ -59,7 +59,7 @@ import java.util.Date;
 import java.util.List;
 import org.dataone.configuration.Settings;
 import org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl;
-import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.cn.v1.impl.NodeRegistryServiceImpl;
 import org.dataone.service.types.v1.*;
 
 /**
@@ -120,7 +120,7 @@ public class NodeRegistryTestCase {
     private ClassPathResource mnInvalidNodeResource;
     @Autowired
     @Qualifier("cnNodeRegistryV1")
-    private NodeRegistryService nodeRegistryService;   
+    private NodeRegistryServiceImpl nodeRegistryService;   
     @Autowired
     @Qualifier("cnIdentityV1")
     private CNIdentityLDAPImpl  cnIdentity;    
@@ -259,7 +259,7 @@ public class NodeRegistryTestCase {
         String sq1dId = "urn:node:sq1d";
         NodeReference sq1dNodeReference = new NodeReference();
         sq1dNodeReference.setValue(sq1dId);
-        Node sq1dNode = nodeRegistryService.getNode(sq1dNodeReference);
+        Node sq1dNode = nodeRegistryService.getNodeCapabilities(sq1dNodeReference);
         Subject sqR1ContactSubject = new Subject();
         sqR1ContactSubject.setValue("CN=Frankenstein,O=Test,C=US,DC=cilogon,DC=org");
         sq1dNode.addContactSubject(sqR1ContactSubject);
@@ -282,7 +282,7 @@ public class NodeRegistryTestCase {
         NodeReference nodeReference = null;
         try {
             testController.updateNodeCapabilities(request, response, sq1dId);
-            Node sq1dUpdatedNode = nodeRegistryService.getNode(sq1dNodeReference);
+            Node sq1dUpdatedNode = nodeRegistryService.getNodeCapabilities(sq1dNodeReference);
             log.info("sizeContactSubjectList " + sq1dUpdatedNode.sizeContactSubjectList());
             assertTrue(sq1dUpdatedNode.sizeContactSubjectList() == 2);
         } catch (Exception ex) {
@@ -307,7 +307,7 @@ public class NodeRegistryTestCase {
         NodeReference sq1shNodeReference = new NodeReference();
         sq1shNodeReference.setValue(sq1shId);
         
-        Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
+        Node sq1shNode = nodeRegistryService.getNodeCapabilities(sq1shNodeReference);
         Date lastHarvested = sq1shNode.getSynchronization().getLastHarvested();
         
         
@@ -329,7 +329,7 @@ public class NodeRegistryTestCase {
         NodeReference nodeReference = null;
         try {
             testController.updateNodeCapabilities(request, response, sq1shId);
-            Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            Node sq1shUpdatedNode = nodeRegistryService.getNodeCapabilities(sq1shNodeReference);
             Date notUpdatedLastHarvested = sq1shUpdatedNode.getSynchronization().getLastHarvested();
             log.info("sizeContactSubjectList " + sq1shUpdatedNode.sizeContactSubjectList());
             assertTrue(notUpdatedLastHarvested.compareTo(lastHarvested) == 0);
@@ -399,7 +399,7 @@ public class NodeRegistryTestCase {
         NodeReference sq1shNodeReference = new NodeReference();
         sq1shNodeReference.setValue(sq1shId);
         
-        Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
+        Node sq1shNode = nodeRegistryService.getNodeCapabilities(sq1shNodeReference);
         String newDescription = "ThisNodeIsaTestNode";
         sq1shNode.setDescription(newDescription);
 
@@ -420,7 +420,7 @@ public class NodeRegistryTestCase {
         NodeReference nodeReference = null;
         try {
             testController.updateNodeCapabilities(request, response, sq1shId);
-            Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            Node sq1shUpdatedNode = nodeRegistryService.getNodeCapabilities(sq1shNodeReference);
             assertTrue(sq1shUpdatedNode.getDescription().compareTo(newDescription) == 0);
         } catch (Exception ex) {
                 ex.printStackTrace();
@@ -496,7 +496,7 @@ public class NodeRegistryTestCase {
         NodeReference sq1shNodeReference = new NodeReference();
         sq1shNodeReference.setValue(sq1shId);
         
-        Node sq1shNode = nodeRegistryService.getNode(sq1shNodeReference);
+        Node sq1shNode = nodeRegistryService.getNodeCapabilities(sq1shNodeReference);
         String newDescription = "ThisNodeIsaTestNode";
         sq1shNode.setDescription(newDescription);
 
@@ -517,7 +517,7 @@ public class NodeRegistryTestCase {
         NodeReference nodeReference = null;
         try {
             testController.updateNodeCapabilities(request, response, sq1shId);
-            Node sq1shUpdatedNode = nodeRegistryService.getNode(sq1shNodeReference);
+            Node sq1shUpdatedNode = nodeRegistryService.getNodeCapabilities(sq1shNodeReference);
             assertTrue(sq1shUpdatedNode.getDescription().compareTo(newDescription) == 0);
         } catch (Exception ex) {
                 ex.printStackTrace();

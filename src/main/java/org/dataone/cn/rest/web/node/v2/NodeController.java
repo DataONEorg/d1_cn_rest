@@ -38,13 +38,11 @@ import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.HazelcastClientFactory;
 import org.dataone.cn.indexer.SolrIndexService;
 import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
-import org.dataone.cn.ldap.NodeAccess;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.cn.synchronization.types.SyncObject;
 import org.dataone.configuration.Settings;
 import org.dataone.mimemultipart.MultipartRequestResolver;
 import org.dataone.portal.PortalCertificateManager;
-import org.dataone.service.cn.impl.v2.NodeRegistryService;
 import org.dataone.service.cn.v2.CNIdentity;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -85,6 +83,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
+import org.dataone.service.cn.v2.NodeRegistryService;
 
 /**
  *
@@ -204,7 +203,7 @@ public class NodeController extends AbstractWebController implements ServletCont
     public ModelAndView getNode(HttpServletRequest request, HttpServletResponse response, @PathVariable String nodeId) throws ServiceFailure, NotFound {
         NodeReference reference = new NodeReference();
         reference.setValue(nodeId);
-        Node node = nodeRegistry.getNode(reference);
+        Node node = nodeRegistry.getNodeCapabilities(reference);
 
         return new ModelAndView("xmlV2NodeViewResolver", "org.dataone.service.types.v2.Node", node);
 
@@ -294,7 +293,7 @@ public class NodeController extends AbstractWebController implements ServletCont
 
         // the node subject must be retrieved from the current node information
         // the node subjects may be changed if the calling subject is an approved administrator
-        Node currentNode = nodeRegistry.getNode(updateNodeReference);
+        Node currentNode = nodeRegistry.getNodeCapabilities(updateNodeReference);
 
         logger.debug("(d) got current node");
 
@@ -530,8 +529,8 @@ public class NodeController extends AbstractWebController implements ServletCont
             // get the NodeID from the subject via xref to the nodeList
             Session session = PortalCertificateManager.getInstance().getSession(request);
             final Subject clientSubject = session.getSubject();
-            NodeAccess na = nodeRegistry.getNodeAccess();
-            List<Node> nodes = na.getApprovedNodeList();
+            NodeList nodeList = nodeRegistry.listNodes();
+            List<Node> nodes = nodeList.getNodeList();
             Node firstFoundNode = (Node) CollectionUtils.find(nodes,
                     new Predicate() {
                         public boolean evaluate(Object o) {

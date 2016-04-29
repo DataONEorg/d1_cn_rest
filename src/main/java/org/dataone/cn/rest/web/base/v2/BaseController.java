@@ -36,7 +36,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.cn.rest.web.AbstractWebController;
 import org.dataone.configuration.Settings;
-import org.dataone.service.cn.impl.v2.NodeRegistryService;
+import org.dataone.service.cn.v2.NodeRegistryService;
+import org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.NotFound;
@@ -94,7 +95,7 @@ public class BaseController extends AbstractWebController implements ServletCont
 
         Node node;
 
-        node = nodeRetrieval.getNode(nodeReference);
+        node = nodeRetrieval.getNodeCapabilities(nodeReference);
 
         return new ModelAndView("xmlV2NodeViewResolver", "org.dataone.service.types.v2.Node", node);
 

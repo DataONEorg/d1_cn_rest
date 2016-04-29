@@ -37,7 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.cn.rest.web.node.v2.NodeController;
 import org.dataone.cn.web.proxy.ProxyWebApplicationContextLoader;
-import org.dataone.service.cn.impl.v2.NodeRegistryService;
+import org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl;
 import org.dataone.service.exceptions.InvalidSystemMetadata;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class NodeControllerTest {
     
     @Autowired
     @Qualifier("cnNodeRegistryV2")
-    private NodeRegistryService nodeRegistryService;   
+    private NodeRegistryServiceImpl nodeRegistryService;   
     
 
     
