@@ -28,7 +28,7 @@
         <spring:qualifier value="cnNodeRegistryV1"/>
     </spring:bean>
     
-    <spring:bean id="cnNodeRegistryV2" class="org.dataone.service.cn.v1.impl.NodeRegistryServiceImpl">
+    <spring:bean id="cnNodeRegistryV2" class="org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl">
         <spring:qualifier value="cnNodeRegistryV2"/>
     </spring:bean>
 
