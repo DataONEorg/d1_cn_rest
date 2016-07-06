@@ -20,6 +20,8 @@ package org.dataone.cn.ldap.v1;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.dataone.exceptions.MarshallingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
@@ -33,7 +35,6 @@ import org.dataone.service.types.v1.ServiceMethodRestriction;
 import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.util.TypeMarshaller;
-import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ldap.core.DirContextAdapter;
@@ -314,7 +315,7 @@ public class NodeLdapPopulation {
             return new DistinguishedName(context.getDn());
         }
     }
-    private Node buildTestNode(String resourcePath) throws IOException, InstantiationException, IllegalAccessException, JiBXException {
+    private Node buildTestNode(String resourcePath) throws IOException, InstantiationException, IllegalAccessException, MarshallingException {
         ByteArrayOutputStream mnNodeOutput = new ByteArrayOutputStream();
         InputStream is = this.getClass().getResourceAsStream(resourcePath);
 

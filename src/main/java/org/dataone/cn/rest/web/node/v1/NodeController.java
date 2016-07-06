@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.functors.EqualPredicate;
+import org.dataone.exceptions.MarshallingException;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.rest.web.AbstractWebController;
@@ -57,7 +58,7 @@ import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
-import org.jibx.runtime.JiBXException;
+//import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -237,7 +238,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                 throw new ServiceFailure("4842", ex.getMessage());
             } catch (IllegalAccessException ex) {
                 throw new ServiceFailure("4842", ex.getMessage());
-            } catch (JiBXException ex) {
+            } catch (MarshallingException ex) {
                 throw new ServiceFailure("4842", ex.getMessage());
             }
 
@@ -415,7 +416,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                 throw new ServiceFailure("4842", ex.getMessage());
             } catch (IllegalAccessException ex) {
                 throw new ServiceFailure("4842", ex.getMessage());
-            } catch (JiBXException ex) {
+            } catch (MarshallingException ex) {
                 throw new ServiceFailure("4842", ex.getMessage());
             }
 

@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.functors.EqualPredicate;
+import org.dataone.exceptions.MarshallingException;
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
 import org.dataone.cn.hazelcast.HazelcastClientFactory;
@@ -68,7 +69,6 @@ import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
-import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -233,7 +233,8 @@ public class NodeController extends AbstractWebController implements ServletCont
      */
 
     @RequestMapping(value = NODE_PATH_V2 + "{nodeId}", method = RequestMethod.PUT)
-    public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
+    public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) 
+    throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
         Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
         if (session == null) {
             throw new NotAuthorized("4821", "Need a valid certificate before request can be processed");
@@ -268,7 +269,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                 throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (IllegalAccessException ex) {
                 throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
-            } catch (JiBXException ex) {
+            } catch (MarshallingException ex) {
                 throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             }
 
@@ -375,10 +376,19 @@ public class NodeController extends AbstractWebController implements ServletCont
 
         // the contactSubject must be a registered and verified user or group
         List<Subject> contactSubjectList = node.getContactSubjectList();
+        
+        // assume verified unless something wrong encountered such as:
+        // one of the contactSubjects is not verified
+        // one of the other members of a group that one of the contactSubjects is member of
+        // is not verified.
         Boolean unVerifiedRegistration = false;
         StringBuilder errorMessage = new StringBuilder();
         if ((contactSubjectList != null) && !(contactSubjectList.isEmpty())) {
             for (Subject contactSubject : contactSubjectList) {
+                // first check that the subject is verified
+                // outcome true | false | NotAuthorized | ServiceFailure | InvalidRequest | NotImplemented | InvalidToken
+                // it's not clear why NotFound is converted to NotAuthorized
+                // in the isVerifiedSubject helper method
                 if (!(isVerifiedSubject(session, contactSubject))) {
                     errorMessage.append("Node Contact Subject: " + contactSubject.getValue() + " is not verified! \n");
                     unVerifiedRegistration = true;
@@ -465,7 +475,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                 throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             } catch (IllegalAccessException ex) {
                 throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
-            } catch (JiBXException ex) {
+            } catch (MarshallingException ex) {
                 throw new ServiceFailure("4842", ex.getMessage() + ex.getCause() == null ? "" : (", " + ex.getCause().getMessage()));
             }
 
@@ -611,7 +621,7 @@ public class NodeController extends AbstractWebController implements ServletCont
         if (sysMetaMultipart != null) {
             try {
                 sysMeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysMetaMultipart.getInputStream());
-            } catch (JiBXException ex) {
+            } catch (MarshallingException ex) {
                 throw new InvalidSystemMetadata("4976", ex.getMessage());
             } catch (Exception e) {
                 throw new ServiceFailure("4971", e.getMessage());
@@ -642,7 +652,7 @@ public class NodeController extends AbstractWebController implements ServletCont
                 try {
                     sysMeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysMetaMultipart.getInputStream());
                     id = sysMeta.getIdentifier().getValue();
-                } catch (JiBXException ex) {
+                } catch (MarshallingException ex) {
                     throw new InvalidSystemMetadata("4985", ex.getMessage());
                 } catch (Exception e) {
                     e.printStackTrace();

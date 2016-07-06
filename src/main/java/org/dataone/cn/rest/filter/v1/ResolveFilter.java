@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.xpath.XPathFactory;
 
+import org.dataone.exceptions.MarshallingException;
 import org.apache.log4j.Logger;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
 import org.dataone.service.cn.v1.NodeRegistryService;
@@ -69,7 +70,6 @@ import org.dataone.service.types.v1.SystemMetadata;
 import org.dataone.service.types.v1.util.NodelistUtil;
 import org.dataone.service.util.EncodingUtilities;
 import org.dataone.service.util.TypeMarshaller;
-import org.jibx.runtime.JiBXException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -393,7 +393,7 @@ public class ResolveFilter implements Filter {
             throw new ServiceFailure("4150", "InstantiationException marshalling SystemMetadata: " + ex.getMessage());
         } catch (IllegalAccessException ex) {
             throw new ServiceFailure("4150", "IllegalAccessException marshalling SystemMetadata: " + ex.getMessage());
-        } catch (JiBXException ex) {
+        } catch (MarshallingException ex) {
             throw new ServiceFailure("4150", "Error parsing /meta output: " + ex.getMessage());
         }
 
@@ -412,7 +412,7 @@ public class ResolveFilter implements Filter {
         response.setHeader("Location", objectLocationList.getObjectLocation(0).getUrl());
         try {
             TypeMarshaller.marshalTypeToOutputStream(objectLocationList, response.getOutputStream());
-        } catch (JiBXException ex) {
+        } catch (MarshallingException ex) {
             throw new ServiceFailure("4150", "error marshalling ObjectLocationList to Response OutputStream: " + ex.getMessage());
         } catch (IOException ex) {
             throw new ServiceFailure("4150", "error marshalling ObjectLocationList to Response OutputStream: " + ex.getMessage());

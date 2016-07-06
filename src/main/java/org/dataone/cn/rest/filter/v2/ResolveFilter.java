@@ -42,8 +42,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.xpath.XPathFactory;
+//import javax.xml.xpath.XPathFactory;
 
+import org.dataone.exceptions.MarshallingException;
 import org.apache.log4j.Logger;
 import org.dataone.cn.rest.filter.BufferedHttpResponseWrapper;
 import org.dataone.service.cn.v2.NodeRegistryService;
@@ -68,8 +69,7 @@ import org.dataone.service.types.v1.Services;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.util.NodelistUtil;
 import org.dataone.service.util.EncodingUtilities;
-import org.dataone.service.util.TypeMarshaller;
-import org.jibx.runtime.JiBXException;
+import org.dataone.service.util.TypeMarshaller; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -101,7 +101,7 @@ public class ResolveFilter implements Filter {
     private FilterConfig filterConfig = null;
     private Map<String, ArrayList<String>> supportedVersionMap = null;
     private Map<String, String> baseUrlMap = null;
-    private XPathFactory xFactory = null;
+//    private XPathFactory xFactory = null;
     private long lastRefreshTimeMS = 0;
     // parameters and their default values  (defaulting for production environment)
     // (see d1_cn_rest/src/main/webapp/WEB-INF/web.xml for std settings of these parameters) 
@@ -121,7 +121,7 @@ public class ResolveFilter implements Filter {
     public void destroy() {
         this.filterConfig = null;
         this.supportedVersionMap = null;
-        this.xFactory = null;
+//        this.xFactory = null;
     }
 
     /*
@@ -137,7 +137,7 @@ public class ResolveFilter implements Filter {
         logger.info("init ResolveFilter");
         this.filterConfig = filterConfig;
 
-        this.xFactory = XPathFactory.newInstance();
+//        this.xFactory = XPathFactory.newInstance();
     }
 
     /**
@@ -393,7 +393,7 @@ public class ResolveFilter implements Filter {
             throw new ServiceFailure("4150", "InstantiationException marshalling SystemMetadata: " + ex.getMessage());
         } catch (IllegalAccessException ex) {
             throw new ServiceFailure("4150", "IllegalAccessException marshalling SystemMetadata: " + ex.getMessage());
-        } catch (JiBXException ex) {
+        } catch (MarshallingException ex) {
             throw new ServiceFailure("4150", "Error parsing /meta output: " + ex.getMessage());
         }
 
@@ -408,11 +408,11 @@ public class ResolveFilter implements Filter {
         //Resolve will return a HTTP status of 303 (see other) on success.
         //The HTTP header "Location" MUST be set, and it's value SHOULD be the full get()
         // URL for retrieving the object from the first location in the resolve response
-        response.setStatus(response.SC_SEE_OTHER);
+        response.setStatus(HttpServletResponse.SC_SEE_OTHER);
         response.setHeader("Location", objectLocationList.getObjectLocation(0).getUrl());
         try {
             TypeMarshaller.marshalTypeToOutputStream(objectLocationList, response.getOutputStream());
-        } catch (JiBXException ex) {
+        } catch (MarshallingException ex) {
             throw new ServiceFailure("4150", "error marshalling ObjectLocationList to Response OutputStream: " + ex.getMessage());
         } catch (IOException ex) {
             throw new ServiceFailure("4150", "error marshalling ObjectLocationList to Response OutputStream: " + ex.getMessage());
