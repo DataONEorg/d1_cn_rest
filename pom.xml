@@ -24,7 +24,7 @@
         <d1_cn_common.version>2.3.0-SNAPSHOT</d1_cn_common.version>
         <d1_identity_manager.version>2.3.0-SNAPSHOT</d1_identity_manager.version>
         <d1_cn_noderegistry.version>2.3.0-SNAPSHOT</d1_cn_noderegistry.version>
-        <d1_cn_rest_proxy.version>2.2.0-SNAPSHOT</d1_cn_rest_proxy.version>
+        <d1_cn_rest_proxy.version>2.3.0-SNAPSHOT</d1_cn_rest_proxy.version>
         <d1_cn_index_processor.version>2.3.0-SNAPSHOT</d1_cn_index_processor.version>
     </properties>
     <build>
