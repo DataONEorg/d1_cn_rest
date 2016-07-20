@@ -6,12 +6,6 @@
     <version>2.3.0-SNAPSHOT</version>
     <name>DataONE_Cn_Rest</name>
     <url>http://dataone.org</url>
-    <parent>
-        <groupId>org.dataone</groupId>
-        <artifactId>d1_cn_service</artifactId>
-        <version>2.3.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,6 +20,7 @@
         <d1_cn_noderegistry.version>2.3.0-SNAPSHOT</d1_cn_noderegistry.version>
         <d1_cn_rest_proxy.version>2.3.0-SNAPSHOT</d1_cn_rest_proxy.version>
         <d1_cn_index_processor.version>2.3.0-SNAPSHOT</d1_cn_index_processor.version>
+        <d1_test_resources.version>2.2.0-SNAPSHOT</d1_test_resources.version>
     </properties>
     <build>
         <finalName>cn</finalName>
@@ -77,7 +72,10 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.4.3</version>
                 <executions>
-<!-- default resources goal should take care of this
+<!-- For testing, the resources  in the package org/dataone/configuration under src/main/resources
+     (mainly config.xml) need to be excluded since they conflicts with the testing resources in
+      src/test/resources .  The files in org/dataone/configuration under src/main/resources
+     are added back after the testing has been complete -->
                     <execution>
                         <id>exclude-src-resources-beforeTests</id>
                         <phase>process-resources</phase>
@@ -101,7 +99,7 @@
                             </resources>
                         </configuration>
                     </execution>
--->
+
                     <execution>
                         <id>include-src-resources-afterTests</id>
                         <phase>test</phase>
@@ -234,22 +232,7 @@
             <artifactId>cglib-nodep</artifactId>
             <version>2.2</version>
         </dependency>
-        <!--  Jackson JSON implementations -CURRENTLY NOT NEEDED
-                <dependency>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-core-asl</artifactId>
-                        <version>1.4.0</version>
-                        <type>jar</type>
-                        <scope>compile</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-mapper-asl</artifactId>
-                        <version>1.4.0</version>
-                        <type>jar</type>
-                        <scope>compile</scope>
-                </dependency>
--->		
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -374,81 +357,27 @@
         
         <dependency>
             <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
 
         <!-- test dependencies -->
+
         <dependency>
-            <groupId>org.springframework.ldap</groupId>
-            <artifactId>spring-ldap-core</artifactId>
-            <version>1.3.1.RELEASE</version>
-            <type>jar</type>
+            <groupId>org.dataone</groupId>
+            <artifactId>d1_test_resources</artifactId>
+            <version>${d1_test_resources.version}</version>
             <scope>test</scope>
-        </dependency>
-        
-        
+            <type>jar</type>
+        </dependency>        
 
     </dependencies>
-    <profiles>
-        <profile>
-            <id>beta</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>beta</value>
-                </property>
-            </activation>
-            <build>
-                <filters>
-                    <filter>src/main/filters/beta.properties</filter>
-                </filters>
-            </build>
-        </profile>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>dev</value>
-                </property>
-            </activation>
-            <build>
-                <filters>
-                    <filter>src/main/filters/development.properties</filter>
-                </filters>
-            </build>
-        </profile>
-        <profile>
-            <id>stage</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>stage</value>
-                </property>
-            </activation>
-            <build>
-                <filters>
-                    <filter>src/main/filters/staging.properties</filter>
-                </filters>
-            </build>
-        </profile>
-        <profile>
-            <id>prod</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>prod</value>
-                </property>
-            </activation>
-            <build>
-                <filters>
-                    <filter>src/main/filters/production.properties</filter>
-                </filters>
-            </build>
-        </profile>
-    </profiles>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>

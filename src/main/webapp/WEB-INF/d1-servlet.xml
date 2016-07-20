@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spring:beans 
+    xmlns:spring="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <context:annotation-config />
+
+    <!-- Spring Web Services configured -->
+    <spring:bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <spring:property name="alwaysUseFullPath" value="true"/>
+    </spring:bean>
+    <spring:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <spring:property name="alwaysUseFullPath" value="true"/>
+        <spring:property name="urlDecode" value="false"/>
+    </spring:bean>
+    <spring:bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+        <spring:property name="alwaysUseFullPath" value="true"/>
+        <spring:property name="urlDecode" value="false"/>
+        <spring:property name="useDefaultSuffixPattern" value="false" />
+    </spring:bean>
+    
+
+    
+    <!-- start up all the DataONE controllers that service HTTP calls -->
+    <context:component-scan base-package="org.dataone.cn.rest.v1" />
+    <context:component-scan base-package="org.dataone.cn.rest.v2" />
+</spring:beans>

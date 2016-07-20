@@ -6,7 +6,7 @@
 	<properties fileName="identity.properties"/>
 	<properties fileName="reserveIdentifier.properties"/>
         <properties fileName="testIdentity.properties"/>
+        <properties fileName="testNodes.properties"/>
         <properties fileName="hzClientConfig.properties"/>
-        <properties fileName="springLdapTest.properties"/>
         <properties fileName="ldapService.properties"/>
 </configuration>

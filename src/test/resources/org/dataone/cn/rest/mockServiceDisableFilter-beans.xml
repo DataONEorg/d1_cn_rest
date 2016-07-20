@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spring:beans
+	xmlns:spring="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	    http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <spring:bean id="mylog"
+    class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
+        <spring:property name="logName" value="log"/>
+    </spring:bean>
+    <spring:bean id="log4jInitialization"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <spring:property name="targetClass">
+            <spring:value>org.springframework.util.Log4jConfigurer</spring:value>
+        </spring:property>
+        <spring:property name="targetMethod" value="initLogging" />
+        <spring:property name="arguments">
+            <spring:list>
+                <spring:value>classpath:log4j.properties</spring:value>
+            </spring:list>
+        </spring:property>
+    </spring:bean>
+    <spring:bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <spring:property name="location">
+            <spring:value>classpath:/org/dataone/configuration/node.properties</spring:value>
+        </spring:property>
+    </spring:bean>
+    
+    <spring:bean id="systemMetadata-valid" class="org.springframework.core.io.ClassPathResource" >
+        <spring:constructor-arg type="java.lang.String" value="org/dataone/cn/samples/v1/systemMetadata-valid.xml"/>
+    </spring:bean>
+
+    <context:annotation-config/>
+   
+
+</spring:beans>

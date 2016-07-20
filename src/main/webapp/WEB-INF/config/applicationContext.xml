@@ -22,37 +22,67 @@
     </spring:bean>
     
     <spring:import resource="hazelcast.xml"/>
+    
+    <!-- import the index processor bean definitions for diagnostic API -->
+    <spring:import resource="index-context.xml"/>
 
+   <spring:bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <spring:property name="location">
+         <spring:value>file:/etc/dataone/node.properties</spring:value>
+      </spring:property>
+   </spring:bean>
+   
+    <!-- DataONE V1 Services to inject into controllers and the resolve filter below -->
 
-    <spring:bean id="cnNodeRegistryV1" class="org.dataone.service.cn.v1.impl.NodeRegistryServiceImpl">
-        <spring:qualifier value="cnNodeRegistryV1"/>
+    <spring:bean id="nodeRegistryServiceV1" class="org.dataone.service.cn.v1.impl.NodeRegistryServiceImpl">
+        <spring:qualifier value="nodeRegistryServiceV1"/>
+    </spring:bean>
+    <spring:bean name="identityServiceV1" class="org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl">
+        <spring:qualifier value="identityServiceV1" />
+    </spring:bean>
+    <spring:bean name="reserveIdentifierServiceV1" class="org.dataone.service.cn.impl.v1.ReserveIdentifierService">
+        <spring:qualifier value="reserveIdentifierServiceV1" />
     </spring:bean>
     
-    <spring:bean id="cnNodeRegistryV2" class="org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl">
-        <spring:qualifier value="cnNodeRegistryV2"/>
-    </spring:bean>
-
-    <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v1"  />
-
-    <context:component-scan base-package="org.dataone.cn.service.ldap.impl.v2"  />
+    <!-- DataONE V2 Services to inject into controllers and the resolve filter below-->
     
-    <context:component-scan base-package="org.dataone.cn.rest.proxy.service.impl.metacat" />
-
-    <spring:bean id="ResolveFilterV1" class="org.dataone.cn.rest.filter.v1.ResolveFilter">
+    <spring:bean id="nodeRegistryServiceV2" class="org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl">
+        <spring:qualifier value="nodeRegistryServiceV2"/>
+    </spring:bean>
+    <spring:bean name="identityServiceV2" class="org.dataone.service.cn.impl.v2.CNIdentityLDAPImpl">
+        <spring:qualifier value="identityServiceV2" />
+    </spring:bean>
+    <spring:bean name="reserveIdentifierServiceV2" class="org.dataone.service.cn.impl.v2.ReserveIdentifierService">
+        <spring:qualifier value="reserveIdentifierServiceV2" />
+    </spring:bean>
+    
+    <!-- web.xml contains two DelegatingFilterProxy definitions, 
+    the specified filter-name corresponds to the below bean name in 
+    our Spring's root application context (this file) --> 
+       
+    <spring:bean id="ResolveFilterV1" class="org.dataone.cn.rest.v1.ResolveFilter">
+        <spring:property name="nodelistRefreshIntervalSeconds" value="180" />
+    </spring:bean> 
+    
+    <spring:bean id="ResolveFilterV2" class="org.dataone.cn.rest.v2.ResolveFilter">
         <spring:property name="nodelistRefreshIntervalSeconds" value="180" />
     </spring:bean>
-    
-    <spring:bean id="ResolveFilterV2" class="org.dataone.cn.rest.filter.v2.ResolveFilter">
-        <spring:property name="nodelistRefreshIntervalSeconds" value="180" />
+
+   <spring:bean id="fileUploadResource" class="org.springframework.core.io.FileSystemResource" >
+        <spring:constructor-arg type="java.lang.String" value="/tmp"/>
+    </spring:bean>
+   <!-- one of the properties available; the maximum file size in bytes -->
+    <!-- Configure the multipart resolver-->
+    <spring:bean id="multipartResolver" class="org.dataone.cn.rest.http.DataoneMultipartResolver">
+        <spring:property name="maxUploadSize" value="10000000000"/>
+        <spring:property name="maxInMemorySize" value="10000"/>
+        <spring:property name="uploadTempDir" ref="fileUploadResource"/>
     </spring:bean>
 
-    <spring:bean id="xmlViewResolverIdentity" class="org.springframework.web.servlet.view.XmlViewResolver">
+    <spring:bean id="xmlViewResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
         <spring:property name="order" value="1"/>
         <spring:property name="location" value="/WEB-INF/config/d1TypeViews.xml"/>
     </spring:bean>
-    
-    <!-- import the index processor bean definitions for diagnostic API -->	
-	<spring:import resource="file:**/**/WEB-INF/config/index-context.xml"/>
         
 
 </spring:beans>

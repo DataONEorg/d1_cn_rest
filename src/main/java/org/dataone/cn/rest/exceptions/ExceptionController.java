@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.cn.rest.web.AbstractWebController;
+import org.dataone.cn.rest.AbstractServiceController;
 import org.dataone.service.exceptions.AuthenticationTimeout;
 import org.dataone.service.exceptions.InsufficientResources;
 import org.dataone.service.exceptions.InvalidCredentials;
@@ -55,7 +55,7 @@ import org.springframework.core.io.ClassPathResource;
  * @author waltz
  */
 @Controller
-public class ExceptionController extends AbstractWebController {
+public class ExceptionController extends AbstractServiceController {
     public static Log log = LogFactory.getLog(ExceptionController.class);
     static final int SIZE = 8192;
     

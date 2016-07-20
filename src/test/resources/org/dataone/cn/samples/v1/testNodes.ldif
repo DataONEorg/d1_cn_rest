@@ -1,0 +1,64 @@
+dn: cn=urn:node:testMNv1,dc=dataone,dc=org
+cn: urn:node:testMNv1
+d1NodeId: urn:node:testMNv1
+d1NodeName: testMNv1
+d1NodeDescription: Test Mock Generic Member Node
+d1NodeBaseURL: https://testMNv1.nowhere.dataone.org/mn
+d1NodeReplicate: TRUE
+d1NodeSynchronize: TRUE
+d1NodeState: down
+d1NodeType: mn
+d1NodeApproved: TRUE
+subject: cn=urn:node:testMNv1,dc=dataone,dc=org
+d1NodeContactSubject: cn=TestONE,o=Test,c=US,dc=cilogon,dc=org
+d1NodeLastHarvested: 1900-01-01T00:00:00Z
+d1NodeLastCompleteHarvest: 1900-01-01T00:00:00Z
+d1NodeSynSchdSec: 0
+d1NodeSynSchdMin: 0,5,10,15,20,25,30,35,40,45,50,55
+d1NodeSynSchdHour: *
+d1NodeSynSchdMday: *
+d1NodeSynSchdMon: *
+d1NodeSynSchdWday: ?
+d1NodeSynSchdYear: *
+objectclass: device
+objectclass: d1Node
+
+dn: d1NodeServiceId=MNCore-v1,cn=urn:node:testMNv1,dc=dataone,dc=org
+d1NodeServiceId: MNCore-v1
+d1NodeId: urn:node:testMNv1
+d1NodeServiceName: MNCore
+d1NodeServiceVersion: v1
+d1NodeServiceAvailable: TRUE
+objectclass: d1NodeService
+
+dn: d1NodeServiceId=MNRead-v1,cn=urn:node:testMNv1,dc=dataone,dc=org
+d1NodeServiceId: MNRead-v1
+d1NodeId: urn:node:testMNv1
+d1NodeServiceName: MNRead
+d1NodeServiceVersion: v1
+d1NodeServiceAvailable: TRUE
+objectclass: d1NodeService
+
+dn: d1NodeServiceId=MNAuthorization-v1,cn=urn:node:testMNv1,dc=dataone,dc=org
+d1NodeServiceId: MNAuthorization-v1
+d1NodeId: urn:node:testMNv1
+d1NodeServiceName: MNAuthorization
+d1NodeServiceVersion: v1
+d1NodeServiceAvailable: TRUE
+objectclass: d1NodeService
+
+dn: d1NodeServiceId=MNStorage-v1,cn=urn:node:testMNv1,dc=dataone,dc=org
+d1NodeServiceId: MNStorage-v1
+d1NodeId: urn:node:testMNv1
+d1NodeServiceName: MNStorage
+d1NodeServiceVersion: v1
+d1NodeServiceAvailable: TRUE
+objectclass: d1NodeService
+
+dn: d1NodeServiceId=MNReplication-v1,cn=urn:node:testMNv1,dc=dataone,dc=org
+d1NodeServiceId: MNReplication-v1
+d1NodeId: urn:node:testMNv1
+d1NodeServiceName: MNReplication
+d1NodeServiceVersion: v1
+d1NodeServiceAvailable: TRUE
+objectclass: d1NodeService
