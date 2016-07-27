@@ -39,6 +39,7 @@ import org.dataone.cn.rest.proxy.ProxyWebApplicationContextLoader;
 import org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl;
 import org.dataone.service.exceptions.InvalidSystemMetadata;
 import org.dataone.service.types.v2.SystemMetadata;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +116,7 @@ public class DiagnosticControllerTest {
                 fail("Test misconfiguration " + ex);
         }
     }
-    
+    @Ignore
     @Test
     public void testEchoInvalidSystemMetadata() throws Exception {
         
