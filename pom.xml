@@ -18,7 +18,6 @@
         <d1_cn_common.version>2.3.0-SNAPSHOT</d1_cn_common.version>
         <d1_identity_manager.version>2.3.0-SNAPSHOT</d1_identity_manager.version>
         <d1_cn_noderegistry.version>2.3.0-SNAPSHOT</d1_cn_noderegistry.version>
-        <d1_cn_rest_proxy.version>2.3.0-SNAPSHOT</d1_cn_rest_proxy.version>
         <d1_cn_index_processor.version>2.3.0-SNAPSHOT</d1_cn_index_processor.version>
         <d1_test_resources.version>2.3.0-SNAPSHOT</d1_test_resources.version>
     </properties>
@@ -271,13 +270,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jibx</groupId>
-            <artifactId>jibx-run</artifactId>
-            <version>1.2.4.5</version>
-            <optional>false</optional>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
             <version>${hazelcast.version}</version>
@@ -328,13 +320,6 @@
             <artifactId>d1_cn_index_processor</artifactId>
             <version>${d1_cn_index_processor.version}</version> 
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.dataone</groupId>
-            <artifactId>d1_cn_rest_proxy</artifactId>
-            <version>${d1_cn_rest_proxy.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.dataone</groupId>

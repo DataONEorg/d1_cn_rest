@@ -29,7 +29,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.Identifier"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxIdentifierMarshallerResponse" target-class="org.dataone.service.types.v1.Identifier"/>
+            <oxm:jaxb2-marshaller id="jaxbIdentifierMarshallerResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v1.Identifier"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
 
@@ -49,7 +51,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.NodeReference"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxNodeReferenceMarshallerResponse" target-class="org.dataone.service.types.v1.NodeReference"/>
+            <oxm:jaxb2-marshaller id="jaxbNodeReferenceMarshallerResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v1.NodeReference"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
     
@@ -57,7 +61,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.SubjectList"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxSubjectListMarshallerResponse" target-class="org.dataone.service.types.v1.SubjectList"/>
+            <oxm:jaxb2-marshaller id="jaxbSubjectListMarshallerResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v1.SubjectList"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
     
@@ -65,7 +71,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.SubjectInfo"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxSubjectInfoMarshallerResponse" target-class="org.dataone.service.types.v1.SubjectInfo"/>
+            <oxm:jaxb2-marshaller id="jaxbSubjectInfoMarshallerResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v1.SubjectInfo"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
 
@@ -73,7 +81,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.Subject"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxSubjectViewMarshallerResponse" target-class="org.dataone.service.types.v1.Subject"/>
+            <oxm:jaxb2-marshaller id="jaxbSubjectViewMarshallerResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v1.Subject"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
     
@@ -81,7 +91,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxChecksumAlgorithmListMarshallerResponse" target-class="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
+            <oxm:jaxb2-marshaller id="jaxbChecksumAlgorithmListMarshallerResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v1.ChecksumAlgorithmList"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
     
@@ -102,7 +114,9 @@
         <spring:property name="modelKey" value="org.dataone.service.types.v2.SystemMetadata"/>
         <spring:property name="contentType" value="text/xml" />
         <spring:property name="marshaller">
-            <oxm:jibx-marshaller id="jibxMarshallerSystemMetadataResponse" target-class="org.dataone.service.types.v2.SystemMetadata"/>
+            <oxm:jaxb2-marshaller id="jaxbMarshallerSystemMetadataResponse">
+                <oxm:class-to-be-bound name="org.dataone.service.types.v2.SystemMetadata"/>
+            </oxm:jaxb2-marshaller>
         </spring:property>
     </spring:bean>
 
