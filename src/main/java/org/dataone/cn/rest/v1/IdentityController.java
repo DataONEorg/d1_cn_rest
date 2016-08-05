@@ -83,13 +83,32 @@ public class IdentityController extends AbstractServiceController implements Ser
     @Qualifier("identityServiceV1")
     CNIdentity  cnIdentity;
     public IdentityController() {}
+    
     /**
      * Create a new mapping between the two identities, asserting that they represent the same subject.
+     * 
+     * Mapping identities with this method requires explicit authorization for the user given in the Session object. 
+     * The caller must have made sure that the primary and secondary identities represent one and the same individual.
+     *  
+     * Successful completion of the request is indicated by returning a HTTP status of 200.
+     *  
+     * A failed request MUST be indicated by returning an appropriate exception and setting the response HTTP 
+     * status accordingly.
      * 
      * POST /accounts/map 	
      * CNIdentity.mapIdentity(session, subject) -> boolean
      *
      * @author leinfelder
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotFound
      */
     @RequestMapping(value = {ACCOUNT_MAPPING_PATH_V1, ACCOUNT_MAPPING_PATH_V1 + "/" }, method = RequestMethod.POST)
     public void mapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
@@ -118,6 +137,16 @@ public class IdentityController extends AbstractServiceController implements Ser
      * CNIdentity.removeMapIdentity(session, subject) -> boolean
      *
      * @author leinfelder
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotFound
      */
     @RequestMapping(value = ACCOUNT_MAPPING_PATH_V1 + "/*", method = RequestMethod.DELETE)
     public void removeMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
@@ -132,7 +161,7 @@ public class IdentityController extends AbstractServiceController implements Ser
     	try {
 			subjectString = urlDecoder.decode(subjectString, "UTF-8");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e,e);
 			throw new ServiceFailure(null, "Could not determine Subject from path: " + requestUri);
 		}
     	Subject subject = new Subject();
@@ -143,11 +172,21 @@ public class IdentityController extends AbstractServiceController implements Ser
     }
 
     /**
+     * Gets the SubjectInfo of a previously initiated identity mapping.
      * 
      * GET /accounts/pendingmap/{subject}
      * CNIdentity.getPendingMapIdentity(session, subject) -> subjectInfo
      *
      * @author leinfelder
+     * @param request
+     * @param response
+     * @return SubjectInfo
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.NotFound
+     * @throws org.dataone.service.exceptions.InvalidRequest
      */
     @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.GET)
     public ModelAndView getPendingMapIdentity(HttpServletRequest request, HttpServletResponse response) 
@@ -185,7 +224,16 @@ public class IdentityController extends AbstractServiceController implements Ser
      * CNIdentity.requestMapIdentity(session, subject) -> boolean
      *
      * @author leinfelder
-     * 
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.NotFound
      */
     @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1, method = RequestMethod.POST)
     public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
@@ -212,6 +260,16 @@ public class IdentityController extends AbstractServiceController implements Ser
      * CNIdentity.confirmMapIdentity(session, subject) -> boolean
      *
      * @author leinfelder
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotFound
      *
      */
     @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.PUT)
@@ -244,6 +302,16 @@ public class IdentityController extends AbstractServiceController implements Ser
      * CNIdentity.denyMapIdentity(session, subject) -> boolean
      *
      * @author leinfelder
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.NotFound
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidRequest
      *
      */
     @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1 + "/*", method = RequestMethod.DELETE)
@@ -270,10 +338,20 @@ public class IdentityController extends AbstractServiceController implements Ser
      *
      * List the subjects, including users, groups, and systems, that match search criteria.
      *
+     * The list can be restricted to subjects whose identifier matches certain substrings, and the size of the resultset can be paged through.
+     * 
      * GET /accounts?query={query}[&status={status}&start={start}&count={count}]
      * CNIdentity.listSubjects(session, query, status, start, count) -> Types.SubjectList
      *
      * @author leinfelder
+     * @param request
+     * @param response
+     * @return SubjectInfo
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotImplemented
      *
      */
     @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.GET)
@@ -308,7 +386,16 @@ public class IdentityController extends AbstractServiceController implements Ser
      * CNIdentity.getSubjectInfo(session, subject) -> Types.SubjectList
      *
      * @author leinfelder
-     *
+     * @param request
+     * @param response
+     * @return SubjectInfo
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotFound
+     * 
      */
     @RequestMapping(value = ACCOUNTS_PATH_V1 + "/*", method = RequestMethod.GET)
     public ModelAndView getSubjectInfo(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, InvalidRequest, NotFound {
@@ -337,10 +424,23 @@ public class IdentityController extends AbstractServiceController implements Ser
      *
      * Create a new subject in the DataONE system.
      *
+     * Note that there should probably be a lot more metadata captured about the new user, 
+     * and there should be a mechanism for specifying the default access control rules for the new account.
+     * 
      * POST /accounts
      * CNIdentity.registerAccount(session, person) -> Types.Subject
      *
      * @author leinfelder
+     * @param fileRequest
+     * @param response
+     * @return 
+     * @throws org.dataone.service.exceptions.ServiceFailure 
+     * @throws org.dataone.service.exceptions.InvalidToken 
+     * @throws org.dataone.service.exceptions.NotAuthorized 
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidRequest
      *
      */
     @RequestMapping(value = {ACCOUNTS_PATH_V1, ACCOUNTS_PATH_V1 + "/"}, method = RequestMethod.POST)
@@ -354,7 +454,7 @@ public class IdentityController extends AbstractServiceController implements Ser
     	try {
 			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, personPart.getInputStream());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e,e);
 			throw new ServiceFailure(null, "Could not create Person from input");
 		}
     	
@@ -366,12 +466,28 @@ public class IdentityController extends AbstractServiceController implements Ser
     
     /**
      *
-     * Update an existing subject in the DataONE system. The target subject is determined from the X509Certificate provided with the session.
+     * Update an existing subject in the DataONE system. 
+     * The target subject is determined from the X509Certificate provided with the session.
      *
+     * The user calling this method must have write access to the account details.
+     * 
+     * Note that there should be a policy for verifying the details that change via this method.
+     * 
      * PUT /accounts
      * CNIdentity.updateAccount(session, person) -> Types.Subject
      *
      * @author leinfelder
+     * @param fileRequest
+     * @param response
+     * @return Subject
+     * @throws org.dataone.service.exceptions.ServiceFailure 
+     * @throws org.dataone.service.exceptions.InvalidToken 
+     * @throws org.dataone.service.exceptions.NotAuthorized 
+     * @throws org.dataone.service.exceptions.NotImplemented 
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique 
+     * @throws org.dataone.service.exceptions.InvalidCredentials 
+     * @throws org.dataone.service.exceptions.InvalidRequest 
+     * @throws org.dataone.service.exceptions.NotFound 
      *
      */
     @RequestMapping(value = ACCOUNTS_PATH_V1 + "/**", method = RequestMethod.PUT)
@@ -385,7 +501,7 @@ public class IdentityController extends AbstractServiceController implements Ser
     	try {
 			person = TypeMarshaller.unmarshalTypeFromStream(Person.class, personPart.getInputStream());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e,e);
 			throw new ServiceFailure(null, "Could not create Person from input");
 		}
     	
@@ -397,7 +513,8 @@ public class IdentityController extends AbstractServiceController implements Ser
 
     /**
      *
-     * Verify that the Person data associated with this Subject is a true representation of the real world person.
+     * Verify that the Person data associated with this Subject 
+     * is a true representation of the real world person.
      *
      * This service can only be called by users who have an administrative role for the domain of users in question.
      *
@@ -405,7 +522,17 @@ public class IdentityController extends AbstractServiceController implements Ser
      * CNIdentity.verifyAccount(session, subject) -> boolean
      *
      * @author leinfelder
-     *
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotFound
+     * 
      */
     @RequestMapping(value = ACCOUNT_VERIFICATION_PATH_V1 + "/*", method = RequestMethod.PUT)
     public void verifyAccount(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
@@ -440,7 +567,17 @@ public class IdentityController extends AbstractServiceController implements Ser
      * 	POST /groups
      *  CNIdentity.createGroup(session, group) -> Types.Subject
      *
-     * @author leinfelder
+     * @param request
+     * @param response
+     * @return Subject
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.NotFound
      *
      */
     @RequestMapping(value = {GROUPS_PATH_V1, GROUPS_PATH_V1 + "/"}, method = RequestMethod.POST)
@@ -454,7 +591,7 @@ public class IdentityController extends AbstractServiceController implements Ser
     	try {
 			group = TypeMarshaller.unmarshalTypeFromStream(Group.class, groupPart.getInputStream());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e,e);
 			throw new ServiceFailure(null, "Could not create SubjectList from members input");
 		}
     	
@@ -477,6 +614,16 @@ public class IdentityController extends AbstractServiceController implements Ser
      *
      *
      * @author leinfelder
+     * @param fileRequest
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.InvalidToken
+     * @throws org.dataone.service.exceptions.NotAuthorized
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.IdentifierNotUnique
+     * @throws org.dataone.service.exceptions.InvalidRequest
+     * @throws org.dataone.service.exceptions.InvalidCredentials
+     * @throws org.dataone.service.exceptions.NotFound
      *
      */
     @RequestMapping(value = {GROUPS_PATH_V1, GROUPS_PATH_V1 + "/"}, method = RequestMethod.PUT)
@@ -490,7 +637,7 @@ public class IdentityController extends AbstractServiceController implements Ser
     	try {
 			group = TypeMarshaller.unmarshalTypeFromStream(Group.class, groupPart.getInputStream());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e,e);
 			throw new ServiceFailure(null, "Could not create Group from group input");
 		}
     	

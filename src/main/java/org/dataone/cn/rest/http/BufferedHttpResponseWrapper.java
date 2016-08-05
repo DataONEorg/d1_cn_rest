@@ -30,8 +30,6 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
 import org.dataone.service.exceptions.*;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;

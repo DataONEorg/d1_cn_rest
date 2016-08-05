@@ -47,6 +47,18 @@ public class ResolveForwarder extends AbstractProxyForwarder {
     public ResolveForwarder(ServletContext servletContext){
         super(servletContext);
     }
+    /**
+     * Take a HttpServletRequest from the resolve endpoint, wrap it in a proxy request
+     * rewriting the path, and then send it on to Metacat
+     * 
+     * @param request
+     * @param response
+     * @param version
+     * @throws ServiceFailure
+     * @throws NotFound
+     * @throws NotImplemented
+     * @throws InvalidRequest 
+     */
     @Override
     public void forward(HttpServletRequest request, HttpServletResponse response, String version) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
         ProxyServletRequestWrapper proxyServletWrapper = new ProxyServletRequestWrapper(request);

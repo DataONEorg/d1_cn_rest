@@ -51,7 +51,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- *
+ * Handle any error that is thrown by Tomcat and transform it into a DataONE Exception response
+ * 
  * @author waltz
  */
 @Controller

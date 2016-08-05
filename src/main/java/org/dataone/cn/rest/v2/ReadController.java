@@ -42,14 +42,19 @@ import org.springframework.web.context.ServletContextAware;
 
 
 /**
- * Forward resolve request to Metacat in order to filter them
- * into ObjectLocationList on the way back
+ * The CNRead API mostly is implemented by Metacat.
+ * In order to implement resolve, the request must be
+ * forwarded to Metacat in order to filter it
+ * into ObjectLocationList on the way back.
+ * 
+ * The reason for the filter strategy is that the
+ * d1-cn-rest has direct access to LDAP
  *
  * @author Robert Patrick Waltz (waltz)
  *
  */
 
-@Controller("cnResolveControllerV2")
+@Controller("cnReadControllerV2")
 public class ReadController implements ServletContextAware {
 
     private ServletContext servletContext;

@@ -29,7 +29,11 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 /**
- *
+ * CommonsMultipartResolver does not implement isMultipart such that 
+ * put can handle multipart content. 
+ * 
+ * override the isMultipart method to allow put requests to succeed
+ * 
  * @author waltz
  */
 public class DataoneMultipartResolver extends CommonsMultipartResolver  implements  MultipartResolver, ServletContextAware  {

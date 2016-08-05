@@ -69,12 +69,10 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * This controller will provide a default xml serialization of the Node that is represented by this CN. This
- * functionality has not yet been defined in an API or documentation but was suggested in July, 2011.
- *
- * The controller also acts as a passthru mechanism for relatively static content that is provided by the
- * node.properties file. Most content of the CN is provided by backend services, such as LDAP or metacat, but some
- * trivial content can be read directly from a properties file and easily exposed as xml
+ * Provides resolution to REST API calls that are described in DataONE's V2 CNCore API
+ * (The only exception being getNodeList, it is found in RegistryController due to 
+ * RequestMapping conflicts)
+ * 
  *
  * @author waltz
  */
@@ -132,7 +130,18 @@ public class CoreController extends AbstractServiceController implements Servlet
     }
 
 
-    
+    /**
+     * Low level “are you alive” operation. A valid ping response is indicated by a HTTP status of 200. 
+     * A timestmap indicating the current system time (UTC) on the node MUST be returned in the HTTP Date header.
+     * 
+     * Any status response other than 200 indicates that the node is offline for DataONE operations.
+     * 
+     * @param request
+     * @param response
+     * @throws org.dataone.service.exceptions.ServiceFailure
+     * @throws org.dataone.service.exceptions.NotImplemented
+     * @throws org.dataone.service.exceptions.NotFound
+    */    
     @RequestMapping(value = {RESOURCE_MONITOR_PING_V2, RESOURCE_MONITOR_PING_V2 + "/"}, method = RequestMethod.GET)
     public void ping(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound {
         OutputStream responseStream = null;
@@ -163,7 +172,16 @@ public class CoreController extends AbstractServiceController implements Servlet
         }
     }
 
-    
+    /**
+     * Returns a list of checksum algorithms that are supported by DataONE.
+     * 
+     * @param request
+     * @param response
+     * @return ModelAndView
+     * @throws ServiceFailure
+     * @throws NotImplemented
+     * @throws NotFound 
+     */    
     @RequestMapping(value = {RESOURCE_LIST_CHECKSUM_ALGORITHM_V2, RESOURCE_LIST_CHECKSUM_ALGORITHM_V2 + "/"}, method = RequestMethod.GET)
     public ModelAndView listChecksumAlgorithms(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotImplemented, NotFound {
         ChecksumAlgorithmList checksumAlgorithmList = new ChecksumAlgorithmList();
@@ -178,7 +196,8 @@ public class CoreController extends AbstractServiceController implements Servlet
 
     }
     /*
-     * Returns a list of query engines, i.e. supported values for the queryEngine parameter of the getQueryEngineDescription and query operations.
+     * Returns a list of query engines, i.e. supported values for the queryEngine parameter of the 
+     * getQueryEngineDescription and query operations.
      * 
      * The list of search engines available may be influenced by the authentication status of the request.
      * (If authentication does become a requirement for retrieval of the query engines then a new
@@ -321,7 +340,21 @@ public class CoreController extends AbstractServiceController implements Servlet
 
         // if we got here, we have the reservation
     }
-
+    /**
+     * Indicates to the CN that a new or existing object identified by PID requires synchronization. 
+     * Note that this operation is asynchronous, a successful return indicates that the synchronization task was 
+     * successfully queued.
+     * This method may be called by any Member Node for new content or the authoritative Member Node for updates 
+     * to existing content.
+     * 
+     * The CN will schedule the synchronization task which will then be processed in the same way as content changes 
+     * identified through the listObjects polling mechanism.
+     * 
+     * @param request
+     * @param response
+     * @throws ServiceFailure
+     * @throws NotAuthorized 
+     */
     @RequestMapping(value = {RESOURCE_SYNCHRONIZE_V2, RESOURCE_SYNCHRONIZE_V2 + "/"}, method = RequestMethod.POST)
     public void synchronize(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotAuthorized {
 

@@ -54,7 +54,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- *
+ * Takes a request and then forwards the request to another web app.
+ * Specifically, for d1-cn-rest, it will take a request for getSystemMetadata
+ * and forward the request to Metacat
+ * 
+ * The only subclass is the ResolveForwarder, but the abstract class is
+ * generic enough to be reused for other contexts.
+ * 
  * @author waltz
  */
 public abstract class AbstractProxyForwarder implements ServletContextAware {

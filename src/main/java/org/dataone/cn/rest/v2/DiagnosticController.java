@@ -58,7 +58,7 @@ import org.springframework.web.servlet.ModelAndView;
  * 
  * Implements the rest endpoint methods from the Diagnostic API
  * 
- * @author waltz
+ * 
  */
 @Controller("diagnosticControllerV2")
 public class DiagnosticController extends AbstractServiceController implements ServletContextAware {
@@ -73,6 +73,23 @@ public class DiagnosticController extends AbstractServiceController implements S
     @Qualifier("solrIndexService")
     SolrIndexService solrIndexService;
 
+    /**
+     * Parse and echo the provided system metadata
+     * 
+     * On successful parsing, a copy of the system metadata is returned, 
+     * otherwise an exception is returned indicating an error condition.
+     * 
+     * @param fileRequest
+     * @param response
+     * @return
+     * @throws ServiceFailure
+     * @throws NotImplemented
+     * @throws InvalidToken
+     * @throws NotAuthorized
+     * @throws InvalidRequest
+     * @throws InvalidSystemMetadata
+     * @throws IdentifierNotUnique 
+     */
     @RequestMapping(value = {RESOURCE_DIAG_SYSMETA_V2, RESOURCE_DIAG_SYSMETA_V2 + "/"}, method = RequestMethod.POST)
     public ModelAndView echoSystemMetadata(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws
             ServiceFailure, NotImplemented, InvalidToken, NotAuthorized, InvalidRequest, InvalidSystemMetadata, IdentifierNotUnique {
@@ -104,11 +121,19 @@ public class DiagnosticController extends AbstractServiceController implements S
     }
   /**
     *
-    * Find out who is calling the service
+    * Echo the credentials used to make the call. This method can be used to verify the
+    * client certificate is valid and contains the expected information.
     *
     * GET /diag/subject
     *
     * @author leinfelder
+    * 
+    * @param request
+    * @param response
+    * @return 
+    * @throws org.dataone.service.exceptions.ServiceFailure 
+    * @throws org.dataone.service.exceptions.InvalidToken 
+    * @throws org.dataone.service.exceptions.NotImplemented 
     *
     */
    @RequestMapping(value = {CREDENTIALS_PATH_V2, CREDENTIALS_PATH_V2 + "/"}, method = RequestMethod.GET)
@@ -137,6 +162,26 @@ public class DiagnosticController extends AbstractServiceController implements S
        }
    }
 
+    /**
+     * Parse and echo the provided science metadata or resource map document. 
+     * The response is governed by the type of object provided in the request, and on success 
+     * is one or more documents that are the result of parsing for indexing.
+     * 
+     * Since DataONE supports multiple types of query engine, the query engine to be used for 
+     * parsing is specified in the request.
+     * 
+     * The servce may terminate the POST operation if the size of the object is beyond a reasonable size.
+     * 
+     * @param fileRequest
+     * @param response
+     * @throws ServiceFailure
+     * @throws NotImplemented
+     * @throws InvalidToken
+     * @throws NotAuthorized
+     * @throws InvalidRequest
+     * @throws InvalidSystemMetadata
+     * @throws IdentifierNotUnique 
+     */
     @RequestMapping(value = {RESOURCE_DIAG_INDEX_V2, RESOURCE_DIAG_INDEX_V2 + "/"}, method = RequestMethod.POST)
     public void echoIndexedObject(MultipartHttpServletRequest fileRequest, HttpServletResponse response) throws
             ServiceFailure, NotImplemented, InvalidToken, NotAuthorized, InvalidRequest, InvalidSystemMetadata, IdentifierNotUnique {

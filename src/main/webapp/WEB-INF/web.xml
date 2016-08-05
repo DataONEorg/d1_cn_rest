@@ -63,6 +63,8 @@
         <filter-name>PortalCertificateFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
+    <!-- the resolve filter is applied after a systeMetadata is proxied through metacat -->
     <filter>
         <filter-name>ResolveFilterV1</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -87,63 +89,23 @@
         <filter-name>ResolveFilterV2</filter-name>
         <url-pattern>/v2/resolve/*</url-pattern>
     </filter-mapping>
+    
+<!--  the d1-servlet covers most cases for DataONE -->
     <servlet>
         <servlet-name>d1</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    
     <servlet-mapping>
         <servlet-name>d1</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
-<!--
-    <servlet>
-        <servlet-name>v1</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>v1</servlet-name>
-        <url-pattern>/v1/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>v1</servlet-name>
-        <url-pattern>/v1</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>v2</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>v2</servlet-name>
-        <url-pattern>/v2/*</url-pattern>
-    </servlet-mapping>
-     <servlet-mapping>
-        <servlet-name>v2</servlet-name>
-        <url-pattern>/v2</url-pattern>
-    </servlet-mapping>
-     <servlet-mapping>
-        <servlet-name>v2</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
-    -->
     
-    <servlet>
-        <servlet-name>exception</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>exception</servlet-name>
-        <url-pattern>/exception/*</url-pattern>
-    </servlet-mapping>
+<!--  the xslt servlet maps to anything under the xslt directory  -->    
     <servlet>
         <servlet-name>xslt</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>xslt</servlet-name>
@@ -153,6 +115,18 @@
         <servlet-name>xslt</servlet-name>
         <url-pattern>/xslt/</url-pattern>
     </servlet-mapping>
+    
+<!--  all http errors should be mapped through the exceptions servlet  -->        
+    <servlet>
+        <servlet-name>exception</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>exception</servlet-name>
+        <url-pattern>/exception/*</url-pattern>
+    </servlet-mapping>
+
     <error-page>
         <error-code>400</error-code>
         <location>/exception/400</location>

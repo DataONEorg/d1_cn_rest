@@ -59,7 +59,6 @@ import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -109,19 +108,17 @@ public class RegistryController extends AbstractServiceController implements Ser
     @Qualifier("identityServiceV1")
     CNIdentity cnIdentity;
 
-    @Value("${cn.nodeId}")
-    String nodeIdentifier;
+    String nodeIdentifier = Settings.getConfiguration().getString("cn.nodeId");
+    
     NodeReference nodeReference;
 
     List<String> nodeAdministrators = Settings.getConfiguration().getList("cn.administrators");
     List<Subject> nodeAdminSubjects = new ArrayList<Subject>();
 
-    /*
-     * initialize a couple class scope variables immediately after the controller has
+    /**
+     * Initialize class scope variables immediately after the controller has
      * been initialized by Spring
      * 
-     * @author waltz
-     * @returns void
      */
     @PostConstruct
     public void init() {
@@ -135,7 +132,7 @@ public class RegistryController extends AbstractServiceController implements Ser
 
     }
 
-   /* 
+    /** 
      * Returns a list of nodes that have been registered with and approved by the DataONE infrastructure.
      * 
      * There is always an exception to the rule that makes order difficult.
@@ -144,10 +141,9 @@ public class RegistryController extends AbstractServiceController implements Ser
      * RegistryController maps the /v1/node URL path to itself due to the register node method.
      *
      * Two controllers can not map the same URL path, even though they have different HTTP Request methods
-     *
-     * @author waltz
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
+     * 
+     * @param request
+     * @param response
      * @throws NotImplemented
      * @throws ServiceFailure
      * @return ModelAndView
@@ -167,13 +163,13 @@ public class RegistryController extends AbstractServiceController implements Ser
         return new ModelAndView("xmlNodeListViewResolverV1", "org.dataone.service.types.v1.NodeList", nodeList);
 
     }
-    /*
-     * pass in a Node Identifier and receive back the node structure.
+    
+    /**
+     * Pass in a Node Identifier and receive back the node structure.
      * 
-     * @author waltz
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
-     * @param String nodeId
+     * @param request
+     * @param response
+     * @param nodeId
      * @throws NotFound
      * @throws ServiceFailure
      * @return ModelAndView
@@ -187,8 +183,11 @@ public class RegistryController extends AbstractServiceController implements Ser
         return new ModelAndView("xmlNodeViewResolverV1", "org.dataone.service.types.v1.Node", node);
 
     }
-    /*
-     * For updating the capabilities of the specified node. Most information is replaced by information in the new node,
+    
+    /**
+     * For updating the capabilities of the specified node. 
+     * 
+     * Most information is replaced by information in the new node,
      * however, the node identifier, nodeType, ping, syncrhonization.lastHarvested, and
      * synchronization.lastCompleteHarvest are preserved from the existing entry. Services in the old record not
      * included in the new Node will be removed.
@@ -197,10 +196,9 @@ public class RegistryController extends AbstractServiceController implements Ser
      *
      * Unsuccessful completion of this operation MUST be indicated by returning an appropriate exception.
      * 
-     * @author waltz
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
-     * @param String nodeId
+     * @param fileRequest
+     * @param response
+     * @param nodeId
      * @throws InvalidToken 
      * @throws InvalidRequest
      * @throws IdentifierNotUnique
@@ -208,9 +206,8 @@ public class RegistryController extends AbstractServiceController implements Ser
      * @throws NotImplemented
      * @throws NotFound
      * @throws ServiceFailure
-     * @return ModelAndView
+     * 
      */
-
     @RequestMapping(value = NODE_PATH_V1 + "{nodeId}", method = RequestMethod.PUT)
     public void updateNodeCapabilities(MultipartHttpServletRequest fileRequest, HttpServletResponse response, @PathVariable String nodeId) throws InvalidToken, ServiceFailure, InvalidRequest, IdentifierNotUnique, NotAuthorized, NotImplemented, NotFound {
         Session session = PortalCertificateManager.getInstance().getSession(fileRequest);
@@ -383,7 +380,6 @@ public class RegistryController extends AbstractServiceController implements Ser
     /*
      * Register a new node in the system. If the node already exists, then a IdentifierNotUnique exception MUST be returned.
      * 
-     * @author waltz
      * @param MultipartHttpServletRequest request
      * @param HttpServletResponse response
      * @throws InvalidToken 
@@ -392,7 +388,7 @@ public class RegistryController extends AbstractServiceController implements Ser
      * @throws NotAuthorized
      * @throws NotImplemented
      * @throws ServiceFailure
-     * @return ModelAndView
+     * @return NodeReference
      * 
      */
     @RequestMapping(value = {NODELIST_PATH_V1, NODE_PATH_V1}, method = RequestMethod.POST)
@@ -476,12 +472,11 @@ public class RegistryController extends AbstractServiceController implements Ser
         return new ModelAndView("xmlNodeReferenceViewResolverV1", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
 
-    /*
-     * determine if the passed in subject has been verified in the Identity service
+   /**
+     * Determine if the passed in subject has been verified in the Identity service
      * 
-     * @author waltz
-     * @param Session session
-     * @param Subject subject
+     * @param session
+     * @param subject
      * @throws ServiceFailure
      * @throws InvalidRequest
      * @throws NotAuthorized
@@ -513,11 +508,10 @@ public class RegistryController extends AbstractServiceController implements Ser
         return verifiedRegistration;
     }
 
-    /*
-     * determine if any changes have occurred either on the NodeList or 
+    /**
+     * Determine if any changes have occurred either on the NodeList or 
      * in the properties file to CN administrative subjects
      * 
-     * @author waltz
      * @return boolean
      */
     private boolean hasNodeAdministratorsChanged() {
@@ -536,11 +530,9 @@ public class RegistryController extends AbstractServiceController implements Ser
         return false;
     }
 
-    /*
-     * from nodeAdministrators list, build a list of Administrator subjects
+    /**
+     *  Build a list of Administrator subjects from nodeAdministrators list
      * 
-     * @author waltz
-     * @return void
      */
     private void constructNodeAdministrators() {
         nodeAdminSubjects = new ArrayList<Subject>();
@@ -552,18 +544,13 @@ public class RegistryController extends AbstractServiceController implements Ser
         }
     }
 
-    /*
-     * refreshes an array of subjects listed as CN's in the nodelist or in a properties file.
+    /**
+     * Refreshes an array of subjects listed as CN's in the nodelist or in a properties file.
      * If the ServiceMethodRestriction list of updateNodeCapabilities is set, 
      * then those subjects act as administrators as well.
      * 
-     * @author waltz
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
-     * @param String acceptType
      * @throws NotImplemented
      * @throws ServiceFailure
-     * 
      * @return List<String>
      */
     private List<String> buildUpdateNodeCapabilitiesAdministrativeList() throws NotImplemented, ServiceFailure {
