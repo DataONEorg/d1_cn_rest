@@ -52,7 +52,6 @@ import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.cn.impl.v1.CNIdentityLDAPImpl;
 import org.dataone.service.cn.v1.impl.NodeRegistryServiceImpl;
 import org.dataone.service.exceptions.NotAuthorized;
-import org.jibx.runtime.JiBXException;
 
 /**
  *
@@ -469,7 +468,7 @@ public class SuiteTestUnit3Registry {
 
     }
 
-    private Node getTestMNNode() throws IOException, InstantiationException, IllegalAccessException, JiBXException, MarshallingException {
+    private Node getTestMNNode() throws IOException, InstantiationException, IllegalAccessException, MarshallingException {
         ByteArrayOutputStream mnNodeOutput = new ByteArrayOutputStream();
 
         BufferedInputStream bInputStream = new BufferedInputStream(mnNodeResource.getInputStream());

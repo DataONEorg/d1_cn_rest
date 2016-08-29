@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
+import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.exceptions.AuthenticationTimeout;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -46,7 +47,6 @@ import org.dataone.service.exceptions.UnsupportedType;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.util.EncodingUtilities;
-import org.jibx.runtime.JiBXException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -200,8 +200,8 @@ public abstract class AbstractServiceController {
         handleBaseException((BaseException) serviceFailure, request, response);
     }
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(JiBXException.class)
-    public void handleException(JiBXException exception, HttpServletRequest request, HttpServletResponse response) {
+    @ExceptionHandler(MarshallingException.class)
+    public void handleException(MarshallingException exception, HttpServletRequest request, HttpServletResponse response) {
         response.setStatus(response.SC_INTERNAL_SERVER_ERROR);
         ServiceFailure serviceFailure = new ServiceFailure("000", exception.getMessage());
         handleBaseException((BaseException) serviceFailure, request, response);

@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.log4j.Logger;
 import org.dataone.cn.servlet.http.ProxyServletRequestWrapper;
+import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.exceptions.AuthenticationTimeout;
 import org.dataone.service.exceptions.BaseException;
 import org.dataone.service.exceptions.IdentifierNotUnique;
@@ -47,7 +48,6 @@ import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.exceptions.UnsupportedMetadataType;
 import org.dataone.service.exceptions.UnsupportedType;
-import org.jibx.runtime.JiBXException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -286,8 +286,8 @@ public abstract class AbstractProxyForwarder implements ServletContextAware {
         handleBaseException((BaseException) serviceFailure, request, response);
     }
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(JiBXException.class)
-    public void handleException(JiBXException exception, HttpServletRequest request, HttpServletResponse response) {
+    @ExceptionHandler(MarshallingException.class)
+    public void handleException(MarshallingException exception, HttpServletRequest request, HttpServletResponse response) {
         ServiceFailure serviceFailure = new ServiceFailure("000", exception.getMessage());
         handleBaseException((BaseException) serviceFailure, request, response);
     }
