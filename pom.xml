@@ -9,6 +9,7 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <compiler.target.version>1.7</compiler.target.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <hazelcast.version>2.4.1</hazelcast.version>
         <bouncycastle.version>1.52</bouncycastle.version>
@@ -48,7 +49,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.7</source>
-                    <target>1.7</target>
+                    <target>${compiler.target.version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -321,6 +322,13 @@
             <version>${d1_cn_index_processor.version}</version> 
             <type>jar</type>
         </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.dataone</groupId> -->
+<!--             <artifactId>d1_cn_rest_proxy</artifactId> -->
+<!--             <version>${d1_cn_rest_proxy.version}</version> -->
+<!--             <type>jar</type> -->
+<!--             <scope>compile</scope> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_cn_noderegistry</artifactId>
