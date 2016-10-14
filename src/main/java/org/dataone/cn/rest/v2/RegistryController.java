@@ -471,7 +471,7 @@ public class RegistryController extends AbstractServiceController implements Ser
         //       NodeReference nodeReference = nodeRegistry.generateNodeIdentifier();
         //       node.setIdentifier(nodeReference);
         NodeReference nodeReference = nodeRegistry.register(node);
-        return new ModelAndView("xmlNodeReferenceViewV1", "org.dataone.service.types.v1.NodeReference", nodeReference);
+        return new ModelAndView("xmlNodeReferenceViewResolverV1", "org.dataone.service.types.v1.NodeReference", nodeReference);
     }
 
    /**
