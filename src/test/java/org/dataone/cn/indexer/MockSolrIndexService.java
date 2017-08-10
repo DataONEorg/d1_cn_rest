@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 import org.dataone.cn.index.util.PerformanceLogger;
 import org.dataone.cn.indexer.parser.IDocumentDeleteSubprocessor;
 import org.dataone.cn.indexer.parser.IDocumentSubprocessor;
-import org.dataone.cn.indexer.solrhttp.HTTPService;
 import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
 import org.xml.sax.SAXException;
 
@@ -59,7 +58,7 @@ public class MockSolrIndexService extends SolrIndexService {
 
     private String solrQueryUri = null;
 
-    private HTTPService httpService = null;
+    private D1IndexerSolrClient httpService = null;
 
     private PerformanceLogger perfLog = PerformanceLogger.getInstance();
 
@@ -130,12 +129,12 @@ public class MockSolrIndexService extends SolrIndexService {
     }
 
     @Override
-    public void setHttpService(HTTPService service) {
+    public void setHttpService(D1IndexerSolrClient service) {
         this.httpService = service;
     }
 
     @Override
-    public HTTPService getHttpService() {
+    public D1IndexerSolrClient getHttpService() {
         return httpService;
     }
 

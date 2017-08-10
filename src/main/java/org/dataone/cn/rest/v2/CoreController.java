@@ -371,6 +371,9 @@ public class CoreController extends AbstractServiceController implements Servlet
         try {
             // get the NodeID from the subject via xref to the nodeList
             Session session = PortalCertificateManager.getInstance().getSession(request);
+            if (session == null) {
+                throw new NotAuthorized("4962", "The client session is null!!");
+            }
             final Subject clientSubject = session.getSubject();
             
          /////////////  PERFORMANCE TIMING ////////////////
@@ -473,9 +476,11 @@ public class CoreController extends AbstractServiceController implements Servlet
         } catch (ServiceFailure e) {
             e.setDetail_code("4961");
             throw e;
+            // TODO: log the error (as ERROR)
         } catch (NotAuthorized e) {
             throw e; // catching and rethrowing to avoid being recast as a service failure 
             // in the following catch Exception block
+            // TODO: log the error (as warn)
         } catch (Exception e) {
             String message = "Unexpected Exception in CN.synchronize: progress: "
                     + progress + ":: " + e.toString();
