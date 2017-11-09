@@ -144,7 +144,8 @@ public class DiagnosticController extends AbstractServiceController implements S
            // get the Session object from the request
            Session session = PortalCertificateManager.getInstance().getSession(request);
            if (session == null) {
-               throw new InvalidToken("4967", "No credentials were received in the request. (Session was null)");
+               //throw new InvalidToken("4967", "No credentials were received in the request. (Session was null)");
+               throw new InvalidToken("4967", "The supplied authentication token (Session) could not be verified as being valid.");
            }
 
            // serialize it back
