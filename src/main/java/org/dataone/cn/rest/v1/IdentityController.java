@@ -235,7 +235,7 @@ public class IdentityController extends AbstractServiceController implements Ser
      * @throws org.dataone.service.exceptions.InvalidCredentials
      * @throws org.dataone.service.exceptions.NotFound
      */
-    @RequestMapping(value = ACCOUNT_MAPPING_PENDING_PATH_V1, method = RequestMethod.POST)
+    @RequestMapping(value = {ACCOUNT_MAPPING_PENDING_PATH_V1, ACCOUNT_MAPPING_PENDING_PATH_V1+"/"} , method = RequestMethod.POST)
     public void requestMapIdentity(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, InvalidToken, NotAuthorized, NotImplemented, IdentifierNotUnique, InvalidCredentials, InvalidRequest, NotFound {
 
     	// get the Session object from certificate in request
