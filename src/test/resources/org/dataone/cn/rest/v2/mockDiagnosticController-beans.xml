@@ -53,6 +53,8 @@
     <spring:bean id="mockSolrIndexService" class="org.dataone.cn.indexer.MockSolrIndexService"> 
         <spring:qualifier value="solrIndexService" />
     </spring:bean>
+    
+    <spring:bean id="subprocessorUtility" class="org.dataone.cn.indexer.parser.SubprocessorUtility" />
 
     <context:component-scan base-package="org.dataone.cn.rest.v2" use-default-filters="false">
             <context:include-filter type="regex" expression=".*DiagnosticController"/>
