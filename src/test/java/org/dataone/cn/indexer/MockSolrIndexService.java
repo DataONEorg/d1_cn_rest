@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.dataone.cn.index.util.PerformanceLogger;
 import org.dataone.cn.indexer.parser.IDocumentDeleteSubprocessor;
 import org.dataone.cn.indexer.parser.IDocumentSubprocessor;
-import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
+import org.dataone.cn.indexer.solrhttp.SolrDoc;
 import org.xml.sax.SAXException;
 
 /**
@@ -85,11 +85,11 @@ public class MockSolrIndexService extends SolrIndexService {
      * @throws EncoderException
      */
     @Override
-    public SolrElementAdd processObject(String id, InputStream systemMetaDataStream,
+    public List<SolrDoc> processObject(String id, InputStream systemMetaDataStream,
             String objectPath) throws IOException, SAXException, ParserConfigurationException,
             XPathExpressionException, EncoderException {
 
-        SolrElementAdd addCommand = new SolrElementAdd();
+        List<SolrDoc> addCommand = new ArrayList<>();
 
         systemMetaDataStream.close();
         return addCommand;
@@ -129,12 +129,12 @@ public class MockSolrIndexService extends SolrIndexService {
     }
 
     @Override
-    public void setHttpService(D1IndexerSolrClient service) {
+    public void setD1IndexerSolrClient(D1IndexerSolrClient service) {
         this.httpService = service;
     }
 
     @Override
-    public D1IndexerSolrClient getHttpService() {
+    public D1IndexerSolrClient getD1IndexerSolrClient() {
         return httpService;
     }
 
