@@ -54,6 +54,10 @@ public class ResolveServlet extends HttpServlet {
         this.is = resource.getInputStream();
     }
 
+    public void doHead(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        doGet(req, res);
+    }
+    
     public void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
