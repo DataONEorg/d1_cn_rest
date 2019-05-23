@@ -405,10 +405,20 @@ public class ResolveFilter implements Filter {
 
 
         ObjectLocationList objectLocationList = createObjectLocationList(identifier.getValue(), systemMetadata.getReplicaList());
-        //Resolve will return a HTTP status of 303 (see other) on success.
+
+        //Resolve will return a HTTP status of 303 (see other) for GET, and 307 (temporary redirect) for HEAD, on success.
         //The HTTP header "Location" MUST be set, and it's value SHOULD be the full get()
         // URL for retrieving the object from the first location in the resolve response
-        response.setStatus(response.SC_SEE_OTHER);
+        if (request.getMethod().toUpperCase().equals("GET")) {
+            response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+            
+        } else if (request.getMethod().toUpperCase().equals("HEAD")) {
+            response.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT);
+            
+        } else {
+            throw new ServiceFailure("4150", "error responding to unhandled HTTP Method: " + request.getMethod());
+        }
+        
         response.setHeader("Location", objectLocationList.getObjectLocation(0).getUrl());
         try {
             TypeMarshaller.marshalTypeToOutputStream(objectLocationList, response.getOutputStream());

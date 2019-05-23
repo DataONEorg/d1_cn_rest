@@ -176,6 +176,29 @@ public class SuiteTestUnit6ResolveFilter {
         assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
         this.nodelistRefreshIntervalSeconds = 120;
     }
+    
+    
+    /**
+     *  this test is for testing the response behavior with a HEAD method
+     * 
+     * @throws FileNotFoundException
+     */
+    @Test
+    public void testDoFilterHEAD() throws FileNotFoundException {
+
+        this.nodelistRefreshIntervalSeconds = 13579;
+        BufferedHttpResponseWrapper responseWrapper = callDoFilter(systemMetadataValidResource,"HEAD");
+        String content = new String(responseWrapper.getBuffer());
+        logger.info(content);
+        // examine contents of the response
+        assertTrue("response is non-null", responseWrapper.getBufferSize() > 0);
+        assertTrue("response is non-null", responseWrapper.getBuffer().length > 0);
+        assertTrue("status must be 307", responseWrapper.getStatus() == responseWrapper.SC_TEMPORARY_REDIRECT);
+        assertTrue("Http Header Location must be set", responseWrapper.containsHeader("Location"));
+
+        assertThat("response contains word 'objectLocationList'", content, containsString("objectLocationList"));
+        this.nodelistRefreshIntervalSeconds = 120;
+    }
 
     @Test
     public void testUrlEncodingAscii() throws FileNotFoundException {
@@ -515,6 +538,11 @@ public class SuiteTestUnit6ResolveFilter {
 
     // ==========================================================================================================
     private BufferedHttpResponseWrapper callDoFilter(ClassPathResource xmlResource) {
+        return callDoFilter(xmlResource, "GET");
+    }
+    
+    
+    private BufferedHttpResponseWrapper callDoFilter(ClassPathResource xmlResource, String method) {
 
         ResourceLoader fsrl = new FileSystemResourceLoader();
         ServletContext sc = new MockServletContext("src/main/webapp", fsrl);
@@ -533,7 +561,7 @@ public class SuiteTestUnit6ResolveFilter {
 
         MockHttpServletRequest request = new MockHttpServletRequest(fc.getServletContext(), null, "/resolve/12345");
         request.addHeader("accept", (Object) "text/xml");
-        request.setMethod("GET");
+        request.setMethod(method);
         ResolveServlet testResolve = null;
         try {
             testResolve = new ResolveServlet(xmlResource);

@@ -79,7 +79,7 @@ public class ReadController implements ServletContextAware {
      * @return void
      * @exception
      */
-    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.GET, headers = "Accept=*/*")
+    @RequestMapping(value = RESOLVE_PATH + "**", method = {RequestMethod.GET, RequestMethod.HEAD}, headers = "Accept=*/*")
     public void resolve(HttpServletRequest request, HttpServletResponse response,
             @RequestHeader("Accept") String acceptType) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
          resolveForwarder.forward(request, response, "v2");
@@ -95,7 +95,7 @@ public class ReadController implements ServletContextAware {
      * @exception
      */
 
-    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.GET)
+    @RequestMapping(value = RESOLVE_PATH + "**", method = {RequestMethod.GET, RequestMethod.HEAD})
     public void resolve(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
          resolveForwarder.forward(request, response, "v2");
     }
