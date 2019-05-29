@@ -79,7 +79,7 @@ public class ReadController implements ServletContextAware {
      * @return void
      * @exception
      */
-    @RequestMapping(value = RESOLVE_PATH + "**", method = {RequestMethod.GET, RequestMethod.HEAD}, headers = "Accept=*/*")
+    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.GET, headers = "Accept=*/*")
     public void resolve(HttpServletRequest request, HttpServletResponse response,
             @RequestHeader("Accept") String acceptType) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
          resolveForwarder.forward(request, response, "v2");
@@ -95,8 +95,30 @@ public class ReadController implements ServletContextAware {
      * @exception
      */
 
-    @RequestMapping(value = RESOLVE_PATH + "**", method = {RequestMethod.GET, RequestMethod.HEAD})
+    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.GET)
     public void resolve(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
+         resolveForwarder.forward(request, response, "v2");
+    }
+    
+    
+    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.HEAD, headers = "Accept=*/*")
+    public void resolveHead(HttpServletRequest request, HttpServletResponse response,
+            @RequestHeader("Accept") String acceptType) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
+         resolveForwarder.forward(request, response, "v2");
+ 
+    }
+    /*
+     * Resolve is proxied through Metacat's getSystemMetadata method and then filtered
+     * to produce the correct ObjectLocationList
+     *
+     * @param HttpServletRequest request
+     * @param HttpServletResponse response
+     * @return void
+     * @exception
+     */
+
+    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.HEAD)
+    public void resolveHead(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
          resolveForwarder.forward(request, response, "v2");
     }
 
