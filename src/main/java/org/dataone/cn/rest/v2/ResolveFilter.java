@@ -41,6 +41,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.xpath.XPathFactory;
 
@@ -284,15 +285,40 @@ public class ResolveFilter implements Filter {
         if (filterConfig == null) {
             return;
         }
-
+       
         // compiles without the subtyping to Http versions of request and response.
         // why is the check here?
         if (!(res instanceof HttpServletResponse) || !(req instanceof HttpServletRequest)) {
             throw new ServletException("This filter only supports HTTP");
         }
+        
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
-
+        
+        // Resolve will return a HTTP status of 303 (see other) for GET, and 307 (temporary redirect) for HEAD, on success.
+        // figure it out before the filter chain, because we need to mask the HEAD as a GET to
+        // get a successful /metacat/meta call
+        
+        
+        String requestMethod = request.getMethod().toUpperCase();
+        int successStatusCode;
+        HttpServletRequest metacatRequest = null;
+        if (requestMethod.equals("GET")) {
+            successStatusCode = HttpServletResponse.SC_SEE_OTHER;
+            metacatRequest = request;
+            
+        } else if (requestMethod.equals("HEAD")) {
+            successStatusCode = HttpServletResponse.SC_TEMPORARY_REDIRECT;
+            // metacat will need a GET request to return the systemMetadata
+            metacatRequest = new HttpServletRequestWrapper(request) {
+                public String getMethod() {
+                    return "GET";
+                }
+            };
+        } else {
+            throw new ServiceFailure("4150", "error responding to unhandled HTTP Method: " + request.getMethod());
+        }
+        
         cacheNodeListURLs(request, response);
         //  ****** Handle request before passing control to next filter or servlet  *********
 
@@ -304,7 +330,7 @@ public class ResolveFilter implements Filter {
         BufferedHttpResponseWrapper responseWrapper =
                 new BufferedHttpResponseWrapper((HttpServletResponse) response);
 
-        chain.doFilter(req, responseWrapper);
+        chain.doFilter(metacatRequest, responseWrapper);
 
         // we're using tomcat 6.  Is the workaround still necessary?
 
@@ -350,19 +376,19 @@ public class ResolveFilter implements Filter {
                 		d1be.getDescription());
                 
                 if (d1be instanceof InvalidToken) {
-                    throw new InvalidToken("4130", augmentedDescription, d1be.getPid(), trace_information);
+                    throw new InvalidToken("4130", augmentedDescription, d1be.getIdentifier(), trace_information);
                 
                 } else if (d1be instanceof NotImplemented) {
-                    throw new NotImplemented("4131", augmentedDescription, d1be.getPid(), trace_information);
+                    throw new NotImplemented("4131", augmentedDescription, d1be.getIdentifier(), trace_information);
                 
                 } else if (d1be instanceof ServiceFailure) {
-                    throw new ServiceFailure("4150", augmentedDescription, d1be.getPid(), trace_information);
+                    throw new ServiceFailure("4150", augmentedDescription, d1be.getIdentifier(), trace_information);
                 
                 } else if (d1be instanceof NotAuthorized) {
-                    throw new NotAuthorized("4120", augmentedDescription, d1be.getPid(), trace_information);
+                    throw new NotAuthorized("4120", augmentedDescription, d1be.getIdentifier(), trace_information);
                 
                 } else if (d1be instanceof NotFound) {
-                    throw new NotFound("4140", augmentedDescription, d1be.getPid(), trace_information);
+                    throw new NotFound("4140", augmentedDescription, d1be.getIdentifier(), trace_information);
                 
                 } else {
                     throw new ServiceFailure("4150", "Unrecognized getSystemMetadata failure: " + 
@@ -370,7 +396,7 @@ public class ResolveFilter implements Filter {
                     				d1be.getClass().getSimpleName(),
                     				d1be.getDetail_code(),
                     				d1be.getDescription()),
-                    		d1be.getPid(), trace_information);
+                    		d1be.getIdentifier(), trace_information);
                 }
             } catch (IllegalStateException ex) {
                 throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());
@@ -406,17 +432,10 @@ public class ResolveFilter implements Filter {
 
         ObjectLocationList objectLocationList = createObjectLocationList(identifier.getValue(), systemMetadata.getReplicaList());
 
-        //Resolve will return a HTTP status of 303 (see other) for GET, and 307 (temporary redirect) for HEAD, on success.
         //The HTTP header "Location" MUST be set, and it's value SHOULD be the full get()
         // URL for retrieving the object from the first location in the resolve response
-        if (request.getMethod().toUpperCase().equals("GET")) {
-            response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-            
-        } else if (request.getMethod().toUpperCase().equals("HEAD")) {
-            response.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-        } else {
-            throw new ServiceFailure("4150", "error responding to unhandled HTTP Method: " + request.getMethod());
-        }
+        
+        response.setStatus(successStatusCode);
         response.setHeader("Location", objectLocationList.getObjectLocation(0).getUrl());
         try {
             TypeMarshaller.marshalTypeToOutputStream(objectLocationList, response.getOutputStream());

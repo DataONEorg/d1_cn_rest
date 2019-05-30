@@ -331,7 +331,8 @@ public abstract class AbstractProxyForwarder implements ServletContextAware {
         logger.debug("request QueryString: " + request.getQueryString());
         logger.debug("request ContextPath: " + request.getContextPath());
         logger.debug("request ServletPath: " + request.getServletPath());
-        logger.debug("request toString:" + request.toString());
+        logger.debug("request toString: " + request.toString());
+        logger.debug("request Method: " + request.getMethod());
         Enumeration<String> attributeNames = request.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             String attributeName = attributeNames.nextElement();
