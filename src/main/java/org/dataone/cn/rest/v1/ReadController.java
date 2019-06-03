@@ -22,7 +22,6 @@
 
 package org.dataone.cn.rest.v1;
 
-
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +33,6 @@ import org.dataone.service.exceptions.InvalidRequest;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.util.Constants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,7 +42,6 @@ import org.springframework.web.context.ServletContextAware;
 
 
 /**
- * 
  * The CNRead API mostly is implemented by Metacat.
  * In order to implement resolve, the request must be
  * forwarded to Metacat in order to filter it
@@ -58,7 +55,7 @@ import org.springframework.web.context.ServletContextAware;
  */
 
 @Controller("cnReadControllerV1")
-public class ReadController  implements ServletContextAware {
+public class ReadController implements ServletContextAware {
 
     private ServletContext servletContext;
     
@@ -109,6 +106,8 @@ public class ReadController  implements ServletContextAware {
     public void resolve(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
         resolveForwarder.forward(request, response, "v1");
     }
+    
+    
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;

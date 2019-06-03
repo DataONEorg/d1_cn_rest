@@ -58,13 +58,19 @@ import org.springframework.web.context.ServletContextAware;
 public class ReadController implements ServletContextAware {
 
     private ServletContext servletContext;
-        
+    
     private static final String RESOLVE_PATH = "/v2/" + Constants.RESOURCE_RESOLVE +  "/";
 
     Logger logger = Logger.getLogger(ReadController.class);
     
     ResolveForwarder resolveForwarder = null;
-    
+    /*
+     * initialize class scope variables immediately after the controller has
+     * been initialized by Spring
+     * 
+     * @author waltz
+     * @returns void
+     */
     @PostConstruct
     public void init() {
         resolveForwarder = new ResolveForwarder(servletContext);
@@ -79,10 +85,10 @@ public class ReadController implements ServletContextAware {
      * @return void
      * @exception
      */
-    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.GET, headers = "Accept=*/*")
+    @RequestMapping(value = RESOLVE_PATH + "**", method = {RequestMethod.GET, RequestMethod.HEAD}, headers = "Accept=*/*")
     public void resolve(HttpServletRequest request, HttpServletResponse response,
             @RequestHeader("Accept") String acceptType) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
-         resolveForwarder.forward(request, response, "v2");
+        resolveForwarder.forward(request, response, "v2");
  
     }
     /*
@@ -95,35 +101,15 @@ public class ReadController implements ServletContextAware {
      * @exception
      */
 
-    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.GET)
+    @RequestMapping(value = RESOLVE_PATH + "**", method = {RequestMethod.GET, RequestMethod.HEAD})
     public void resolve(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
-         resolveForwarder.forward(request, response, "v2");
+        resolveForwarder.forward(request, response, "v2");
     }
     
     
-    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.HEAD, headers = "Accept=*/*")
-    public void resolveHead(HttpServletRequest request, HttpServletResponse response,
-            @RequestHeader("Accept") String acceptType) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
-         resolveForwarder.forward(request, response, "v2");
- 
-    }
-    /*
-     * Resolve is proxied through Metacat's getSystemMetadata method and then filtered
-     * to produce the correct ObjectLocationList
-     *
-     * @param HttpServletRequest request
-     * @param HttpServletResponse response
-     * @return void
-     * @exception
-     */
-
-    @RequestMapping(value = RESOLVE_PATH + "**", method = RequestMethod.HEAD)
-    public void resolveHead(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotFound, NotImplemented, InvalidRequest {
-         resolveForwarder.forward(request, response, "v2");
-    }
-
     @Override
     public void setServletContext(ServletContext sc) {
         this.servletContext = sc;
     }
+
 }
