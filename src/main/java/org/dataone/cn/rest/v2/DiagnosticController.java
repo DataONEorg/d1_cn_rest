@@ -22,7 +22,6 @@
 package org.dataone.cn.rest.v2;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -31,9 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.dataone.cn.indexer.SolrIndexService;
-import org.dataone.cn.indexer.solrhttp.SolrDoc;
+import org.dataone.cn.indexer.solrhttp.SolrElementAdd;
 import org.dataone.cn.rest.AbstractServiceController;
-import org.dataone.exceptions.MarshallingException;
 import org.dataone.portal.PortalCertificateManager;
 import org.dataone.service.exceptions.IdentifierNotUnique;
 import org.dataone.service.exceptions.InvalidRequest;
@@ -47,6 +45,7 @@ import org.dataone.service.types.v1.SubjectInfo;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.Constants;
 import org.dataone.service.util.TypeMarshaller;
+import org.dataone.exceptions.MarshallingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -226,15 +225,14 @@ public class DiagnosticController extends AbstractServiceController implements S
             object.transferTo(objectFile);
 
             // process the object
-            Map<String,SolrDoc> solrDocs = solrIndexService.parseTaskObject(id, sysMetaMultipart.getInputStream(), objectFile.getAbsolutePath());
+//             solrDocs = solrIndexService.parseTaskObject(id, sysMetaMultipart.getInputStream(), objectFile.getAbsolutePath());
+            SolrElementAdd addCommand = solrIndexService.processObject(id, sysMetaMultipart.getInputStream(), objectFile.getAbsolutePath());
 
             // remove temp file
             objectFile.delete();
 
             // send result to response output stream
-            for (SolrDoc sd : solrDocs.values()) {
-                sd.serialize(response.getOutputStream(), "UTF-8");
-            }
+            addCommand.serialize(response.getOutputStream(), "UTF-8");
 
         } catch (Exception e) {
             e.printStackTrace();

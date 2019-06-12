@@ -376,19 +376,19 @@ public class ResolveFilter implements Filter {
                 		d1be.getDescription());
                 
                 if (d1be instanceof InvalidToken) {
-                    throw new InvalidToken("4130", augmentedDescription, d1be.getIdentifier(), trace_information);
+                    throw new InvalidToken("4130", augmentedDescription, d1be.getPid(), trace_information);
                 
                 } else if (d1be instanceof NotImplemented) {
-                    throw new NotImplemented("4131", augmentedDescription, d1be.getIdentifier(), trace_information);
+                    throw new NotImplemented("4131", augmentedDescription, d1be.getPid(), trace_information);
                 
                 } else if (d1be instanceof ServiceFailure) {
-                    throw new ServiceFailure("4150", augmentedDescription, d1be.getIdentifier(), trace_information);
+                    throw new ServiceFailure("4150", augmentedDescription, d1be.getPid(), trace_information);
                 
                 } else if (d1be instanceof NotAuthorized) {
-                    throw new NotAuthorized("4120", augmentedDescription, d1be.getIdentifier(), trace_information);
+                    throw new NotAuthorized("4120", augmentedDescription, d1be.getPid(), trace_information);
                 
                 } else if (d1be instanceof NotFound) {
-                    throw new NotFound("4140", augmentedDescription, d1be.getIdentifier(), trace_information);
+                    throw new NotFound("4140", augmentedDescription, d1be.getPid(), trace_information);
                 
                 } else {
                     throw new ServiceFailure("4150", "Unrecognized getSystemMetadata failure: " + 
@@ -396,7 +396,7 @@ public class ResolveFilter implements Filter {
                     				d1be.getClass().getSimpleName(),
                     				d1be.getDetail_code(),
                     				d1be.getDescription()),
-                    		d1be.getIdentifier(), trace_information);
+                    		d1be.getPid(), trace_information);
                 }
             } catch (IllegalStateException ex) {
                 throw new ServiceFailure("4150", "BaseExceptionHandler.deserializeXml: " + ex.getMessage());

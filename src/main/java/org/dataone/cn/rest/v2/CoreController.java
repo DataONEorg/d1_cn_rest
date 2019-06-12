@@ -111,9 +111,6 @@ public class CoreController extends AbstractServiceController implements Servlet
 
     SimpleDateFormat pingDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
-    /* probably should be set in dataone-cn-rest-service/etc/dataone/cn/dataoneHazelcast.properties */
-    private static boolean SYNC_CHECK_BEFORE_ADDING = 
-            Settings.getConfiguration().getBoolean("dataone.hazelcast.synchronization.checkBeforeAdding", /* default */ true);
     
     @PostConstruct
     public void init() {
@@ -362,27 +359,10 @@ public class CoreController extends AbstractServiceController implements Servlet
     public void synchronize(HttpServletRequest request, HttpServletResponse response) throws ServiceFailure, NotAuthorized {
 
         String progress = null;
-        long start = 0;
-        long t0 = 0;
-        if (logger.isDebugEnabled()) {
-            start = System.currentTimeMillis();
-            t0 = start;
-        }
         try {
             // get the NodeID from the subject via xref to the nodeList
             Session session = PortalCertificateManager.getInstance().getSession(request);
-            if (session == null) {
-                throw new NotAuthorized("4962", "The client session is null!!");
-            }
             final Subject clientSubject = session.getSubject();
-            
-         /////////////  PERFORMANCE TIMING ////////////////
-            if (logger.isDebugEnabled()) {
-                long time1 = System.currentTimeMillis();
-                logger.debug(String.format("in CN.synchronize, got Session in %d millis", time1 = start));
-                start = time1;
-            }
-            
             NodeList nodeList = nodeRegistryService.listNodes();
             List<Node> nodes = nodeList.getNodeList();
             Node firstFoundNode = (Node) CollectionUtils.find(nodes,
@@ -397,15 +377,8 @@ public class CoreController extends AbstractServiceController implements Servlet
                 throw new NotAuthorized("4962", "The client certificate does not find an approved Member Node");
             }
             NodeReference nodeId = firstFoundNode.getIdentifier();
+
             progress = "(a) found an approved MN: " + nodeId.getValue();
-            
-         /////////////  PERFORMANCE TIMING ////////////////
-            if (logger.isDebugEnabled()) {
-                long time1 = System.currentTimeMillis();
-                logger.debug(String.format("in CN.synchronize, got registered Node in %d millis", time1 - start));
-                start = time1;
-                
-            }
 
             // get the pid parameter from the request object directly
             String pidString = request.getParameter("pid");
@@ -420,15 +393,6 @@ public class CoreController extends AbstractServiceController implements Servlet
                 throw new ServiceFailure("4691", "Unexpected Error! The CN could not get the SystemMetadata map!");
             }
 
-         /////////////  PERFORMANCE TIMING ////////////////
-            progress = "(c) got Hz sysMeta map: " + pidString;
-            if (logger.isDebugEnabled()) {
-                long time1 = System.currentTimeMillis();
-                logger.debug(String.format("in CN.synchronize, got the Hz sysMeta map in %d millis", time1 - start));
-                start = time1;
-                
-            }
-            
             SystemMetadata sysmeta = smm.get(pid);
             if (sysmeta != null && !sysmeta.getAuthoritativeMemberNode().equals(nodeId)) {
                 String message = String.format(
@@ -437,57 +401,30 @@ public class CoreController extends AbstractServiceController implements Servlet
                 logger.info(message);
                 throw new NotAuthorized("4692", message);
             }
-            
-         /////////////  PERFORMANCE TIMING ////////////////
-            progress = "(d) got sysMeta from the CN map...";
-            if (logger.isDebugEnabled()) {
-                long time1 = System.currentTimeMillis();
-                logger.debug(String.format("in CN.synchronize, got the systemMetadata from Hz in %d millis", time1 - start));
-                start = time1;
-                
-            }
+
+            progress = "(c) got sysMeta from the CN map...";
 
             if (hzSyncObjectQueue == null) {
                 throw new ServiceFailure("4691", "CN misconfiguration - could not reach hzSyncObjectQueue named "
                         + synchronizationObjectQueueName);
             }
-            progress = "(e) got HzSyncObjectQueue: " + synchronizationObjectQueueName;
+            progress = "(d) got HzSyncObjectQueue: " + synchronizationObjectQueueName;
             // check that the item isn't already in the queue
             SyncObject so = new SyncObject(nodeId.getValue(), pid.getValue());
-            
-            long split = 0;
-            if (!SYNC_CHECK_BEFORE_ADDING || !hzSyncObjectQueue.contains(so)) {
-                split = System.currentTimeMillis();
+            if (!hzSyncObjectQueue.contains(so)) {
                 hzSyncObjectQueue.add(so);
-            }
-            
-         /////////////  PERFORMANCE TIMING ////////////////
-            if (logger.isDebugEnabled()) {
-                long time1 = System.currentTimeMillis();
-           
-                if (split == 0) {
-                    // it was a dupe, only record time to find it
-                    logger.debug(String.format("in CN.synchronize, checked sync queue for duplicate in %d millis", time1 - start));
-                } else {
-                    logger.debug(String.format("in CN.synchronize, checked sync queue for duplicate in %d millis", split - start));
-                    logger.debug(String.format("in CN.synchronize, added to queue in %d millis", time1 - split));
-                }
             }
         } catch (ServiceFailure e) {
             e.setDetail_code("4961");
             throw e;
-            // TODO: log the error (as ERROR)
         } catch (NotAuthorized e) {
             throw e; // catching and rethrowing to avoid being recast as a service failure 
             // in the following catch Exception block
-            // TODO: log the error (as warn)
         } catch (Exception e) {
             String message = "Unexpected Exception in CN.synchronize: progress: "
                     + progress + ":: " + e.toString();
             logger.error(message, e);
             throw new ServiceFailure("4961", message);
-        } finally {
-            logger.debug(String.format("in CN.synchronize for total time of %d millis", System.currentTimeMillis() - t0));
         }
     }
 
