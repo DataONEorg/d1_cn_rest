@@ -9,7 +9,7 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <compiler.target.version>1.8</compiler.target.version>
+        <compiler.target.version>1.7</compiler.target.version>
         <spring.version>3.1.4.RELEASE</spring.version>
         <hazelcast.version>2.4.1</hazelcast.version>
         <bouncycastle.version>1.52</bouncycastle.version>
@@ -264,7 +264,7 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <artifactId>servlet-api</artifactId>
             <version>2.5</version>
             <type>jar</type>
             <scope>provided</scope>
