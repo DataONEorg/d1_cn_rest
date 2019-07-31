@@ -121,6 +121,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <packagingExcludes>WEB-INF/lib/httpclient-4.5.2.jar, WEB-INF/lib/httpcore-4.4.4.jar</packagingExcludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <repositories>
