@@ -19,7 +19,7 @@
         <d1_cn_common.version>2.3.0</d1_cn_common.version>
         <d1_identity_manager.version>2.3.2</d1_identity_manager.version>
         <d1_cn_noderegistry.version>2.3.1</d1_cn_noderegistry.version>
-        <d1_cn_index_processor.version>2.3.9</d1_cn_index_processor.version>
+        <d1_cn_index_processor.version>2.3.10</d1_cn_index_processor.version>
         <d1_test_resources.version>2.3.0</d1_test_resources.version>
     </properties>
     <build>
@@ -120,6 +120,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <packagingExcludes>WEB-INF/lib/httpclient-4.5.2.jar, WEB-INF/lib/httpcore-4.4.4.jar</packagingExcludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
