@@ -8,8 +8,8 @@
  		
  	<context:property-placeholder location="file:/etc/dataone/index/jdbc.properties, file:/etc/dataone/index/solr.properties"/>
  	
-	<import resource="classpath:index-context-file-includes.xml" />    
-        
+<!--	<import resource="classpath:index-context-file-includes.xml" /> -->    
+	<import resource="file:/etc/dataone/index/index-generation-context/index-context-file-includes.xml" />
 	<import resource="file:/etc/dataone/index/index-generation-context/index-processor-context.xml"/>
 	
     
